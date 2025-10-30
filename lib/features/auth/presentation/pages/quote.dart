@@ -9,7 +9,9 @@ class QuotesPage extends StatefulWidget {
 class _QuotesPageState extends State<QuotesPage> {
   final TextEditingController _quoteController = TextEditingController();
   final TextEditingController _bookController = TextEditingController();
+
   List<Map<String, String>> _quotes = [];
+  List<Map<String, String>> _savedQuotes = []; // 📥 قائمة الاقتباسات المحفوظة
 
   void _showAddQuoteDialog() {
     showDialog(
@@ -143,6 +145,29 @@ class _QuotesPageState extends State<QuotesPage> {
     }
   }
 
+  void _saveQuote(int index) {
+    final selectedQuote = _quotes[index];
+    if (!_savedQuotes.contains(selectedQuote)) {
+      setState(() {
+        _savedQuotes.add(selectedQuote);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('تم حفظ الاقتباس في ملفك الشخصي!'),
+          backgroundColor: Color(0xFF1C597B),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('هذا الاقتباس محفوظ مسبقًا.'),
+          backgroundColor: Colors.grey[700],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,7 +179,7 @@ class _QuotesPageState extends State<QuotesPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF000000), // 💙 متناسق مع الخلفية
+        backgroundColor: const Color(0xFF000000),
         elevation: 4,
         centerTitle: true,
       ),
@@ -218,30 +243,6 @@ class _QuotesPageState extends State<QuotesPage> {
               ),
             ),
           ),
-          Positioned(
-            left: 40,
-            top: 60,
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.07),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 20,
-            top: 90,
-            child: Container(
-              width: 45,
-              height: 45,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
-              ),
-            ),
-          ),
 
           // 📚 قائمة الاقتباسات
           Padding(
@@ -273,6 +274,12 @@ class _QuotesPageState extends State<QuotesPage> {
                     subtitle: Text(
                       '📖 ${_quotes[index]['book']}',
                       style: TextStyle(color: Color(0xFF1C597B)),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.download_rounded,
+                          color: Color(0xFF1C597B)),
+                      onPressed: () => _saveQuote(index),
+                      tooltip: 'حفظ في البروفايل',
                     ),
                   ),
                 );
