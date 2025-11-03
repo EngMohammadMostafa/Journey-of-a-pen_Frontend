@@ -9,7 +9,7 @@ import 'features/auth/presentation/pages/welcome_page.dart';
 import 'features/auth/presentation/pages/profile_page.dart';
 import 'features/auth/presentation/pages/choose_interests_page.dart';
 import 'features/auth/presentation/pages/success_page.dart';
-import 'features/auth/presentation/pages/quote.dart';
+import 'features/quotes/presentation/pages/quote.dart';
 
 // Provider و Repository
 import 'features/auth/provider/profile_provider.dart';
@@ -37,14 +37,14 @@ class MyApp extends StatelessWidget {
         title: 'Readify',
         initialRoute: '/',
         routes: {
-          '/welcome': (context) => const WelcomePage(),
+          '/': (context) => const WelcomePage(),
           '/login': (context) => const LoginPage(),
           '/register': (context) => const RegisterPage(),
           '/profile': (context) => const ProfilePage(),
           '/choose-interests': (context) => const ChooseInterestsPage(),
           '/success': (context) => const SuccessPage(),
           '/home': (context) => const HomePage(),
-          '/': (context) =>  QuotesPage(),
+          '/quote': (context) =>  QuotesPage(),
 
         },
       ),

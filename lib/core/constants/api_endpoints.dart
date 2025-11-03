@@ -1,6 +1,6 @@
 class ApiEndpoints {
   // استبدل baseUrl بعنوان السيرفر المحلي
-  static const String baseUrl = "http://192.168.43.251:8000/api";
+  static const String baseUrl = "http://192.168.0.103:8000/api";
 
   // 🔐 Auth
   static const String register = "/auth/register";
