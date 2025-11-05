@@ -1,5 +1,4 @@
 class ApiEndpoints {
-  // استبدل baseUrl بعنوان السيرفر المحلي
   static const String baseUrl = "http://192.168.0.103:8000/api";
 
   // 🔐 Auth
@@ -8,18 +7,22 @@ class ApiEndpoints {
   static const String logout = "/auth/logout";
 
   // 👤 User
-  static const String currentUser = "/users/me"; // GET: بيانات المستخدم الحالي
-  static const String updateCurrentUser = "/users/me"; // PUT: تحديث بيانات المستخدم
+  static const String currentUser = "/users/me";
+  static const String updateCurrentUser = "/users/me";
 
   // ⭐ Points
-  static const String userPoints = "/users/points"; // GET: عدد النقاط الحالية
+  static const String userPoints = "/users/points";
 
-  // ✅ Getter لعنوان المستخدم الحالي
+  // 📚 Quotes
+  static const String quotes = "/quotes"; // GET → جميع الاقتباسات | POST → نشر اقتباس جديد
+  static const String saveQuote = "/quotes/save"; // POST → حفظ اقتباس للمستخدم
+
+  // ✅ Getters
   static String get getCurrentUser => baseUrl + currentUser;
-
-  // مثال getter لتحديث المستخدم
   static String get getUpdateCurrentUser => baseUrl + updateCurrentUser;
-
-  // مثال getter لنقاط المستخدم
   static String get getUserPoints => baseUrl + userPoints;
+
+  // 📖 Quotes Getters
+  static String get getQuotes => baseUrl + quotes;
+  static String get postSaveQuote => baseUrl + saveQuote;
 }

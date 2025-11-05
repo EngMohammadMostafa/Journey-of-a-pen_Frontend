@@ -43,8 +43,8 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => const ProfilePage(),
           '/choose-interests': (context) => const ChooseInterestsPage(),
           '/success': (context) => const SuccessPage(),
-          '/home': (context) => const HomePage(),
-          '/': (context) =>  QuotesPage(),
+          '/': (context) => const HomePage(),
+          '/quote': (context) =>  QuotesPage(),
 
         },
       ),
