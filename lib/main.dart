@@ -37,14 +37,14 @@ class MyApp extends StatelessWidget {
         title: 'Readify',
         initialRoute: '/',
         routes: {
-          '/': (context) => const WelcomePage(),
+          '/welcome': (context) => const WelcomePage(),
           '/login': (context) => const LoginPage(),
           '/register': (context) => const RegisterPage(),
           '/profile': (context) => const ProfilePage(),
           '/choose-interests': (context) => const ChooseInterestsPage(),
           '/success': (context) => const SuccessPage(),
           '/home': (context) => const HomePage(),
-          '/quote': (context) =>  QuotesPage(),
+          '/': (context) =>  QuotesPage(),
 
         },
       ),

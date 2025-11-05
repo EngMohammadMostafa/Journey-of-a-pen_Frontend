@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:book_worm_haven/features/quotes/models/quote_model.dart';
-import 'package:book_worm_haven/features/quotes/repository/quote_repository.dart';
-import '../widgets/quote_card.dart'; // استدعاء الـ Widget الجديد
+import 'package:book_worm_haven/features/quotes/presentation/widgets/quote_card.dart';
+
 
 class QuotesPage extends StatefulWidget {
   @override
@@ -12,29 +11,7 @@ class QuotesPage extends StatefulWidget {
 class _QuotesPageState extends State<QuotesPage> {
   final TextEditingController _quoteController = TextEditingController();
   final TextEditingController _bookController = TextEditingController();
-  final QuoteRepository _repository = QuoteRepository();
-
-  List<Quote> _quotes = [];
-  List<Quote> _savedQuotes = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadQuotes();
-  }
-
-  Future<void> _loadQuotes() async {
-    try {
-      final quotes = await _repository.fetchQuotes();
-      setState(() {
-        _quotes = quotes;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل في جلب الاقتباسات')),
-      );
-    }
-  }
+  List<Map<String, String>> _quotes = [];
 
   void _showAddQuoteDialog() {
     showDialog(
@@ -42,7 +19,7 @@ class _QuotesPageState extends State<QuotesPage> {
       builder: (context) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 60),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 30, vertical: 60),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(25),
             child: BackdropFilter(
@@ -61,7 +38,7 @@ class _QuotesPageState extends State<QuotesPage> {
                       color: Colors.white.withOpacity(0.25),
                       blurRadius: 25,
                       spreadRadius: -5,
-                      offset: Offset(0, 8),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -69,9 +46,9 @@ class _QuotesPageState extends State<QuotesPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.cloud, color: Color(0xFF4C869F), size: 55),
-                      SizedBox(height: 10),
-                      Text(
+                      const Icon(Icons.cloud, color: Color(0xFF4C869F), size: 55),
+                      const SizedBox(height: 10),
+                      const Text(
                         'أضف اقتباسًا جديدًا',
                         style: TextStyle(
                           fontSize: 20,
@@ -79,87 +56,63 @@ class _QuotesPageState extends State<QuotesPage> {
                           color: Color(0xFF1C597B),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       TextField(
                         controller: _quoteController,
                         maxLines: 3,
                         decoration: InputDecoration(
                           labelText: 'نص الاقتباس',
-                          labelStyle: TextStyle(color: Color(0xFF1C597B)),
+                          labelStyle: const TextStyle(color: Color(0xFF1C597B)),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.7),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(color: Colors.white),
+                            borderSide: const BorderSide(color: Colors.white),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
-                            borderSide:
-                            BorderSide(color: Colors.white.withOpacity(0.8)),
+                            borderSide: BorderSide(
+                              color: Colors.white.withOpacity(0.8),
+                            ),
                           ),
                         ),
-                        style: TextStyle(color: Color(0xFF1C597B)),
+                        style: const TextStyle(color: Color(0xFF1C597B)),
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       TextField(
                         controller: _bookController,
                         decoration: InputDecoration(
                           labelText: 'اسم الكتاب',
-                          labelStyle: TextStyle(color: Color(0xFF1C597B)),
+                          labelStyle: const TextStyle(color: Color(0xFF1C597B)),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.7),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(color: Colors.white),
+                            borderSide: const BorderSide(color: Colors.white),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
-                            borderSide:
-                            BorderSide(color: Colors.white.withOpacity(0.8)),
+                            borderSide: BorderSide(
+                              color: Colors.white.withOpacity(0.8),
+                            ),
                           ),
                         ),
-                        style: TextStyle(color: Color(0xFF1C597B)),
+                        style: const TextStyle(color: Color(0xFF1C597B)),
                       ),
-                      SizedBox(height: 25),
+                      const SizedBox(height: 25),
                       ElevatedButton.icon(
-                        onPressed: () async {
-                          if (_quoteController.text.isNotEmpty &&
-                              _bookController.text.isNotEmpty) {
-                            try {
-                              final newQuote = await _repository.addQuote(
-                                  _quoteController.text,
-                                  _bookController.text,
-                                  1); // ضع هنا User ID الحقيقي
-                              setState(() {
-                                _quotes.add(newQuote);
-                              });
-                              _quoteController.clear();
-                              _bookController.clear();
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('تم نشر الاقتباس بنجاح!'),
-                                  backgroundColor: Color(0xFF1C597B),
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('فشل في نشر الاقتباس'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          }
+                        onPressed: () {
+                          _addQuote();
+                          Navigator.pop(context);
                         },
-                        icon: Icon(Icons.cloud_upload, color: Colors.white),
-                        label: Text('نشر', style: TextStyle(color: Colors.white)),
+                        icon: const Icon(Icons.cloud_upload, color: Colors.white),
+                        label: const Text('نشر', style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF1C597B),
+                          backgroundColor: const Color(0xFF1C597B),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 12),
                         ),
                       ),
@@ -174,33 +127,21 @@ class _QuotesPageState extends State<QuotesPage> {
     );
   }
 
-  void _saveQuote(int index) async {
-    final selectedQuote = _quotes[index];
-    try {
-      await _repository.saveQuote(selectedQuote.id, 1); // ضع هنا User ID الحقيقي
-      if (!_savedQuotes.contains(selectedQuote)) {
-        setState(() {
-          _savedQuotes.add(selectedQuote);
+  void _addQuote() {
+    if (_quoteController.text.isNotEmpty && _bookController.text.isNotEmpty) {
+      setState(() {
+        _quotes.add({
+          'quote': _quoteController.text,
+          'book': _bookController.text,
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم حفظ الاقتباس في ملفك الشخصي!'),
-            backgroundColor: Color(0xFF1C597B),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('هذا الاقتباس محفوظ مسبقًا.'),
-            backgroundColor: Colors.grey,
-          ),
-        );
-      }
-    } catch (e) {
+      });
+      _quoteController.clear();
+      _bookController.clear();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('حدث خطأ أثناء حفظ الاقتباس'),
-          backgroundColor: Colors.grey,
+          content: Text('تم نشر الاقتباس بنجاح!'),
+          backgroundColor: Color(0xFF1C597B),
         ),
       );
     }
@@ -210,7 +151,7 @@ class _QuotesPageState extends State<QuotesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'الاقتباسات',
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -223,12 +164,12 @@ class _QuotesPageState extends State<QuotesPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddQuoteDialog,
-        backgroundColor: Color(0xFF1C597B),
-        child: Icon(Icons.add, size: 30),
+        backgroundColor: const Color(0xFF1C597B),
+        child: const Icon(Icons.add, size: 30),
       ),
       body: Stack(
         children: [
-          // 🌈 الخلفية بالتدرج
+          // 🌈 الخلفية
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -243,7 +184,8 @@ class _QuotesPageState extends State<QuotesPage> {
               ),
             ),
           ),
-          // ⚪️ الدوائر الزخرفية
+
+          // ⚪️ زخارف دائرية
           Positioned(
             right: -20,
             bottom: 20,
@@ -280,11 +222,12 @@ class _QuotesPageState extends State<QuotesPage> {
               ),
             ),
           ),
-          // 📚 قائمة الاقتباسات باستخدام الـ Widget
+
+          // 📚 عرض الاقتباسات باستخدام QuoteCard
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: _quotes.isEmpty
-                ? Center(
+                ? const Center(
               child: Text(
                 'لا توجد اقتباسات حتى الآن',
                 style: TextStyle(
@@ -297,9 +240,8 @@ class _QuotesPageState extends State<QuotesPage> {
               itemCount: _quotes.length,
               itemBuilder: (context, index) {
                 return QuoteCard(
-                  quoteText: _quotes[index].text,
-                  bookName: _quotes[index].author.username,
-                  onSave: () => _saveQuote(index),
+                  quoteText: _quotes[index]['quote']!,
+                  bookName: _quotes[index]['book']!,
                 );
               },
             ),
