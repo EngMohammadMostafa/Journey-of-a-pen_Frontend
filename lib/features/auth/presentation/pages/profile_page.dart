@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/user_model.dart';
@@ -49,8 +48,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   actions: [
                     {'icon': 'assets/icons/star_filled.png', 'onTap': (){}},
                     {'icon': 'assets/icons/bookmark_filled.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/Book.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/Gift.png', 'onTap': (){}},
+                    {'icon': 'assets/icons/book.png', 'onTap': (){}},
+                    {'icon': 'assets/icons/gift.png', 'onTap': (){}},
                     {'icon': 'assets/icons/Edit.png', 'onTap': (){}},
                   ],
                 ),
