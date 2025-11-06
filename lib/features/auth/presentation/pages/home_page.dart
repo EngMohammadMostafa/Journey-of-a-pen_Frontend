@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/profile_page.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
-import '../../../books/presentation/widgets/book_card.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'package:book_worm_haven/features/books/repository/books_repository.dart';
 import 'package:book_worm_haven/features/books/data/models/book_model.dart';
