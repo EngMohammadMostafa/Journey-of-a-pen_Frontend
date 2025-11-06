@@ -4,6 +4,7 @@ import 'package:book_worm_haven/features/auth/presentation/pages/writing_competi
 import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/profile_page.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
+import '../../../books/presentation/pages/book_details_page.dart';
 import '../../../books/presentation/widgets/book_card.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'package:book_worm_haven/features/books/repository/books_repository.dart';
@@ -146,6 +147,7 @@ class _HomeContentState extends State<HomeContent> {
         category: "Action",
         isPaid: false,
         imageUrl: "https://picsum.photos/200/300?random=1",
+        description: "رحلة مثيرة لبطل يسعى لإنقاذ العالم وسط مغامرات مشوقة.",
       ),
       BookModel(
         id: 2,
@@ -154,22 +156,25 @@ class _HomeContentState extends State<HomeContent> {
         category: "Romance",
         isPaid: true,
         imageUrl: "https://picsum.photos/200/300?random=2",
+        description: "قصة حب دافئة تدور أحداثها في شوارع باريس الجميلة.",
       ),
       BookModel(
         id: 3,
         title: "Galaxy Wars",
         author: "Mark Sky",
-        category: "Science Fiction",
+        category: "Romance",
         isPaid: false,
         imageUrl: "https://picsum.photos/200/300?random=3",
+        description: "ملحمة فضائية بين المجرات، تجمع بين الشجاعة والتكنولوجيا.",
       ),
       BookModel(
         id: 4,
         title: "Haunted Nights",
         author: "Lucy Grey",
-        category: "Horror",
+        category: "Romance",
         isPaid: true,
         imageUrl: "https://picsum.photos/200/300?random=4",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
       ),
       BookModel(
         id: 5,
@@ -178,6 +183,7 @@ class _HomeContentState extends State<HomeContent> {
         category: "Fantasy",
         isPaid: false,
         imageUrl: "https://picsum.photos/200/300?random=5",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
       ),
       BookModel(
         id: 6,
@@ -186,6 +192,7 @@ class _HomeContentState extends State<HomeContent> {
         category: "Comedy",
         isPaid: false,
         imageUrl: "https://picsum.photos/200/300?random=6",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
       ),
     ];
 
@@ -273,7 +280,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
             const SizedBox(height: 20),
 
-            // 📚 قائمة الكتب باستخدام BookCard
+// 📚 عرض الكتب في كروت أنيقة مع وصف متدرج وتأثير حركة ناعم (تصحيح: إزالة `delay`)
             getBooksByCategory(selectedCategory).isEmpty
                 ? Center(
               child: Text(
@@ -287,46 +294,139 @@ class _HomeContentState extends State<HomeContent> {
               itemCount: getBooksByCategory(selectedCategory).length,
               itemBuilder: (context, index) {
                 final book = getBooksByCategory(selectedCategory)[index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        book.imageUrl ?? '',
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
+
+                return TweenAnimationBuilder<double>(
+                  duration: Duration(milliseconds: 500 + 100 * index), // ← هنا تم التعديل
+                  curve: Curves.easeOut,
+                  tween: Tween<double>(begin: 0, end: 1),
+                  builder: (context, double value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 30 * (1 - value)),
+                      child: Opacity(opacity: value, child: child),
+                    );
+                  },
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookDetailsPage(book: book),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // 🖼️ صورة الكتاب
+                          ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                            ),
+                            child: Image.network(
+                              book.imageUrl ?? '',
+                              width: 100,
+                              height: 140,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+
+                          // 📝 تفاصيل الكتاب
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // 🏷️ العنوان
+                                  Text(
+                                    book.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1C597B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+
+                                  // ✏️ الوصف المتدرج
+                                  ShaderMask(
+                                    shaderCallback: (bounds) => const LinearGradient(
+                                      colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ).createShader(bounds),
+                                    child: Text(
+                                      book.description ??
+                                          "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  // 🔒 أو ✅ شارة الحالة
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: book.isPaid
+                                          ? Colors.red.withOpacity(0.1)
+                                          : Colors.green.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          book.isPaid ? Icons.lock : Icons.check_circle,
+                                          color: book.isPaid ? Colors.red : Colors.green,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          book.isPaid ? "مدفوع" : "مجاني",
+                                          style: TextStyle(
+                                            color: book.isPaid ? Colors.red : Colors.green,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    title: Text(
-                      book.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text("المؤلف: ${book.author}"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (book.isPaid)
-                          const Icon(Icons.lock, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text(
-                          book.isPaid ? "مدفوع" : "مجاني",
-                          style: TextStyle(
-                            color: book.isPaid ? Colors.red : Colors.green,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
+
                 );
               },
             ),
+
+
+
+
 
           ],
         ),
