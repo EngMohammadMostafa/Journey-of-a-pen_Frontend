@@ -14,11 +14,11 @@ class BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<String> iconPaths = [
       'assets/icons/home_book.png',
-      'assets/icons/quote.png',
-      'assets/icons/profile.png',
       'assets/icons/shopping_cart.png',
-      'assets/icons/notifications.png',
+      'assets/icons/quote.png',
       'assets/icons/writing_competitions.png',
+      'assets/icons/notifications.png',
+      'assets/icons/profile.png',
     ];
 
     return Padding(
@@ -59,9 +59,7 @@ class BottomNavBar extends StatelessWidget {
                         width: 32,
                         height: 32,
                         fit: BoxFit.contain,
-                        color: isSelected
-                            ? const Color(0xFF1C597B)
-                            : Colors.black54,
+                        color: null,
                       ),
                     ),
                   ),

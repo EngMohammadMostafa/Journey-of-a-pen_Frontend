@@ -24,11 +24,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   final List<Widget> _pages = [
     const HomeContent(),
-    const ProfilePage(),
-    const NotificationsPage(),
     const ShoppingCartPage(),
+    QuotesPage(),
     const WritingCompetitionsPage(),
-     QuotesPage(),
+    const NotificationsPage(),
+    const ProfilePage(),
+
   ];
 
   late AnimationController _introController;
