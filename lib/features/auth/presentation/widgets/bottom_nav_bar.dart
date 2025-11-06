@@ -40,27 +40,44 @@ class BottomNavBar extends StatelessWidget {
           child: Row(
             children: List.generate(iconPaths.length, (index) {
               bool isSelected = selectedIndex == index;
+
               return Expanded(
                 child: GestureDetector(
                   onTap: () => onItemTapped(index),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOut,
+                    margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF1C597B).withOpacity(0.15)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Center(
-                      child: Image.asset(
-                        iconPaths[index],
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.contain,
-                        color: null,
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // 🔹 الأيقونة (بدون color حتى تبقى ملونة)
+                        Image.asset(
+                          iconPaths[index],
+                          width: isSelected ? 34 : 30,
+                          height: isSelected ? 34 : 30,
+                          fit: BoxFit.contain,
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // 🔹 النقطة الصغيرة أسفل الأيقونة عند التحديد
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          height: 5,
+                          width: isSelected ? 20 : 0,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1C597B),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

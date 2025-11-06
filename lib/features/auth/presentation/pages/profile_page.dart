@@ -5,6 +5,7 @@ import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
 
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 

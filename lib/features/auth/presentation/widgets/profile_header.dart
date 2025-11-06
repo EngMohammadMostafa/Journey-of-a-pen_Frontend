@@ -59,7 +59,7 @@ class ProfileHeader extends StatelessWidget {
               SizedBox(height: 8),
               Text(username, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
               SizedBox(height: 12),
-              // ايقونات صغيرة في صف
+              // ايقونات صغيئرة في صف
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: actions.map((a) {
