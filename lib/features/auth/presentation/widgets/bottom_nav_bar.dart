@@ -57,11 +57,11 @@ class BottomNavBar extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // 🔹 الأيقونة (بدون color حتى تبقى ملونة)
+                        // 🔹 حجم الأيقونة ثابت وكبير قليلاً
                         Image.asset(
                           iconPaths[index],
-                          width: isSelected ? 34 : 30,
-                          height: isSelected ? 34 : 30,
+                          width: 36,
+                          height: 36,
                           fit: BoxFit.contain,
                         ),
 

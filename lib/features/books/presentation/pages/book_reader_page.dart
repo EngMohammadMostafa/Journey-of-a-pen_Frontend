@@ -13,12 +13,7 @@ class BookReaderPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1C597B),
         title: Text(book.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_border),
-            onPressed: () {},
-          ),
-        ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
