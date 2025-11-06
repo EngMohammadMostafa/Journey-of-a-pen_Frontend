@@ -50,7 +50,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             Text(
               book.title,
               style: const TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1C597B)),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1C597B)),
             ),
             Text(
               "المؤلف: ${book.author}",
