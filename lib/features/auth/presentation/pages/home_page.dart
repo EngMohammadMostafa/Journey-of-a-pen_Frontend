@@ -122,6 +122,7 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
+  String searchQuery = "";
   List<BookModel> _books = [];
   bool _isLoading = true;
   String selectedCategory = "Action";
@@ -204,8 +205,20 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   List<BookModel> getBooksByCategory(String category) {
-    return _books.where((book) => book.category == category).toList();
+    // إن لم يكن هناك نص بحث، نعرض حسب التصنيف فقط
+    if (searchQuery.isEmpty) {
+      return _books.where((book) => book.category == category).toList();
+    }
+
+    // إذا كتب المستخدم في مربع البحث، نبحث في جميع التصنيفات
+    return _books.where((book) {
+      final matchesSearch = book.title.toLowerCase().contains(searchQuery) ||
+          book.author.toLowerCase().contains(searchQuery) ||
+          (book.description?.toLowerCase().contains(searchQuery) ?? false);
+      return matchesSearch; // نعرض كل كتاب يطابق البحث بغض النظر عن التصنيف
+    }).toList();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -229,10 +242,15 @@ class _HomeContentState extends State<HomeContent> {
             ),
             const SizedBox(height: 16),
 
-            // 🔍 شريط البحث
+            // 🔍 شريط البحث الفعّال
             TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
-                hintText: "Search for a book...",
+                hintText: "ابحث عن كتاب...",
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -241,6 +259,7 @@ class _HomeContentState extends State<HomeContent> {
                 fillColor: Colors.white,
               ),
             ),
+
             const SizedBox(height: 16),
 
             // 🏷️ قائمة التصنيفات
