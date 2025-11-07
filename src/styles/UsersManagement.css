@@ -5,6 +5,31 @@
   margin: 0 auto;
 }
 
+
+/* صورة الترحيب في لوحة التحكم */
+.hero-section {
+  position: fixed; /* يجعل العنصر ثابتًا */
+  top: 15%; /* يلتصق بأعلى الشاشة */
+  right: 2%; /* لأن الاتجاه RTL */
+  width: 73%; /* يأخذ عرض الشاشة بالكامل */
+  height: 200px;
+  display: flex;
+  flex-direction: row-reverse;
+  border-radius: 0 0 15px 15px; /* حواف سفلية فقط */
+  overflow: hidden;
+  z-index: 900; /* فوق باقي العناصر */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff; /* خلفية مناسبة */
+}
+
+.hero-image {
+  width: 500%;
+  height: 160%;
+  object-fit:scale-down;
+  
+}
+
+
 .page-header {
   display: flex;
   justify-content: space-between;
