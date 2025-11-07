@@ -1,16 +1,172 @@
-// src/pages/QuotesManagement.jsx
-import React from "react"
-import "../styles/QuotesManagement.css"
+import React, { useState, useEffect } from 'react';
+import DataTable from '../components/common/DataTable';
+import Modal from '../components/common/Modal';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import SearchBar from '../components/common/SearchBar';
+import { quotesService } from '../services/quotesService';
+import '../styles/QuotesManagement.css';
 
 const QuotesManagement = () => {
+  const [quotes, setQuotes] = useState([]);
+  const [filteredQuotes, setFilteredQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, quote: null });
+
+  // أعمدة الجدول
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'text', label: 'نص الاقتباس' },
+    { key: 'book_name', label: 'اسم الكتاب' },
+    { key: 'user_id', label: 'معرف المستخدم' },
+    { key: 'created_at', label: 'تاريخ الإنشاء' },
+    { key: 'actions', label: 'الإجراءات' }
+  ];
+
+  // جلب البيانات من API
+  const fetchQuotes = async () => {
+    try {
+      setLoading(true);
+      const response = await quotesService.getAllQuotes();
+      
+      if (response.success) {
+        setQuotes(response.quotes);
+        setFilteredQuotes(response.quotes);
+      } else {
+        setError('فشل في جلب البيانات');
+      }
+    } catch (err) {
+      setError('حدث خطأ في الاتصال بالخادم');
+      console.error('Error fetching quotes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuotes();
+  }, []);
+
+  // البحث والتصفية
+  const handleSearch = (searchTerm) => {
+    if (!searchTerm) {
+      setFilteredQuotes(quotes);
+      return;
+    }
+
+    const filtered = quotes.filter(quote =>
+      quote.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.book_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.id.toString().includes(searchTerm)
+    );
+    
+    setFilteredQuotes(filtered);
+  };
+
+  // فتح نافذة حذف الاقتباس
+  const handleDeleteClick = (quote) => {
+    setDeleteModal({ isOpen: true, quote });
+  };
+
+  // تأكيد الحذف
+  const confirmDelete = async () => {
+    try {
+      const response = await quotesService.deleteQuote(deleteModal.quote.id);
+      
+      if (response.success) {
+        // إعادة تحميل البيانات بعد الحذف
+        await fetchQuotes();
+        setDeleteModal({ isOpen: false, quote: null });
+      } else {
+        setError('فشل في حذف الاقتباس');
+      }
+    } catch (err) {
+      setError('حدث خطأ أثناء الحذف');
+      console.error('Error deleting quote:', err);
+    }
+  };
+
+  // تنسيق البيانات للجدول
+  const formatTableData = () => {
+    return filteredQuotes.map(quote => ({
+      id: quote.id,
+      text: quote.text,
+      book_name: quote.book_name,
+      user_id: quote.user_id,
+      created_at: new Date(quote.created_at).toLocaleDateString('ar-SA'),
+      actions: (
+        <div className="actions-buttons">
+          <button 
+            className="btn btn-danger btn-sm"
+            onClick={() => handleDeleteClick(quote)}
+          >
+            حذف
+          </button>
+        </div>
+      )
+    }));
+  };
+
+  if (loading) return <LoadingSpinner />;
+
   return (
-    <div className="quotes-page">
-      <h2 className="page-title">مرحباً بك في صفحة إدارة الاقتباسات</h2>
-      <p className="page-description">
-        هذه نسخة مبسطة من الصفحة تقوم فقط بعرض رسالة ترحيب.
-      </p>
+    <div className="quotes-management">
+      <div className="page-header">
+        <h1>إدارة الاقتباسات</h1>
+        <p>إدارة وعرض جميع الاقتباسات في النظام</p>
+      </div>
+
+      {error && (
+        <div className="alert alert-error">
+          {error}
+          <button onClick={() => setError('')} className="close-btn">×</button>
+        </div>
+      )}
+
+      <div className="table-controls">
+        <SearchBar onSearch={handleSearch} placeholder="ابحث في الاقتباسات..." />
+        <div className="table-info">
+          <span>إجمالي الاقتباسات: {filteredQuotes.length}</span>
+        </div>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={formatTableData()}
+        emptyMessage="لا توجد اقتباسات لعرضها"
+      />
+
+      {/* نافذة تأكيد الحذف */}
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, quote: null })}
+        title="تأكيد الحذف"
+      >
+        <div className="delete-confirmation">
+          <p>هل أنت متأكد من أنك تريد حذف هذا الاقتباس؟</p>
+          <div className="quote-preview">
+            <strong>الاقتباس:</strong> 
+            <p>"{deleteModal.quote?.text}"</p>
+            <small>الكتاب: {deleteModal.quote?.book_name}</small>
+          </div>
+          <div className="modal-actions">
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setDeleteModal({ isOpen: false, quote: null })}
+            >
+              إلغاء
+            </button>
+            <button 
+              className="btn btn-danger"
+              onClick={confirmDelete}
+            >
+              تأكيد الحذف
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
 
-export default QuotesManagement
+export default QuotesManagement;
