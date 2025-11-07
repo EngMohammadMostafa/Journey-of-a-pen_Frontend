@@ -39,7 +39,7 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
   }
 
   // إذا لم يكن مسجل دخول، اعرض صفحة اللوجين فقط
-  if (isAuthenticated) {
+  if (!isAuthenticated) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />

@@ -17,7 +17,7 @@ body {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  
+  overflow-y: visible; /* أو احذفي أي overflow يمنع التمرير */
 }
 /* صورة الترحيب في لوحة التحكم */
 .hero-section {
@@ -39,7 +39,7 @@ body {
   width: 500%;
   height: 160%;
   object-fit:scale-down;
- 
+    
 
 }
 .hero-text {
@@ -57,7 +57,7 @@ body {
 .content-area {
   flex: 1;
   margin-left: 70%;
-  width: calc(100% - 20%);
+  width: calc(94% - 20%);
   
 }
 .main-content {
@@ -125,17 +125,19 @@ flex-grow: 1;
 
 .sidebar {
   width: 23%;  
-  background: linear-gradient(180deg,#000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
+  background: linear-gradient(180deg, #000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
   color: white;
-  position:fixed; /* تغيير من fixed إلى sticky */
-  left: 0;
-  margin-top: 7%; /* مسافة من الأعلى */
+  position: sticky; /* ✅ تتحرك مع الصفحة */
+  top: 15%; /* تبدأ أسفل قسم الهيرو */
+  right: 80%;
+  height: calc(100vh - 7%); /* تغطي طول الشاشة */
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  border-top-right-radius: 40% 20%;
-  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* ✅ ظل من اليمين */
+  z-index: 100;
+  border-top-right-radius: 40% 20%; /* ✅ الحافة اليمنى العليا */
+  overflow-y: auto; /* ✅ تمرير داخل السايدبار */
+  scrollbar-width: thin;
 }
 
 .sidebar {

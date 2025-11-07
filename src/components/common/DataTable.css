@@ -3,7 +3,7 @@
   width: 100%;
   background: #fff;
   border-radius: 10px;
-  padding: 20px;
+  padding: 30px;
   box-shadow: 0 2px 8px rgba(72, 117, 184, 0.861);
   margin-bottom: 20px;
 }
@@ -14,7 +14,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #5099e6;
+  border-bottom: 2px solid #e67d50;
 }
 
 .table-title {
