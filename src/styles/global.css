@@ -1,0 +1,221 @@
+/* src/styles/global.css - الحل النهائي */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  direction: rtl;
+  overflow-y: auto;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  
+}
+/* صورة الترحيب في لوحة التحكم */
+.hero-section {
+  position: fixed; /* يجعل العنصر ثابتًا */
+  top: 15%; /* يلتصق بأعلى الشاشة */
+  right: 2%; /* لأن الاتجاه RTL */
+  width: 73%; /* يأخذ عرض الشاشة بالكامل */
+  height: 200px;
+  display: flex;
+  flex-direction: row-reverse;
+  border-radius: 0 0 15px 15px; /* حواف سفلية فقط */
+  overflow: hidden;
+  z-index: 900; /* فوق باقي العناصر */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff; /* خلفية مناسبة */
+}
+
+.hero-image {
+  width: 500%;
+  height: 160%;
+  object-fit:scale-down;
+ 
+
+}
+.hero-text {
+  width: 300%; /* مساحة مناسبة للنص */
+  padding: 50px;
+  display: flex; /* عنصر block داخل Flexbox */
+  flex-direction: column;
+  justify-content: center;
+  color: rgb(8, 8, 8);
+  text-align: right; /* لأن الاتجاه RTL */
+}
+
+
+
+.content-area {
+  flex: 1;
+  margin-left: 70%;
+  width: calc(100% - 20%);
+  
+}
+.main-content {
+  padding: 20px;
+  background-color: white;
+  min-height: auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+flex-grow: 1;
+}
+
+
+.main-content h1 {
+  color: #27ae60;
+  margin-bottom: 20px;
+}
+
+.main-content p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loading-spinner {
+  font-size: 18px;
+  color: #667eea;
+}
+
+/* تحسينات للعربية */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* إخفاء scrollbar ولكن مع الحفاظ على functionality */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.sidebar {
+  width: 23%;  
+  background: linear-gradient(180deg,#000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
+  color: white;
+  position:fixed; /* تغيير من fixed إلى sticky */
+  left: 0;
+  margin-top: 7%; /* مسافة من الأعلى */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  border-top-right-radius: 40% 20%;
+  overflow-y: auto;
+}
+
+.sidebar {
+  clip-path: polygon(0 0, 100% , 100% 100%, 0% 100%);
+  border-top-right-radius: 40% 20%;
+}
+
+.sidebar-header-horizontal {
+  display: flex;
+  align-items:flex-end;
+  justify-content: flex-end;
+  padding: 8px 15px;
+  border: 1px solid #ffffff;
+  border-radius: 40px;
+  gap: 40%;
+  background-color: #ffffff;
+  width: 14vw; /* يناسب عرض السايدبار */
+  height: 10vh;
+  margin: 18% auto 10% auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* الصورة على اليسار */
+.sidebar-image-small {
+
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 0%;
+}
+
+/* النصوص على اليمين */
+.sidebar-info {
+  display: flex;
+  flex-direction:column;
+  justify-content: center;
+}
+
+.sidebar-info h2 {
+  font-size: 1rem;
+  color: #030303;
+  margin: 0%;
+  
+  
+}
+
+.sidebar-info p {
+  font-size: 0.7rem;
+  color: #0a0a0a;
+  margin: 2% 0 0 0;
+}
+.nav-link::after {
+  content: '•'; /* النقطة */
+  color: #e8f0fe;
+  font-size: 2.0rem;
+  margin-right: 10%; /* تباعد بين النقطة والنص */
+}
+
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: #e8f0fe;
+  padding: 10px 16px; 
+  gap: 8px; 
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  border-right: none;
+}
+
+.nav-link:hover {
+  background-color: #2a5298;
+  border-left-color: #4a90e2;
+}
+
+.nav-link.active {
+  background-color: #3a6bc0;
+  border-left-color: #5dade2;
+}
+

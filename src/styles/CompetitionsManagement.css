@@ -1,0 +1,44 @@
+.competitions-page {
+    padding: 20px;
+  }
+  
+  .page-title {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .buttons-container {
+    display: flex;
+    gap: 80px;
+    margin-bottom: 50px;
+    justify-content: center;
+  }
+  
+  .main-btn {
+    background: #1C597B;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 40px;
+    transition: all 0.3s ease;
+  }
+  
+  .main-btn:hover {
+    background: #1C597B;
+    transform: translateY(-2px);
+  }
+  
+  .table-container {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  /* تأكيد ظهور الأزرار */
+  button {
+    display: inline-block ;
+    visibility: visible ;
+    opacity: 1 ;
+  }

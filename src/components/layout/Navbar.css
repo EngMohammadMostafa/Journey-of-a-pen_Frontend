@@ -1,0 +1,159 @@
+/* src/components/layout/Navbar.css */
+
+.navbar {
+  display: flex;
+  flex-direction: row-reverse; /* يجعل الأيقونات على اليمين والكلمة على اليسار */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  z-index: 999;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse; /* يجعل زر القائمة على يمين الكلمة */
+  gap: 15px;
+}
+  .sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+    margin-left: 20px;
+    color: #2c3e50;
+    transition: color 0.3s ease;
+  }
+  
+  .sidebar-toggle:hover {
+    color: #3498db;
+  }
+  
+  .navbar-brand h1 {
+    text-align: left; /* يضمن أن النص يظهر بمحاذاة اليسار */
+    direction: ltr;   /* يحافظ على ترتيب الحروف بالإنجليزية */
+    font-size:150% ;
+    margin-top: 17%;
+    
+  }
+  .navbar-brand p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: #7f8c8d;
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items:end;
+  }
+  
+  .navbar-items {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .nav-item {
+    position: relative;
+  }
+  
+  .nav-icon-btn {
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    position: relative;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-icon-btn:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .icon {
+    font-size: 1.2rem;
+  }
+  
+  .badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 15px;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .user-menu:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .user-avatar-small {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(45deg, #3498db, #1abc9c);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: white;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #2c3e50;
+  }
+  
+  .user-role {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+  }
+  
+  /* تصميم متجاوب */
+  @media (max-width: 768px) {
+    .navbar {
+      right: 70px;
+      padding: 0 15px;
+    }
+    
+    .navbar-brand h1 {
+      font-size: 1.1rem;
+    }
+    
+    .navbar-brand p {
+      display: none;
+    }
+    
+    .user-info {
+      display: none;
+    }
+  }
