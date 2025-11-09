@@ -32,7 +32,7 @@ class WelcomePage extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // 🌿 صورة الورقة مع تدرج شفاف من الأعلى
+                // 🌿 الورقة مع التدرج الشفاف من الأعلى
                 Positioned(
                   top: 40,
                   right: 5,
@@ -74,19 +74,18 @@ class WelcomePage extends StatelessWidget {
                   ),
                 ),
 
-                // 👧 صورة البنت أصغر وأكثر استدارة
+                // 👧 صورة الفتاة كما كانت بالحجم الأصلي لكن بدائرة أكثر نعومة
                 Positioned(
                   bottom: 40,
-                  left: 80,
-                  right: 80,
+                  left: 40,
+                  right: 40,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(200), // أكثر تدويرًا
+                    borderRadius: BorderRadius.circular(150), // أكثر تدويرًا
                     child: Container(
                       color: Colors.white,
-                      padding: const EdgeInsets.all(15),
+                      padding: const EdgeInsets.all(20),
                       child: Image.asset(
                         'assets/images/girl_reading.png',
-                        height: 180, // تصغير الصورة
                         fit: BoxFit.contain,
                       ),
                     ),
