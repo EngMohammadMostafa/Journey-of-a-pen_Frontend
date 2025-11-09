@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/login_page.dart';
-
 import 'auth_choice_page.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -10,9 +9,8 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureDetector( // 👈 هنا أضفنا GestureDetector
+      body: GestureDetector(
         onTap: () {
-          // عند النقر، انتقل إلى الصفحة التالية
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AuthChoicePage()),
@@ -34,15 +32,31 @@ class WelcomePage extends StatelessWidget {
             ),
             child: Stack(
               children: [
+                // 🌿 صورة الورقة مع تدرج شفاف من الأعلى
                 Positioned(
                   top: 40,
                   right: 5,
                   bottom: 80,
-                  child: Image.asset(
-                    'assets/images/leaf.png',
-                    fit: BoxFit.contain,
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent, // يخفي الجزء العلوي
+                          Colors.white, // يظهر الباقي
+                        ],
+                        stops: [0.0, 0.3],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: Image.asset(
+                      'assets/images/leaf.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
+
                 const Positioned(
                   top: 120,
                   left: 40,
@@ -59,17 +73,20 @@ class WelcomePage extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // 👧 صورة البنت أصغر وأكثر استدارة
                 Positioned(
                   bottom: 40,
-                  left: 40,
-                  right: 40,
+                  left: 80,
+                  right: 80,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(200), // أكثر تدويرًا
                     child: Container(
                       color: Colors.white,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(15),
                       child: Image.asset(
                         'assets/images/girl_reading.png',
+                        height: 180, // تصغير الصورة
                         fit: BoxFit.contain,
                       ),
                     ),
