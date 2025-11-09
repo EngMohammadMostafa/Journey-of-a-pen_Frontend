@@ -1,37 +1,78 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../../core/constants/api_endpoints.dart';
+import 'package:book_worm_haven/core/api/api_service.dart';
+import 'package:book_worm_haven/core/constants/api_endpoints.dart';
+import 'package:book_worm_haven/core/utils/prefs_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/quote_model.dart';
 
 class QuoteRepository {
-  // 📚 جلب جميع الاقتباسات
-  Future<List<Quote>> fetchQuotes() async {
-    final response = await http.get(Uri.parse(ApiEndpoints.getQuotes));
+  final ApiService _apiService = ApiService();
 
-    if (response.statusCode == 200) {
-      final List quotesJson = json.decode(response.body)['quotes'];
-      return quotesJson.map((json) => Quote.fromJson(json)).toList();
-    } else {
-      throw Exception('فشل في تحميل الاقتباسات');
+  // ==============================
+  // 🔹 جلب جميع الاقتباسات
+  // ==============================
+  Future<List<Quote>> fetchQuotes() async {
+    try {
+      // 🟢 جلب التوكن من SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null || token.isEmpty) {
+        throw Exception('لم يتم العثور على التوكن. يُرجى تسجيل الدخول مجددًا.');
+      }
+
+      // 🟢 تعيين التوكن في ApiService
+      _apiService.setAuthToken(token);
+
+      final response = await _apiService.get(ApiEndpoints.quotes);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['quotes'] ?? [];
+        return data.map((q) => Quote.fromJson(q)).toList();
+      } else {
+        throw Exception('فشل في تحميل الاقتباسات (${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('حدث خطأ أثناء تحميل الاقتباسات: $e');
     }
   }
 
-  // ✨ إضافة اقتباس جديد
+  // ==============================
+  // 🔹 إضافة اقتباس جديد
+  // ==============================
   Future<Quote> addQuote(String text, String bookName, int userId) async {
-    final response = await http.post(
-      Uri.parse(ApiEndpoints.getQuotes),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'text': text,
-        'book_name': bookName,
-        'userid': userId,
-      }),
-    );
+    try {
+      // 🟢 جلب التوكن من SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return Quote.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('فشل في إضافة الاقتباس');
+      if (token == null || token.isEmpty) {
+        throw Exception('لم يتم العثور على التوكن. يُرجى تسجيل الدخول مجددًا.');
+      }
+
+      // 🟢 إعداد التوكن في ApiService
+      _apiService.setAuthToken(token);
+
+      // 📡 إرسال البيانات
+      final response = await _apiService.post(
+        ApiEndpoints.quotes,
+        data: {
+          'text': text,
+          'book_name': bookName,
+          'user_id': userId,
+        },
+      );
+
+      final data = response.data;
+
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          data['success'] == true) {
+        return Quote.fromJson(data['quote']);
+      } else {
+        throw Exception(data['message'] ?? 'فشل في إضافة الاقتباس.');
+      }
+    } catch (e) {
+      throw Exception('حدث خطأ أثناء إضافة الاقتباس: $e');
     }
   }
 }

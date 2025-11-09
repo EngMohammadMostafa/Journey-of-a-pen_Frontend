@@ -4,6 +4,7 @@ import 'package:book_worm_haven/core/constants/api_endpoints.dart';
 import 'package:book_worm_haven/features/auth/data/models/login_response.dart';
 import 'package:book_worm_haven/features/auth/data/models/register_response.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
   final ApiService _apiService = ApiService();
@@ -74,9 +75,9 @@ class AuthRepository {
   // ==============================
   // 🔹 تسجيل الدخول
   // ==============================
+
+
   Future<bool> login(String email, String password) async {
-
-
     try {
       final Map<String, dynamic> body = {
         'email': email,
@@ -105,6 +106,11 @@ class AuthRepository {
         print('✅ Login Success → Token: $token');
 
         if (token != null) {
+          // 🟢 حفظ التوكن في SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
+
+          // 🟢 تعيينه في ApiService فورًا
           _apiService.setAuthToken(token);
         }
 
@@ -118,4 +124,5 @@ class AuthRepository {
       return false;
     }
   }
+
 }

@@ -1,6 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/quotes/presentation/widgets/quote_card.dart';
+import '../../../../core/api/api_service.dart';
+import '../../../../core/utils/prefs_helper.dart';
+import '../../models/quote_model.dart';
+import '../../repository/quote_repository.dart';
 
 
 class QuotesPage extends StatefulWidget {
@@ -11,7 +15,83 @@ class QuotesPage extends StatefulWidget {
 class _QuotesPageState extends State<QuotesPage> {
   final TextEditingController _quoteController = TextEditingController();
   final TextEditingController _bookController = TextEditingController();
-  List<Map<String, String>> _quotes = [];
+
+  final QuoteRepository _quoteRepo = QuoteRepository();
+
+  List<Quote> _quotes = [];
+  bool _isLoading = true;
+
+  // ============================
+  // استرجاع التوكن عند فتح الصفحة
+  // ============================
+  Future<void> _initAuth() async {
+    final token = await PrefsHelper.getToken();
+    if (token != null) {
+      ApiService().setAuthToken(token);
+      print('🔹 Token restored from storage: $token');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePage();
+  }
+
+  // ============================
+  // استدعاء التوكن أولاً ثم جلب الاقتباسات
+  // ============================
+  Future<void> _initializePage() async {
+    await _initAuth();  // ← استرجاع التوكن أولاً
+    await _fetchQuotes(); // ← ثم جلب الاقتباسات
+  }
+
+  Future<void> _fetchQuotes() async {
+    try {
+      final quotes = await _quoteRepo.fetchQuotes();
+      setState(() {
+        _quotes = quotes;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء تحميل الاقتباسات: $e')),
+      );
+    }
+  }
+
+  Future<void> _addQuote() async {
+    if (_quoteController.text.isEmpty || _bookController.text.isEmpty) return;
+
+    try {
+      const int userId = 1; // مؤقتًا
+      final newQuote = await _quoteRepo.addQuote(
+        _quoteController.text,
+        _bookController.text,
+        userId,
+      );
+
+      setState(() {
+        _quotes.insert(0, newQuote);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم نشر الاقتباس بنجاح!'),
+          backgroundColor: Color(0xFF1C597B),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('فشل في النشر: $e')),
+      );
+    } finally {
+      _quoteController.clear();
+      _bookController.clear();
+      Navigator.pop(context);
+    }
+  }
 
   void _showAddQuoteDialog() {
     showDialog(
@@ -67,16 +147,8 @@ class _QuotesPageState extends State<QuotesPage> {
                           fillColor: Colors.white.withOpacity(0.7),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(color: Colors.white),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.white.withOpacity(0.8),
-                            ),
                           ),
                         ),
-                        style: const TextStyle(color: Color(0xFF1C597B)),
                       ),
                       const SizedBox(height: 15),
                       TextField(
@@ -88,23 +160,12 @@ class _QuotesPageState extends State<QuotesPage> {
                           fillColor: Colors.white.withOpacity(0.7),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(color: Colors.white),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.white.withOpacity(0.8),
-                            ),
                           ),
                         ),
-                        style: const TextStyle(color: Color(0xFF1C597B)),
                       ),
                       const SizedBox(height: 25),
                       ElevatedButton.icon(
-                        onPressed: () {
-                          _addQuote();
-                          Navigator.pop(context);
-                        },
+                        onPressed: _addQuote,
                         icon: const Icon(Icons.cloud_upload, color: Colors.white),
                         label: const Text('نشر', style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
@@ -112,8 +173,7 @@ class _QuotesPageState extends State<QuotesPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                         ),
                       ),
                     ],
@@ -127,36 +187,13 @@ class _QuotesPageState extends State<QuotesPage> {
     );
   }
 
-  void _addQuote() {
-    if (_quoteController.text.isNotEmpty && _bookController.text.isNotEmpty) {
-      setState(() {
-        _quotes.add({
-          'quote': _quoteController.text,
-          'book': _bookController.text,
-        });
-      });
-      _quoteController.clear();
-      _bookController.clear();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم نشر الاقتباس بنجاح!'),
-          backgroundColor: Color(0xFF1C597B),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'الاقتباسات',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: const Color(0xFF000000),
         elevation: 4,
@@ -169,7 +206,6 @@ class _QuotesPageState extends State<QuotesPage> {
       ),
       body: Stack(
         children: [
-          // 🌈 الخلفية
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -184,64 +220,26 @@ class _QuotesPageState extends State<QuotesPage> {
               ),
             ),
           ),
-
-          // ⚪️ زخارف دائرية
-          Positioned(
-            right: -20,
-            bottom: 20,
-            child: Container(
-              width: 110,
-              height: 110,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.10),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 60,
-            bottom: 60,
-            child: Container(
-              width: 75,
-              height: 75,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.07),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 80,
-            bottom: 30,
-            child: Container(
-              width: 45,
-              height: 45,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
-              ),
-            ),
-          ),
-
-          // 📚 عرض الاقتباسات باستخدام QuoteCard
-          Padding(
+          _isLoading
+              ? const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          )
+              : Padding(
             padding: const EdgeInsets.all(16.0),
             child: _quotes.isEmpty
                 ? const Center(
               child: Text(
                 'لا توجد اقتباسات حتى الآن',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             )
                 : ListView.builder(
               itemCount: _quotes.length,
               itemBuilder: (context, index) {
+                final quote = _quotes[index];
                 return QuoteCard(
-                  quoteText: _quotes[index]['quote']!,
-                  bookName: _quotes[index]['book']!,
+                  quoteText: quote.text,
+                  bookName: quote.bookName ?? 'غير معروف',
                 );
               },
             ),

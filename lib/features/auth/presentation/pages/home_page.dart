@@ -4,6 +4,8 @@ import 'package:book_worm_haven/features/auth/presentation/pages/writing_competi
 import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/profile_page.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
+import '../../../../core/api/api_service.dart';
+import '../../../../core/utils/prefs_helper.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'package:book_worm_haven/features/books/repository/books_repository.dart';
@@ -29,16 +31,30 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     const WritingCompetitionsPage(),
     const NotificationsPage(),
     const ProfilePage(),
-
   ];
 
   late AnimationController _introController;
   late Animation<double> _introAnimation;
   bool _showIntro = true;
 
+  // ============================
+  // استرجاع التوكن عند فتح التطبيق
+  // ============================
+  void _initAuth() async {
+    final token = await PrefsHelper.getToken();
+    if (token != null) {
+      ApiService().setAuthToken(token);
+      print('🔹 Token restored from storage: $token');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    // استدعاء استرجاع التوكن
+    _initAuth();
+
     _introController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -94,10 +110,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 opacity: _introAnimation,
                 child: Container(
                   color: Colors.black.withOpacity(0.6),
-                  ),
                 ),
               ),
-
+            ),
         ],
       ),
       bottomNavigationBar: BottomNavBar(
@@ -206,20 +221,17 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   List<BookModel> getBooksByCategory(String category) {
-    // إن لم يكن هناك نص بحث، نعرض حسب التصنيف فقط
     if (searchQuery.isEmpty) {
       return _books.where((book) => book.category == category).toList();
     }
 
-    // إذا كتب المستخدم في مربع البحث، نبحث في جميع التصنيفات
     return _books.where((book) {
       final matchesSearch = book.title.toLowerCase().contains(searchQuery) ||
           book.author.toLowerCase().contains(searchQuery) ||
           (book.description?.toLowerCase().contains(searchQuery) ?? false);
-      return matchesSearch; // نعرض كل كتاب يطابق البحث بغض النظر عن التصنيف
+      return matchesSearch;
     }).toList();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +243,6 @@ class _HomeContentState extends State<HomeContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 📸 صورة تحفيزية
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(
@@ -243,7 +254,6 @@ class _HomeContentState extends State<HomeContent> {
             ),
             const SizedBox(height: 16),
 
-            // 🔍 شريط البحث الفعّال
             TextField(
               onChanged: (value) {
                 setState(() {
@@ -260,10 +270,8 @@ class _HomeContentState extends State<HomeContent> {
                 fillColor: Colors.white,
               ),
             ),
-
             const SizedBox(height: 16),
 
-            // 🏷️ قائمة التصنيفات
             SizedBox(
               height: 50,
               child: ListView.builder(
@@ -299,7 +307,6 @@ class _HomeContentState extends State<HomeContent> {
             ),
             const SizedBox(height: 20),
 
-// 📚 عرض الكتب في كروت أنيقة مع وصف متدرج وتأثير حركة ناعم (تصحيح: إزالة `delay`)
             getBooksByCategory(selectedCategory).isEmpty
                 ? Center(
               child: Text(
@@ -315,7 +322,7 @@ class _HomeContentState extends State<HomeContent> {
                 final book = getBooksByCategory(selectedCategory)[index];
 
                 return TweenAnimationBuilder<double>(
-                  duration: Duration(milliseconds: 500 + 100 * index), // ← هنا تم التعديل
+                  duration: Duration(milliseconds: 500 + 100 * index),
                   curve: Curves.easeOut,
                   tween: Tween<double>(begin: 0, end: 1),
                   builder: (context, double value, child) {
@@ -348,7 +355,6 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                       child: Row(
                         children: [
-                          // 🖼️ صورة الكتاب
                           ClipRRect(
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),
@@ -361,15 +367,12 @@ class _HomeContentState extends State<HomeContent> {
                               fit: BoxFit.cover,
                             ),
                           ),
-
-                          // 📝 تفاصيل الكتاب
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // 🏷️ العنوان
                                   Text(
                                     book.title,
                                     style: const TextStyle(
@@ -379,8 +382,6 @@ class _HomeContentState extends State<HomeContent> {
                                     ),
                                   ),
                                   const SizedBox(height: 6),
-
-                                  // ✏️ الوصف المتدرج
                                   ShaderMask(
                                     shaderCallback: (bounds) => const LinearGradient(
                                       colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
@@ -388,8 +389,7 @@ class _HomeContentState extends State<HomeContent> {
                                       end: Alignment.bottomRight,
                                     ).createShader(bounds),
                                     child: Text(
-                                      book.description ??
-                                          "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
+                                      book.description ?? "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -400,11 +400,8 @@ class _HomeContentState extends State<HomeContent> {
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-
-                                  // 🔒 أو ✅ شارة الحالة
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: book.isPaid
                                           ? Colors.red.withOpacity(0.1)
@@ -438,19 +435,12 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                     ),
                   ),
-
                 );
               },
             ),
-
-
-
-
-
           ],
         ),
       ),
     );
   }
 }
-
