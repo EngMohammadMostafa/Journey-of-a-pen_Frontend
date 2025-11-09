@@ -76,7 +76,7 @@ class WelcomePage extends StatelessWidget {
 
                 // 👧 صورة الفتاة كما كانت بالحجم الأصلي لكن بدائرة أكثر نعومة
                 Positioned(
-                  bottom: 40,
+                  bottom: 30,
                   left: 40,
                   right: 40,
                   child: ClipRRect(
