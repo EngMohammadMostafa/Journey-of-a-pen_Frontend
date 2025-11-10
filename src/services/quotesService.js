@@ -3,13 +3,18 @@ import api from './api';
 export const quotesService = {
   // جلب جميع الاقتباسات
   getAllQuotes: async () => {
-    const response = await api.get('/api/quotes');
+    try{
+    const response = await api.get('/quotes');
     return response.data;
+    }
+    catch (error) {
+      throw error;
+    }
   },
 
   // حذف اقتباس
   deleteQuote: async (quoteId) => {
-    const response = await api.delete(`/api/admin/quotes/${quoteId}`);
+    const response = await api.delete(`/admin/quotes/${quoteId}`);
     return response.data;
   }
 };
