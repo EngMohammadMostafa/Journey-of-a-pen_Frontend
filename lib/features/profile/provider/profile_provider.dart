@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/utils/prefs_helper.dart';
 import '../data/models/user_model.dart';
 import '../repository/profile_repository.dart';
@@ -124,7 +125,18 @@ class ProfileProvider extends ChangeNotifier {
       loading = false;
       notifyListeners();
 
-      // 🔁 الانتقال إلى صفحة AuthChoicePage
+      // ✅ عرض رسالة نجاح بعد تسجيل الخروج
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم تسجيل الخروج بنجاح'),
+          backgroundColor: Colors.grey,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // 🔁 الانتقال إلى صفحة AuthChoicePage بعد لحظة قصيرة
+      await Future.delayed(const Duration(milliseconds: 400));
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/auth_choice',
             (route) => false,
@@ -133,7 +145,9 @@ class ProfileProvider extends ChangeNotifier {
       loading = false;
       error = e.toString();
       notifyListeners();
+
     }
   }
+
 
 }
