@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileSection extends StatelessWidget {
   final String title;
@@ -23,7 +22,7 @@ class ProfileSection extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 18),
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
-          color: Color(0xFF2E3A3F), // غامق
+          color: Color(0xFF37474F),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -37,10 +36,13 @@ class ProfileSection extends StatelessWidget {
             Text(subtitle, style: TextStyle(color: Colors.white70)),
             SizedBox(width: 8),
             Container(
-              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
               padding: EdgeInsets.all(8),
-              child: SvgPicture.asset(iconAsset, width: 18, height: 18),
-            )
+              child: Image.asset(iconAsset, width: 18, height: 18),
+            ),
           ],
         ),
       ),
