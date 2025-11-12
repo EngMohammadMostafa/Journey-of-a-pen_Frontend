@@ -1,7 +1,7 @@
 // src/pages/ReportsManagement.jsx
 import React from "react"
 import "../styles/ReportsManagement.css"
-
+//تم حذف كذا ملف تقارير مكرر جعل هذا المفل دامج الاداء والماليه
 const ReportsManagement = () => {
   return (
     <div className="reports-page">

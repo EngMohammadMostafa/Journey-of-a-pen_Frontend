@@ -13,8 +13,8 @@ import BooksManagement from './pages/BooksManagement'
 import CompetitionsManagement from './pages/CompetitionsManagement'
 import QuotesManagement from './pages/QuotesManagement'
 import NotificationsManagement from './pages/NotificationsManagement'
-import PerformanceReports from './pages/PerformanceReports'
-import FinancialReports from './pages/FinancialReports'
+
+
 import AuthorRequests from './pages/AuthorRequests'
 import PaymentsManagement from './pages/PaymentsManagement'
 import PointsManagement from './pages/PointsManagement'
@@ -65,8 +65,8 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
             <Route path="/competitions" element={<CompetitionsManagement />} />
             <Route path="/quotes" element={<QuotesManagement />} />
             <Route path="/notifications" element={<NotificationsManagement />} />
-            <Route path="/performance" element={<PerformanceReports />} />
-            <Route path="/financial" element={<FinancialReports />} />
+            
+            
             <Route path="/reports" element={<ReportsManagement />} />
             <Route path="/author-requests" element={<AuthorRequests />} />
             <Route path="/payments" element={<PaymentsManagement />} />
