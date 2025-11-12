@@ -49,14 +49,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                   actions: [
                     {'icon': 'assets/icons/star_filled.png', 'onTap': () {}},
-                    {'icon': 'assets/icons/bookmark_filled.png', 'onTap': () {}},
+                    {'icon': 'assets/icons/book_open.png', 'onTap': () {}},
                     {'icon': 'assets/icons/book.png', 'onTap': () {}},
                     {'icon': 'assets/icons/gift.png', 'onTap': () {}},
-                    {
-                      'icon': 'assets/icons/logout.png',
-                      'onTap': () {
-                        // ✅ تم تعديل هذا السطر فقط
-                        provider.logout(context);
+                    {'icon': 'assets/icons/logout.png', 'onTap': () {
+                      provider.logout(context);
                       }
                     },
                   ],
