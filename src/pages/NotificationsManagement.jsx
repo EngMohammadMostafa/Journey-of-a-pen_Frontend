@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
-
+import { notificationsService } from '../services/notificationsService'
 import { useAuth } from '../context/AuthContext'
 import '../styles/global.css'
 import '../styles/NotificationsManagement.css'
