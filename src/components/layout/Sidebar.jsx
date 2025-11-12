@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-
-
+import '../../styles/global.css'
 
 const Sidebar = () => {
   const location = useLocation()

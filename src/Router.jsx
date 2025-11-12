@@ -58,6 +58,7 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
       <div className="main-container">
         <Navbar onToggleSidebar={onToggleSidebar} />
         <div className="content-area">
+          
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UsersManagement />} />
@@ -66,7 +67,7 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
             <Route path="/quotes" element={<QuotesManagement />} />
             <Route path="/notifications" element={<NotificationsManagement />} />
             
-            
+          
             <Route path="/reports" element={<ReportsManagement />} />
             <Route path="/author-requests" element={<AuthorRequests />} />
             <Route path="/payments" element={<PaymentsManagement />} />

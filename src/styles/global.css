@@ -59,7 +59,7 @@ body {
   flex: 1;
   margin-left: 70%;
   width: calc(94% - 20%);
-  margin-top: -30%;
+  margin-top: -37%;
   
 }
 .main-content {
@@ -126,21 +126,22 @@ flex-grow: 1;
 }
 
 .sidebar {
-  width: 23%;  
+  width: 23%;
   background: linear-gradient(180deg, #000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
   color: white;
-  position: sticky; /* ✅ تتحرك مع الصفحة */
-  top: 15%; /* تبدأ أسفل قسم الهيرو */
+  position: sticky;
+  margin-top:7%;
   right: 80%;
-  height: calc(100vh - 7%); /* تغطي طول الشاشة */
+  height: calc(100vh - 7%);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* ✅ ظل من اليمين */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  border-top-right-radius: 40% 20%; /* ✅ الحافة اليمنى العليا */
-  overflow-y: auto; /* ✅ تمرير داخل السايدبار */
+  border-top-right-radius: 40% 20%;
+  overflow-y: auto;
   scrollbar-width: thin;
 }
+
 
 .sidebar {
   clip-path: polygon(0 0, 100% , 100% 100%, 0% 100%);
@@ -244,8 +245,8 @@ flex-grow: 1;
   position: fixed; /* يجعل العنصر ثابتًا */
   top: 15%; /* يلتصق بأعلى الشاشة */
   right: 2%; /* لأن الاتجاه RTL */
-  width: 73%; /* يأخذ عرض الشاشة بالكامل */
-  height: 100%;
+  width: 70%; /* يأخذ عرض الشاشة بالكامل */
+  height: 30%;
   display: flex;
   flex-direction: row-reverse;
   border-radius: 0 0 15px 15px; /* حواف سفلية فقط */

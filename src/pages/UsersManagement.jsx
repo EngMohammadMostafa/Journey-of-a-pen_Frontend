@@ -5,6 +5,8 @@ import Modal from '../components/common/Modal'
 import { usersService } from '../services/usersService'
 import { useAuth } from '../context/AuthContext'
 import '../styles/UsersManagement.css'
+import '../styles/global.css'
+
 
 const UsersManagement = () => {
   const [users, setUsers] = useState([]);
