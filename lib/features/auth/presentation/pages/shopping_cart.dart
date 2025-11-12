@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../books/data/models/book_model.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
 
 class ShoppingCartPage extends StatelessWidget {
@@ -8,6 +9,7 @@ class ShoppingCartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // بيانات وهمية تمثل مشتريات المستخدم
     final userPurchases = [
       {
         "purchasing_id": 1,
@@ -19,6 +21,8 @@ class ShoppingCartPage extends StatelessWidget {
           "price": 12.99,
           "discount_rate": 0.0,
           "image": "https://picsum.photos/200/300?random=10",
+          "category": "مغامرة",
+          "description": "كتاب عن رحلة البطل في مواجهة التحديات."
         }
       },
       {
@@ -31,6 +35,8 @@ class ShoppingCartPage extends StatelessWidget {
           "price": 15.99,
           "discount_rate": 3.0,
           "image": "https://picsum.photos/200/300?random=11",
+          "category": "رواية",
+          "description": "رواية رومانسية تدور أحداثها في باريس."
         }
       },
       {
@@ -43,6 +49,8 @@ class ShoppingCartPage extends StatelessWidget {
           "price": 10.50,
           "discount_rate": 0.0,
           "image": "https://picsum.photos/200/300?random=12",
+          "category": "رعب",
+          "description": "قصص مرعبة تحدث في الليالي المظلمة."
         }
       },
     ];
@@ -81,12 +89,12 @@ class ShoppingCartPage extends StatelessWidget {
                     itemCount: userPurchases.length,
                     itemBuilder: (context, index) {
                       final purchase = userPurchases[index];
-                      final book = purchase["book"] as Map<String, dynamic>?;
+                      final bookMap = purchase["book"] as Map<String, dynamic>?;
 
-                      if (book == null) return const SizedBox();
+                      if (bookMap == null) return const SizedBox();
 
-                      final price = book["price"] as double? ?? 0.0;
-                      final discount = book["discount_rate"] as double? ?? 0.0;
+                      final price = bookMap["price"] as double? ?? 0.0;
+                      final discount = bookMap["discount_rate"] as double? ?? 0.0;
                       final discountedPrice = price - discount;
 
                       final date = purchase["date"] as DateTime?;
@@ -94,17 +102,31 @@ class ShoppingCartPage extends StatelessWidget {
                           ? DateFormat('yyyy/MM/dd').format(date)
                           : '';
 
-                      final title = book["title"] as String? ?? '';
-                      final author = book["author"] as String? ?? '';
-                      final imageUrl = book["image"] as String? ??
+                      final title = bookMap["title"] as String? ?? '';
+                      final author = bookMap["author"] as String? ?? '';
+                      final imageUrl = bookMap["image"] as String? ??
                           'https://picsum.photos/200/300?random=1';
+                      final category = bookMap['category'] as String? ?? 'غير محدد';
+                      final description = bookMap['description'] as String? ??
+                          'لا يوجد وصف متاح.';
 
                       return GestureDetector(
                         onTap: () {
+                          // تحويل Map إلى BookModel
+                          final bookModel = BookModel(
+                            id: bookMap['book_id'] as int? ?? 0,
+                            title: title,
+                            author: author,
+                            imageUrl: imageUrl,
+                            isPaid: price > 0,
+                            category: category,
+                            description: description,
+                          );
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => BookDetailsPage(book:book), // تمرير بيانات الكتاب
+                              builder: (context) => BookDetailsPage(book: bookModel),
                             ),
                           );
                         },
@@ -198,7 +220,6 @@ class ShoppingCartPage extends StatelessWidget {
                           ),
                         ),
                       );
-
                     },
                   ),
                 ),
