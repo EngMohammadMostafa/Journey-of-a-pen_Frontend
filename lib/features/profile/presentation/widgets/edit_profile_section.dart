@@ -5,99 +5,253 @@ import '../../provider/profile_provider.dart';
 
 class EditProfileSection extends StatefulWidget {
   final UserModel user;
-  const EditProfileSection({super.key, required this.user});
+
+  const EditProfileSection({Key? key, required this.user}) : super(key: key);
 
   @override
   State<EditProfileSection> createState() => _EditProfileSectionState();
 }
 
 class _EditProfileSectionState extends State<EditProfileSection> {
-  final _formKey = GlobalKey<FormState>();
-  final passwordC = TextEditingController();
-  final confirmC = TextEditingController();
+  late TextEditingController usernameC;
+  late TextEditingController ageC;
+  late TextEditingController oldPassC;
+  late TextEditingController newPassC;
 
-  bool isLoading = false;
+  int? gender;
+  bool showPasswordSection = false;
+
+  @override
+  void initState() {
+    super.initState();
+    usernameC = TextEditingController(text: widget.user.username);
+    ageC = TextEditingController(text: widget.user.age?.toString() ?? '');
+    oldPassC = TextEditingController();
+    newPassC = TextEditingController();
+    gender = widget.user.gender;
+  }
+
+  @override
+  void dispose() {
+    usernameC.dispose();
+    ageC.dispose();
+    oldPassC.dispose();
+    newPassC.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('تعديل الملف الشخصي',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Divider(),
-            const SizedBox(height: 10),
-            Text('الاسم: ${widget.user.username}'),
-            Text('العمر: ${widget.user.age}'),
-            const SizedBox(height: 20),
-
-            TextFormField(
-              controller: passwordC,
-              decoration: const InputDecoration(
-                labelText: 'كلمة المرور الجديدة',
-                prefixIcon: Icon(Icons.lock_outline),
-              ),
-              obscureText: true,
-              validator: (v) =>
-              v!.length < 6 ? 'يجب أن تكون 6 أحرف على الأقل' : null,
+    return DraggableScrollableSheet(
+      initialChildSize: 0.65,
+      maxChildSize: 0.9,
+      minChildSize: 0.4,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF1C597B),
+                Color(0xFF4C869F),
+                Color(0xFF7199AA),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: confirmC,
-              decoration: const InputDecoration(
-                labelText: 'تأكيد كلمة المرور',
-                prefixIcon: Icon(Icons.lock_reset_outlined),
-              ),
-              obscureText: true,
-              validator: (v) =>
-              v != passwordC.text ? 'كلمات المرور غير متطابقة' : null,
-            ),
-            const SizedBox(height: 20),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const Text(
+                    'تحديث الملف الشخصي',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading
-                    ? null
-                    : () async {
-                  if (!_formKey.currentState!.validate()) return;
-                  setState(() => isLoading = true);
+                  // اسم المستخدم
+                  _inputField(
+                    controller: usernameC,
+                    label: 'اسم المستخدم',
+                    icon: Icons.person_outline,
+                  ),
 
-                  final success = await provider.updateUser({
-                    'password': passwordC.text,
-                  });
+                  const SizedBox(height: 12),
 
-                  setState(() => isLoading = false);
+                  // العمر
+                  _inputField(
+                    controller: ageC,
+                    label: 'العمر',
+                    icon: Icons.cake_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
 
-                  if (success) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content:
-                        Text('تم تحديث كلمة المرور بنجاح ✅'),
-                        backgroundColor: Colors.green,
+                  const SizedBox(height: 12),
+
+                  // الجنس
+                  DropdownButtonFormField<int>(
+                    value: gender,
+                    decoration: _inputDecoration(
+                      label: 'الجنس',
+                      icon: Icons.wc_outlined,
+                    ),
+                    dropdownColor: const Color(0xFF1C597B),
+                    style: const TextStyle(color: Colors.white),
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text("ذكر")),
+                      DropdownMenuItem(value: 2, child: Text("أنثى")),
+                    ],
+                    onChanged: (v) => setState(() => gender = v),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // زر تغيير كلمة المرور
+                  TextButton.icon(
+                    onPressed: () =>
+                        setState(() => showPasswordSection = !showPasswordSection),
+                    icon: const Icon(Icons.lock_reset, color: Colors.white),
+                    label: Text(
+                      showPasswordSection
+                          ? "إلغاء تغيير كلمة المرور"
+                          : "تغيير كلمة المرور",
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: showPasswordSection
+                        ? Column(
+                      key: const ValueKey('password_section'),
+                      children: [
+                        _inputField(
+                          controller: oldPassC,
+                          label: 'كلمة المرور القديمة',
+                          icon: Icons.lock_outline,
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 12),
+                        _inputField(
+                          controller: newPassC,
+                          label: 'كلمة المرور الجديدة',
+                          icon: Icons.lock_reset_outlined,
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 12),
+                        _inputField(
+                          controller: newPassC,
+                          label: 'تأكيد كلمة المرور الجديدة ',
+                          icon: Icons.lock_reset_outlined,
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    )
+                        : const SizedBox.shrink(),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // زر الحفظ
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF1C597B),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    );
-                  }
-                },
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('حفظ التغييرات'),
+                      onPressed: () async {
+                        final body = {
+                          'username': usernameC.text,
+                          'age': int.tryParse(ageC.text),
+                          'gender': gender,
+                        };
+
+                        final ok = await provider.updateUser(body);
+                        if (ok && mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('تم تحديث الملف بنجاح'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('حفظ التعديلات'),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// عنصر إدخال موحّد التصميم
+  Widget _inputField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.white),
+      decoration: _inputDecoration(label: label, icon: icon),
+    );
+  }
+
+  /// تنسيق الحقول بنفس طابع التسجيل
+  InputDecoration _inputDecoration({required String label, required IconData icon}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      prefixIcon: Icon(icon, color: Colors.white),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.15),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white70),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.6)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white),
       ),
     );
   }
