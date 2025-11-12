@@ -104,4 +104,40 @@ class ProfileProvider extends ChangeNotifier {
       return false;
     }
   }
+  /// 🚪 تسجيل الخروج
+  Future<void> logout() async {
+    try {
+      loading = true;
+      notifyListeners();
+
+      if (mockMode) {
+        // 🧩 في وضع التجربة، فقط نحذف المستخدم محليًا
+        await Future.delayed(const Duration(milliseconds: 400));
+        user = null;
+        await PrefsHelper.clearToken();
+        loading = false;
+        notifyListeners();
+        return;
+      }
+
+      // 🔹 في الوضع الحقيقي (مع API)
+      final token = await PrefsHelper.getToken();
+      if (token != null) {
+        _repository.setAuthToken(token);
+        await _repository.logout(); // ← نرسل الطلب إلى API
+      }
+
+      // حذف بيانات المستخدم محليًا
+      user = null;
+      await PrefsHelper.clearToken();
+
+      loading = false;
+      notifyListeners();
+    } catch (e) {
+      loading = false;
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
 }

@@ -5,7 +5,6 @@ import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
 
-
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -20,63 +19,65 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     provider = Provider.of<ProfileProvider>(context, listen: false);
-    provider.loadUser(); // إذا تحتاجين توكن مرريه: provider.loadUser(token: '...')
+    provider.loadUser();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1F1F1F), // خلفية داكنة كما في الصورة
+      backgroundColor: const Color(0xFFE3EDF2),
       body: Consumer<ProfileProvider>(
         builder: (context, p, _) {
           if (p.loading && p.user == null) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (p.error != null) {
-            return Center(child: Text('Error: ${p.error}', style: TextStyle(color: Colors.white)));
+            return Center(
+                child: Text('Error: ${p.error}',
+                    style: const TextStyle(color: Colors.red)));
           }
           final user = p.user!;
           return SingleChildScrollView(
             child: Column(
               children: [
+                // رأس الصفحة
                 ProfileHeader(
                   username: user.username,
                   points: user.points,
                   onEditProfile: () {
-                    // افتح صفحة التعديل أو عرض حوار لتعديل الاسم
                     _showEditDialog(context, user);
                   },
                   actions: [
-                    {'icon': 'assets/icons/star_filled.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/bookmark_filled.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/book.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/gift.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/edit.png', 'onTap': (){}},
+                    {'icon': 'assets/icons/star_filled.png', 'onTap': () {}},
+                    {'icon': 'assets/icons/bookmark_filled.png', 'onTap': () {}},
+                    {'icon': 'assets/icons/book.png', 'onTap': () {}},
+                    {'icon': 'assets/icons/gift.png', 'onTap': () {}},
+                    {
+                      'icon': 'assets/icons/logout.png',
+                      'onTap': () {
+                        provider.logout();
+                      }
+                    },
                   ],
                 ),
-                SizedBox(height: 12),
+
+                const SizedBox(height: 30),
+
                 // لوحة عدد النقاط
                 ProfileSection(
-                  title: 'number of points',
+                  title: 'عدد النقاط',
                   subtitle: '${user.points}',
                   iconAsset: 'assets/icons/star_filled.png',
-                  onTap: () {
-                    // انتقلي الى صفحة تفاصيل النقاط
-                  },
+                  onTap: () {},
                 ),
 
-                // أقسام بروفايل: الكتب المحملة، الكتب المدفوعة، المكافئات، الخ
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6),
-                  child: Column(
-                    children: [
-                      _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {}),
-                      _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () {}),
-                      _buildSectionTile('المكافئات', 'تفاصيل المكافئات و الاستبدال', () {}),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 30),
+                const SizedBox(height: 16),
+
+                // أقسام أخرى
+                _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {}),
+                _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () {}),
+                _buildSectionTile('المكافآت', 'تفاصيل المكافآت والاستبدال', () {}),
+                const SizedBox(height: 30),
               ],
             ),
           );
@@ -87,13 +88,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildSectionTile(String title, String subtitle, VoidCallback onTap) {
     return Card(
-      color: Color(0xFFEAF6FB).withOpacity(0.15),
+      color: Colors.white.withOpacity(0.8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: ListTile(
         onTap: onTap,
-        title: Text(title, style: TextStyle(color: Colors.white)),
-        subtitle: Text(subtitle, style: TextStyle(color: Colors.white60)),
-        trailing: Icon(Icons.chevron_right, color: Colors.white60),
+        title: Text(title, style: const TextStyle(color: Colors.black87)),
+        subtitle: Text(subtitle, style: const TextStyle(color: Colors.black54)),
+        trailing: const Icon(Icons.chevron_right, color: Colors.black45),
       ),
     );
   }
@@ -105,15 +106,20 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('تحديث الملف'),
+        title: const Text('تحديث الملف'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: usernameC, decoration: InputDecoration(labelText: 'اسم المستخدم')),
-            TextField(controller: ageC, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: 'العمر')),
+            TextField(
+                controller: usernameC,
+                decoration: const InputDecoration(labelText: 'اسم المستخدم')),
+            TextField(
+                controller: ageC,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'العمر')),
             DropdownButton<int>(
               value: gender,
-              items: [
+              items: const [
                 DropdownMenuItem(child: Text('ذكر'), value: 1),
                 DropdownMenuItem(child: Text('أنثى'), value: 2),
               ],
@@ -124,15 +130,20 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('إلغاء')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إلغاء')),
           ElevatedButton(
             onPressed: () async {
-              final body = {'username': usernameC.text, 'age': int.tryParse(ageC.text) ?? user.age, 'gender': gender};
+              final body = {
+                'username': usernameC.text,
+                'age': int.tryParse(ageC.text) ?? user.age,
+                'gender': gender
+              };
               final ok = await provider.updateUser(body);
               if (ok) Navigator.pop(context);
-              // خطأ يعرضه الـ provider
             },
-            child: Text('حفظ'),
+            child: const Text('حفظ'),
           )
         ],
       ),

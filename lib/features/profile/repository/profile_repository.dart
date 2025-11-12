@@ -7,7 +7,6 @@ import '../../../core/constants/api_endpoints.dart';
 class ProfileRepository {
   final ApiService _api = ApiService(isMockMode: true);
 
-
   /// 🟩 جلب بيانات المستخدم الحالي
   Future<UserModel> getCurrentUser() async {
     try {
@@ -38,6 +37,20 @@ class ProfileRepository {
           : response.data as Map<String, dynamic>;
 
       return UserModel.fromJson(data);
+    } on DioException catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
+
+  /// 🚪 تسجيل الخروج
+  Future<void> logout() async {
+    try {
+      final response = await _api.post(ApiEndpoints.logout);
+
+      // تحقق أن الخروج تم بنجاح من السيرفر
+      if (response.statusCode != 200) {
+        throw Exception('فشل تسجيل الخروج (${response.statusCode})');
+      }
     } on DioException catch (e) {
       throw Exception(_handleError(e));
     }
