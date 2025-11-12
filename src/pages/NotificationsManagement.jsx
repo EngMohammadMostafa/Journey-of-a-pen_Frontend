@@ -10,7 +10,6 @@ const NotificationsManagement = () => {
   const [loading, setLoading] = useState(false)
   const { token } = useAuth()
 
-  // أعمدة الجدول
   const columns = [
     { key: 'notification_id', title: 'ID' },
     { key: 'title', title: 'عنوان الإشعار' },
@@ -20,7 +19,6 @@ const NotificationsManagement = () => {
     { key: 'created_at', title: 'تاريخ الإنشاء' }
   ]
 
-  // جلب جميع الإشعارات من الباك
   const fetchNotifications = async () => {
     setLoading(true)
     try {
@@ -38,18 +36,25 @@ const NotificationsManagement = () => {
     fetchNotifications()
   }, [])
 
+  // زر فتح إضافة إشعار
+  const handleAddNotification = () => {
+    alert('زر إضافة إشعار جديد جاهز، سيتم إضافة المودال لاحقاً')
+  }
+
   return (
     <div className="notifications-management">
       <div className="page-header">
         <h1>إدارة الإشعارات</h1>
+        <button className="btn-primary" onClick={handleAddNotification}>
+          + إضافة إشعار جديد
+        </button>
       </div>
 
-      {/* جدول الإشعارات */}
       <DataTable
         columns={columns}
         data={notifications}
         loading={loading}
-        actions={[]} // لا يوجد تعديل أو حذف
+        actions={[]}
       />
     </div>
   )
