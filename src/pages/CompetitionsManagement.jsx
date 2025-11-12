@@ -10,6 +10,7 @@ const CompetitionsManagement = () => {
   const [competitions, setCompetitions] = useState([])
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingCompetition, setEditingCompetition] = useState(null)
   const { token } = useAuth()
 
   const [formData, setFormData] = useState({
@@ -48,8 +49,9 @@ const CompetitionsManagement = () => {
     fetchCompetitions()
   }, [])
 
-  // فتح مودال إضافة مسابقة
+  // فتح مودال الإضافة أو التعديل
   const handleAddCompetition = () => {
+    setEditingCompetition(null)
     setFormData({
       name: '',
       status: 'ongoing',
@@ -60,12 +62,30 @@ const CompetitionsManagement = () => {
     setIsModalOpen(true)
   }
 
-  // حفظ مسابقة جديدة
+  const handleEdit = (competition) => {
+    setEditingCompetition(competition)
+    setFormData({
+      name: competition.name || '',
+      status: competition.status || 'ongoing',
+      start_date: competition.start_date || '',
+      end_date: competition.end_date || '',
+      max_users: competition.max_users || ''
+    })
+    setIsModalOpen(true)
+  }
+
+  // حفظ إضافة أو تعديل
   const handleSave = async () => {
     try {
-      await competitionsService.addCompetition(formData, token)
-      alert('تم إضافة المسابقة بنجاح')
+      if (editingCompetition) {
+        await competitionsService.updateCompetition(editingCompetition.id, formData, token)
+        alert('تم تعديل المسابقة بنجاح')
+      } else {
+        await competitionsService.addCompetition(formData, token)
+        alert('تم إضافة المسابقة بنجاح')
+      }
       setIsModalOpen(false)
+      setEditingCompetition(null)
       setFormData({
         name: '',
         status: 'ongoing',
@@ -75,10 +95,12 @@ const CompetitionsManagement = () => {
       })
       fetchCompetitions()
     } catch (error) {
-      console.error('Error adding competition:', error)
-      alert('حدث خطأ في إضافة المسابقة')
+      console.error('Error saving competition:', error)
+      alert('حدث خطأ في حفظ البيانات')
     }
   }
+
+  const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'إضافة مسابقة جديدة'
 
   return (
     <div className="competitions-management">
@@ -94,14 +116,18 @@ const CompetitionsManagement = () => {
         columns={columns}
         data={competitions}
         loading={loading}
-        actions={[]} // لا يوجد تعديل أو حذف في هذه الدفعة
+        onEdit={handleEdit}
+        actions={['edit']} // فقط التعديل موجود
       />
 
-      {/* مودال إضافة مسابقة */}
+      {/* مودال إضافة/تعديل مسابقة */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="إضافة مسابقة جديدة"
+        onClose={() => {
+          setIsModalOpen(false)
+          setEditingCompetition(null)
+        }}
+        title={modalTitle}
       >
         <div className="competition-form">
           <div className="form-group">
@@ -159,7 +185,7 @@ const CompetitionsManagement = () => {
               إلغاء
             </button>
             <button className="btn-primary" onClick={handleSave}>
-              إضافة مسابقة
+              {editingCompetition ? 'حفظ التغييرات' : 'إضافة مسابقة'}
             </button>
           </div>
         </div>

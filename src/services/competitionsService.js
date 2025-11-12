@@ -14,5 +14,11 @@ export const competitionsService = {
       headers: { Authorization: `Bearer ${token}` }
     })
     return res.data
+  },
+  updateCompetition: async (id, data, token) => {
+    const res = await axios.put(`${API_BASE}/competitions/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return res.data
   }
 }
