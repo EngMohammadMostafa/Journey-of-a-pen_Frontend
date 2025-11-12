@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import DataTable from '../components/common/DataTable'
+import Modal from '../components/common/Modal'
 
 import { useAuth } from '../context/AuthContext'
 import '../styles/global.css'
@@ -8,6 +9,13 @@ import '../styles/NotificationsManagement.css'
 const NotificationsManagement = () => {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    type: 'competition',
+    status: 0
+  })
   const { token } = useAuth()
 
   const columns = [
@@ -36,9 +44,31 @@ const NotificationsManagement = () => {
     fetchNotifications()
   }, [])
 
-  // زر فتح إضافة إشعار
   const handleAddNotification = () => {
-    alert('زر إضافة إشعار جديد جاهز، سيتم إضافة المودال لاحقاً')
+    setFormData({
+      title: '',
+      content: '',
+      type: 'competition',
+      status: 0
+    })
+    setIsModalOpen(true)
+  }
+
+  const handleSendNotification = async () => {
+    if (!formData.title || !formData.content) {
+      alert('الرجاء ملء جميع الحقول المطلوبة')
+      return
+    }
+
+    try {
+      await notificationsService.addNotification(formData, token)
+      alert('تم إرسال الإشعار بنجاح')
+      setIsModalOpen(false)
+      fetchNotifications()
+    } catch (error) {
+      console.error('Error sending notification:', error)
+      alert('حدث خطأ أثناء إرسال الإشعار')
+    }
   }
 
   return (
@@ -56,6 +86,64 @@ const NotificationsManagement = () => {
         loading={loading}
         actions={[]}
       />
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="إضافة إشعار جديد"
+      >
+        <div className="notification-form">
+          <div className="form-group">
+            <label>عنوان الإشعار: *</label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>المحتوى: *</label>
+            <textarea
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>النوع:</label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            >
+              <option value="competition">مسابقة</option>
+              <option value="general">عام</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>الحالة:</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: parseInt(e.target.value) })}
+            >
+              <option value={0}>نشط</option>
+              <option value={1}>غير نشط</option>
+            </select>
+          </div>
+
+          <div className="form-actions">
+            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
+              إلغاء
+            </button>
+            <button className="btn-primary" onClick={handleSendNotification}>
+              إرسال
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
