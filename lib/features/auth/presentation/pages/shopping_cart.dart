@@ -1,39 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // لتنسيق التاريخ
+import 'package:intl/intl.dart';
+
+import '../../../books/presentation/pages/book_details_page.dart';
 
 class ShoppingCartPage extends StatelessWidget {
   const ShoppingCartPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // بيانات وهمية لعمليات الشراء
-    final List<Map<String, dynamic>> purchases = [
+    final userPurchases = [
       {
-        "title": "The Hero's Journey",
-        "author": "John Smith",
-        "price": 12.99,
-        "discount": 0.0,
+        "purchasing_id": 1,
         "date": DateTime(2025, 11, 4),
-        "address": "شارع الجامعة - مبنى A",
-        "image": "https://picsum.photos/200/300?random=10",
+        "book": {
+          "book_id": 101,
+          "title": "The Hero's Journey",
+          "author": "John Smith",
+          "price": 12.99,
+          "discount_rate": 0.0,
+          "image": "https://picsum.photos/200/300?random=10",
+        }
       },
       {
-        "title": "Love in Paris",
-        "author": "Emily Rose",
-        "price": 15.99,
-        "discount": 3.0,
+        "purchasing_id": 2,
         "date": DateTime(2025, 11, 1),
-        "address": "المدينة الجامعية - بوابة 2",
-        "image": "https://picsum.photos/200/300?random=11",
+        "book": {
+          "book_id": 102,
+          "title": "Love in Paris",
+          "author": "Emily Rose",
+          "price": 15.99,
+          "discount_rate": 3.0,
+          "image": "https://picsum.photos/200/300?random=11",
+        }
       },
       {
-        "title": "Haunted Nights",
-        "author": "Lucy Grey",
-        "price": 10.50,
-        "discount": 0.0,
+        "purchasing_id": 3,
         "date": DateTime(2025, 10, 29),
-        "address": "حي المستقبل - عمارة 5",
-        "image": "https://picsum.photos/200/300?random=12",
+        "book": {
+          "book_id": 103,
+          "title": "Haunted Nights",
+          "author": "Lucy Grey",
+          "price": 10.50,
+          "discount_rate": 0.0,
+          "image": "https://picsum.photos/200/300?random=12",
+        }
       },
     ];
 
@@ -57,7 +67,6 @@ class ShoppingCartPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🛒 عنوان الصفحة
                 const Text(
                   "سلة المشتريات",
                   style: TextStyle(
@@ -67,125 +76,129 @@ class ShoppingCartPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // 🧾 قائمة المشتريات
                 Expanded(
                   child: ListView.builder(
-                    itemCount: purchases.length,
+                    itemCount: userPurchases.length,
                     itemBuilder: (context, index) {
-                      final item = purchases[index];
-                      final discountedPrice = item["price"] - item["discount"];
-                      final formattedDate =
-                      DateFormat('yyyy/MM/dd').format(item["date"]);
+                      final purchase = userPurchases[index];
+                      final book = purchase["book"] as Map<String, dynamic>?;
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 6,
-                              offset: const Offset(0, 4),
+                      if (book == null) return const SizedBox();
+
+                      final price = book["price"] as double? ?? 0.0;
+                      final discount = book["discount_rate"] as double? ?? 0.0;
+                      final discountedPrice = price - discount;
+
+                      final date = purchase["date"] as DateTime?;
+                      final formattedDate = date != null
+                          ? DateFormat('yyyy/MM/dd').format(date)
+                          : '';
+
+                      final title = book["title"] as String? ?? '';
+                      final author = book["author"] as String? ?? '';
+                      final imageUrl = book["image"] as String? ??
+                          'https://picsum.photos/200/300?random=1';
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookDetailsPage(book:book), // تمرير بيانات الكتاب
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // 📘 صورة الكتاب
-                            ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(18),
-                                bottomLeft: Radius.circular(18),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6,
+                                offset: const Offset(0, 4),
                               ),
-                              child: Image.network(
-                                item["image"],
-                                width: 100,
-                                height: 130,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-
-                            // 🧾 تفاصيل الشراء
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item["title"],
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1C597B),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "بواسطة: ${item["author"]}",
-                                      style: const TextStyle(
-                                        color: Colors.black54,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-
-                                    // 💰 السعر والخصم
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "${discountedPrice.toStringAsFixed(2)} \$",
-                                          style: const TextStyle(
-                                            color: Colors.green,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        if (item["discount"] > 0)
-                                          Padding(
-                                            padding:
-                                            const EdgeInsets.only(left: 8),
-                                            child: Text(
-                                              "${item["price"]} \$",
-                                              style: const TextStyle(
-                                                color: Colors.red,
-                                                fontSize: 14,
-                                                decoration:
-                                                TextDecoration.lineThrough,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-
-                                    // 🏠 العنوان
-                                    Text(
-                                      "📍 ${item["address"]}",
-                                      style: const TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-
-                                    // 📅 التاريخ
-                                    Text(
-                                      "🗓️ $formattedDate",
-                                      style: const TextStyle(
-                                        color: Colors.black54,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(18),
+                                  bottomLeft: Radius.circular(18),
+                                ),
+                                child: Image.network(
+                                  imageUrl,
+                                  width: 100,
+                                  height: 130,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1C597B),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "بواسطة: $author",
+                                        style: const TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            "${discountedPrice.toStringAsFixed(2)} \$",
+                                            style: const TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          if (discount > 0)
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 8),
+                                              child: Text(
+                                                "${price.toStringAsFixed(2)} \$",
+                                                style: const TextStyle(
+                                                  color: Colors.red,
+                                                  fontSize: 14,
+                                                  decoration: TextDecoration.lineThrough,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        "🗓️ $formattedDate",
+                                        style: const TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
+
                     },
                   ),
                 ),
