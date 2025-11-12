@@ -55,7 +55,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     {
                       'icon': 'assets/icons/logout.png',
                       'onTap': () {
-                        provider.logout();
+                        // ✅ تم تعديل هذا السطر فقط
+                        provider.logout(context);
                       }
                     },
                   ],
