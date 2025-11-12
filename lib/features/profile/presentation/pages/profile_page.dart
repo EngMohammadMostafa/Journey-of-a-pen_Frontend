@@ -4,7 +4,8 @@ import '../../data/models/user_model.dart';
 import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
-import '../widgets/edit_profile_section.dart'; // ✅ استدعاء الودجت الجديد
+import '../widgets/edit_profile_section.dart';
+import '../widgets/purchased_books_section.dart'; // ✅ استدعاء الودجت الجديد
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -59,7 +60,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       _openEditProfileSheet(context, user);
                     }},
                     {'icon': 'assets/icons/book_open.png', 'onTap': () {}},
-                    {'icon': 'assets/icons/book.png', 'onTap': () {}},
+                    {'icon': 'assets/icons/book.png', 'onTap': () {
+                      _showPurchasedBooks(context);
+                    }},
+
                     {'icon': 'assets/icons/gift.png', 'onTap': () {}},
                     {
                       'icon': 'assets/icons/logout.png',
@@ -119,4 +123,35 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => EditProfileSection(user: user),
     );
   }
+
+  void _showPurchasedBooks(BuildContext context) {
+    final purchasedBooks = [
+      {
+        'title': 'مدخل إلى البرمجة بلغة Dart',
+        'author': 'أحمد علي',
+        'cover': 'assets/images/book1.jpg',
+        'downloaded': true,
+      },
+      {
+        'title': 'أساسيات Flutter الحديثة',
+        'author': 'سارة محمد',
+        'cover': 'assets/images/book2.jpg',
+        'downloaded': true,
+      },
+      {
+        'title': 'هندسة البرمجيات الشاملة',
+        'author': 'خالد إبراهيم',
+        'cover': 'assets/images/book3.jpg',
+        'downloaded': false,
+      },
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => PurchasedBooksSection(books: purchasedBooks),
+    );
+  }
+
 }
