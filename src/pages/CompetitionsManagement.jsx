@@ -11,6 +11,7 @@ const CompetitionsManagement = () => {
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCompetition, setEditingCompetition] = useState(null)
+  const [showCompetitionsTable, setShowCompetitionsTable] = useState(false) // لإظهار جدول المسابقات
   const { token } = useAuth()
 
   const [formData, setFormData] = useState({
@@ -46,8 +47,10 @@ const CompetitionsManagement = () => {
   }
 
   useEffect(() => {
-    fetchCompetitions()
-  }, [])
+    if (showCompetitionsTable) {
+      fetchCompetitions()
+    }
+  }, [showCompetitionsTable])
 
   // فتح مودال الإضافة
   const handleAddCompetition = () => {
@@ -120,92 +123,113 @@ const CompetitionsManagement = () => {
   return (
     <div className="competitions-management">
       <div className="page-header">
-        <h1>إدارة المسابقات</h1>
-        <button className="btn-primary" onClick={handleAddCompetition}>
-          + إضافة مسابقة
-        </button>
+        <h1>لوحة الإدارة</h1>
+        <div className="admin-buttons">
+          <button
+            className="btn-primary"
+            onClick={() => setShowCompetitionsTable(true)}
+          >
+            إدارة المسابقات
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={() => setShowCompetitionsTable(false)}
+          >
+            إدارة المشاركين والكتب
+          </button>
+        </div>
       </div>
 
-      {/* جدول المسابقات */}
-      <DataTable
-        columns={columns}
-        data={competitions}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        actions={['edit', 'delete']} // كل الوظائف موجودة
-      />
-
-      {/* مودال إضافة/تعديل مسابقة */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setEditingCompetition(null)
-        }}
-        title={modalTitle}
-      >
-        <div className="competition-form">
-          <div className="form-group">
-            <label>اسم المسابقة: *</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>الحالة:</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            >
-              <option value="ongoing">جارية</option>
-              <option value="active">نشطة</option>
-              <option value="completed">منتهية</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>تاريخ البداية:</label>
-            <input
-              type="date"
-              value={formData.start_date}
-              onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>تاريخ النهاية:</label>
-            <input
-              type="date"
-              value={formData.end_date}
-              onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>الحد الأقصى للمستخدمين:</label>
-            <input
-              type="number"
-              value={formData.max_users}
-              onChange={(e) => setFormData({ ...formData, max_users: e.target.value })}
-              min="1"
-            />
-          </div>
-
-          <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
-              إلغاء
-            </button>
-            <button className="btn-primary" onClick={handleSave}>
-              {editingCompetition ? 'حفظ التغييرات' : 'إضافة مسابقة'}
+      {showCompetitionsTable && (
+        <>
+          <div className="page-header">
+            <button className="btn-primary" onClick={handleAddCompetition}>
+              + إضافة مسابقة
             </button>
           </div>
-        </div>
-      </Modal>
+
+          {/* جدول المسابقات */}
+          <DataTable
+            columns={columns}
+            data={competitions}
+            loading={loading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            actions={['edit', 'delete']}
+          />
+
+          {/* مودال إضافة/تعديل مسابقة */}
+          <Modal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false)
+              setEditingCompetition(null)
+            }}
+            title={modalTitle}
+          >
+            <div className="competition-form">
+              <div className="form-group">
+                <label>اسم المسابقة: *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>الحالة:</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                >
+                  <option value="ongoing">جارية</option>
+                  <option value="active">نشطة</option>
+                  <option value="completed">منتهية</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>تاريخ البداية:</label>
+                <input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>تاريخ النهاية:</label>
+                <input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>الحد الأقصى للمستخدمين:</label>
+                <input
+                  type="number"
+                  value={formData.max_users}
+                  onChange={(e) => setFormData({ ...formData, max_users: e.target.value })}
+                  min="1"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
+                  إلغاء
+                </button>
+                <button className="btn-primary" onClick={handleSave}>
+                  {editingCompetition ? 'حفظ التغييرات' : 'إضافة مسابقة'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        </>
+      )}
     </div>
   )
 }
