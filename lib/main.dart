@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 // صفحات التطبيق
+import 'features/auth/presentation/pages/auth_choice_page.dart';
 import 'features/auth/presentation/pages/home_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const WelcomePage(),
-          
+          '/auth_choice': (context) => const AuthChoicePage(),
           '/login': (context) => const LoginPage(),
           '/register': (context) => const RegisterPage(),
           '/profile': (context) => const ProfilePage(),
