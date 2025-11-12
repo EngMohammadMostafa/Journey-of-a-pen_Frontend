@@ -49,7 +49,7 @@ const CompetitionsManagement = () => {
     fetchCompetitions()
   }, [])
 
-  // فتح مودال الإضافة أو التعديل
+  // فتح مودال الإضافة
   const handleAddCompetition = () => {
     setEditingCompetition(null)
     setFormData({
@@ -62,6 +62,7 @@ const CompetitionsManagement = () => {
     setIsModalOpen(true)
   }
 
+  // فتح مودال التعديل
   const handleEdit = (competition) => {
     setEditingCompetition(competition)
     setFormData({
@@ -74,7 +75,7 @@ const CompetitionsManagement = () => {
     setIsModalOpen(true)
   }
 
-  // حفظ إضافة أو تعديل
+  // حفظ الإضافة أو التعديل
   const handleSave = async () => {
     try {
       if (editingCompetition) {
@@ -100,6 +101,20 @@ const CompetitionsManagement = () => {
     }
   }
 
+  // حذف مسابقة
+  const handleDelete = async (competition) => {
+    if (window.confirm(`هل أنت متأكد من حذف المسابقة "${competition.name}"؟`)) {
+      try {
+        await competitionsService.deleteCompetition(competition.id, token)
+        alert('تم حذف المسابقة بنجاح')
+        fetchCompetitions()
+      } catch (error) {
+        console.error('Error deleting competition:', error)
+        alert('حدث خطأ في حذف المسابقة')
+      }
+    }
+  }
+
   const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'إضافة مسابقة جديدة'
 
   return (
@@ -117,7 +132,8 @@ const CompetitionsManagement = () => {
         data={competitions}
         loading={loading}
         onEdit={handleEdit}
-        actions={['edit']} // فقط التعديل موجود
+        onDelete={handleDelete}
+        actions={['edit', 'delete']} // كل الوظائف موجودة
       />
 
       {/* مودال إضافة/تعديل مسابقة */}

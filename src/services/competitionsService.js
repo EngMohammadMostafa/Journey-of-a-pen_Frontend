@@ -20,5 +20,11 @@ export const competitionsService = {
       headers: { Authorization: `Bearer ${token}` }
     })
     return res.data
+  },
+  deleteCompetition: async (id, token) => {
+    const res = await axios.delete(`${API_BASE}/competitions/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return res.data
   }
 }
