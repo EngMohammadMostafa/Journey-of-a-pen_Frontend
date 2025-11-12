@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/utils/prefs_helper.dart';
 import '../data/models/user_model.dart';
@@ -105,34 +106,29 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
   /// 🚪 تسجيل الخروج
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     try {
       loading = true;
       notifyListeners();
 
       if (mockMode) {
-        // 🧩 في وضع التجربة، فقط نحذف المستخدم محليًا
-        await Future.delayed(const Duration(milliseconds: 400));
-        user = null;
-        await PrefsHelper.clearToken();
-        loading = false;
-        notifyListeners();
-        return;
+        // 🧩 في الوضع التجريبي لا نتصل بالخادم
+        await Future.delayed(const Duration(milliseconds: 500));
+      } else {
+        await _repository.logout();
       }
 
-      // 🔹 في الوضع الحقيقي (مع API)
-      final token = await PrefsHelper.getToken();
-      if (token != null) {
-        _repository.setAuthToken(token);
-        await _repository.logout(); // ← نرسل الطلب إلى API
-      }
-
-      // حذف بيانات المستخدم محليًا
-      user = null;
+      // 🗑 حذف التوكن من التخزين
       await PrefsHelper.clearToken();
 
       loading = false;
       notifyListeners();
+
+      // 🔁 الانتقال إلى صفحة AuthChoicePage
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/auth_choice',
+            (route) => false,
+      );
     } catch (e) {
       loading = false;
       error = e.toString();
