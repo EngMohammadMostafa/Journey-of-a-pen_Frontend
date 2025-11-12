@@ -1,13 +1,11 @@
-// core/features/auth/presentation/widgets/profile_header.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'rounded_icon_button.dart';
 
 class ProfileHeader extends StatelessWidget {
   final String username;
   final int points;
   final VoidCallback onEditProfile;
-  final List<Map<String, dynamic>> actions; // [{icon:'assets/..', onTap: (){}}]
+  final List<Map<String, dynamic>> actions;
 
   const ProfileHeader({
     Key? key,
@@ -21,45 +19,52 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
     return Stack(
+      clipBehavior: Clip.none,
       children: [
-        // الخلفية المثلثية / درجات الأزرق
+        // الخلفية العلوية
         ClipPath(
           clipper: _HeaderClipper(),
           child: Container(
-            height: 240,
-            color: Color(0xFF2C6B86), // رئيسي (ضبطي ليناسب الصورة)
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Container(width: screenW*0.6, color: Color(0xFF1F5970).withOpacity(0.25)),
-                  ),
-                ),
-              ],
+            height: 260,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF345D7E), Color(0xFF2C6B86)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
         ),
 
-        // Avatar واسم و أيقونات
+        // محتوى الرأس
         Positioned(
-          top: 32,
+          top: 40,
           left: 0,
           right: 0,
           child: Column(
             children: [
+              // الصورة الشخصية
               CircleAvatar(
-                radius: 40,
+                radius: 45,
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
-                  radius: 36,
+                  radius: 41,
                   backgroundImage: AssetImage('assets/icons/profile.png'),
                 ),
               ),
-              SizedBox(height: 8),
-              Text(username, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
-              SizedBox(height: 12),
-              // ايقونات صغيئرة في صف
+              SizedBox(height: 10),
+              Text(
+                username,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1,
+                ),
+              ),
+              SizedBox(height: 15),
+
+              // صف الأيقونات
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: actions.map((a) {
@@ -68,11 +73,11 @@ class ProfileHeader extends StatelessWidget {
                     child: RoundedIconButton(
                       assetName: a['icon'] as String,
                       onTap: a['onTap'] as VoidCallback,
-                      size: 44,
+                      size: 50,
                     ),
                   );
                 }).toList(),
-              )
+              ),
             ],
           ),
         ),
@@ -85,14 +90,15 @@ class _HeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final p = Path();
-    p.lineTo(0, size.height*0.7);
-    p.quadraticBezierTo(size.width*0.15, size.height*0.95, size.width*0.4, size.height*0.85);
-    p.lineTo(size.width, size.height*0.7);
+    p.lineTo(0, size.height * 0.75);
+    p.quadraticBezierTo(
+        size.width * 0.25, size.height, size.width * 0.55, size.height * 0.85);
+    p.lineTo(size.width, size.height * 0.7);
     p.lineTo(size.width, 0);
     p.close();
     return p;
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
