@@ -3,7 +3,6 @@ import '../../../../core/utils/validators.dart';
 import 'package:book_worm_haven/core/utils/prefs_helper.dart';
 import '../../repository/auth_repository.dart';
 
-
 class LoginPage extends StatefulWidget {
   static const routeName = '/login';
   const LoginPage({super.key});
@@ -35,11 +34,14 @@ class _LoginPageState extends State<LoginPage> {
           const SnackBar(content: Text('Login successful!')),
         );
 
+        // ✅ التحقق مما إذا كان المستخدم قد اختار الاهتمامات سابقًا
         final hasChosen = await PrefsHelper.hasChosenInterests();
 
         if (hasChosen) {
-          Navigator.pushReplacementNamed(context, '/choose-interests');
+          // 🔹 إذا اختار الاهتمامات مسبقًا → الصفحة الرئيسية
+          Navigator.pushReplacementNamed(context, '/home');
         } else {
+          // 🔹 إذا لم يختر الاهتمامات → صفحة اختيار الاهتمامات
           Navigator.pushReplacementNamed(context, '/choose-interests');
         }
       } else {
@@ -230,13 +232,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 100), // مساحة لتفادي التداخل
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
           ),
 
-          // ⚪️ الدوائر الشفافة الزخرفية (أسفل النص على اليمين)
+          // ⚪️ الدوائر الزخرفية
           Positioned(
             right: -20,
             bottom: 20,
@@ -273,7 +275,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
           Positioned(
             left: 40,
             top: 60,
@@ -298,10 +299,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
         ],
       ),
-
     );
   }
 }

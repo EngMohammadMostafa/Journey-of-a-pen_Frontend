@@ -51,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     {'icon': 'assets/icons/bookmark_filled.png', 'onTap': (){}},
                     {'icon': 'assets/icons/book.png', 'onTap': (){}},
                     {'icon': 'assets/icons/gift.png', 'onTap': (){}},
-                    {'icon': 'assets/icons/Edit.png', 'onTap': (){}},
+                    {'icon': 'assets/icons/edit.png', 'onTap': (){}},
                   ],
                 ),
                 SizedBox(height: 12),
@@ -65,12 +65,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
 
-                // أقسام بروفايل: الاقتباسات المحفوظة، الكتب المحملة، الكتب المدفوعة، المكافئات، الخ
+                // أقسام بروفايل: الكتب المحملة، الكتب المدفوعة، المكافئات، الخ
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6),
                   child: Column(
                     children: [
-                      _buildSectionTile('الاقتباسات المحفوظة', 'عرض الاقتباسات المحفوظة', () {}),
                       _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {}),
                       _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () {}),
                       _buildSectionTile('المكافئات', 'تفاصيل المكافئات و الاستبدال', () {}),

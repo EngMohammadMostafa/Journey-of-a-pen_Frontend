@@ -2,7 +2,7 @@ import 'package:book_worm_haven/features/quotes/presentation/pages/quote.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/shopping_cart.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/writing_competitions.dart';
 import 'package:flutter/material.dart';
-import 'package:book_worm_haven/features/auth/presentation/pages/profile_page.dart';
+import 'package:book_worm_haven/features/profile/presentation/pages/profile_page.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/utils/prefs_helper.dart';

@@ -5,8 +5,12 @@ import '../repository/profile_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _repository;
+  final bool mockMode; // ✅ إضافة وضع وهمي لتجربة الصفحة بدون API
 
-  ProfileProvider({required ProfileRepository repository}) : _repository = repository;
+  ProfileProvider({
+    required ProfileRepository repository,
+    this.mockMode = false, // افتراضيًا مغلق
+  }) : _repository = repository;
 
   UserModel? user;
   bool loading = false;
@@ -19,7 +23,25 @@ class ProfileProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      // جلب التوكن من SharedPreferences إن وجد
+      if (mockMode) {
+        // 🧩 بيانات وهمية لتجربة واجهة الملف الشخصي
+        await Future.delayed(const Duration(seconds: 1));
+        user = UserModel(
+          id: 1,
+          username: "محمد أحمد",
+          email: "mohamed@example.com",
+          userType: 1,
+          points: 2450,
+          purchasesCount: 7,
+          age: 23,
+          gender: 1,
+        );
+        loading = false;
+        notifyListeners();
+        return;
+      }
+
+      // في الحالة الحقيقية (API)
       final token = await PrefsHelper.getToken();
       if (token != null) {
         _repository.setAuthToken(token);
@@ -36,7 +58,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// ✏️ تحديث بيانات المستخدم عبر UserModel
+  /// ✏️ تحديث بيانات المستخدم
   Future<bool> updateUser(Map<String, dynamic> body) async {
     if (user == null) return false;
 
@@ -45,7 +67,20 @@ class ProfileProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      // تحديث بيانات المستخدم الحالي
+      if (mockMode) {
+        // ✅ تحديث محلي فقط (بدون API)
+        await Future.delayed(const Duration(milliseconds: 500));
+        user = user!.copyWith(
+          username: body['username'] ?? user!.username,
+          age: body['age'] ?? user!.age,
+          gender: body['gender'] ?? user!.gender,
+        );
+        loading = false;
+        notifyListeners();
+        return true;
+      }
+
+      // 🔸 تحديث فعلي عبر الريبو
       final updatedUser = UserModel(
         id: user!.id,
         username: body['username'] ?? user!.username,
