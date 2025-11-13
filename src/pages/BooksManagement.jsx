@@ -1,19 +1,41 @@
-import React from 'react'
+import React, { useState } from 'react'
+import DataTable from '../components/common/DataTable'
 import '../styles/global.css'
 import '../styles/BooksManagement.css'
 
 const BooksManagement = () => {
+  const [activeSection, setActiveSection] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // أعمدة جدول إدارة الكتب فقط
+  const bookColumns = [
+    { key: 'id', title: 'ID' },
+    { key: 'author', title: 'المؤلف' },
+    { key: 'title', title: 'عنوان الكتاب' },
+    { key: 'description', title: 'الوصف' },
+    { key: 'price', title: 'السعر' },
+    { 
+      key: 'is_free', 
+      title: 'مجاني؟',
+      render: (value) => (value === 1 ? 'نعم' : 'لا')
+    },
+    { key: 'book_type', title: 'نوع الكتاب' },
+    { key: 'discount_rate', title: 'نسبة الخصم' },
+    { key: 'number_of_likes', title: 'عدد الإعجابات' },
+    { key: 'sectionid', title: 'القسم' }
+  ];
 
   const handleRequests = () => {
-    alert('تم الضغط على إدارة محتوى طلبات الكتب');
+    setActiveSection('requests');
   };
 
   const handleBooks = () => {
-    alert('تم الضغط على إدارة الكتب');
+    setActiveSection('books');
   };
 
   const handleQuestions = () => {
-    alert('تم الضغط على الأسئلة والأجوبة');
+    setActiveSection('questions');
   };
 
   return (
@@ -23,10 +45,39 @@ const BooksManagement = () => {
       </div>
 
       <div className="buttons-container">
-        <button className="btn-primary" onClick={handleRequests}>إدارة محتوى طلبات الكتب</button>
-        <button className="btn-secondary" onClick={handleBooks}>إدارة الكتب</button>
-        <button className="btn-tertiary" onClick={handleQuestions}>الأسئلة والأجوبة</button>
+        <button
+          className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`}
+          onClick={handleRequests}
+        >
+          إدارة محتوى طلبات الكتب
+        </button>
+
+        <button
+          className={`btn ${activeSection === 'books' ? 'btn-primary' : 'btn-outline'}`}
+          onClick={handleBooks}
+        >
+          إدارة الكتب
+        </button>
+
+        <button
+          className={`btn ${activeSection === 'questions' ? 'btn-primary' : 'btn-outline'}`}
+          onClick={handleQuestions}
+        >
+          الأسئلة والأجوبة
+        </button>
       </div>
+
+      {/* عرض جدول إدارة الكتب فقط */}
+      {activeSection === 'books' && (
+        <div className="books-section">
+          <h2>قسم إدارة الكتب</h2>
+          <DataTable
+            columns={bookColumns}
+            data={books}
+            loading={loading}
+          />
+        </div>
+      )}
     </div>
   );
 };
