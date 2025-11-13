@@ -38,7 +38,17 @@ const BooksManagement = () => {
     { key: 'book_type', title: 'نوع الكتاب' },
     { key: 'discount_rate', title: 'نسبة الخصم' },
     { key: 'number_of_likes', title: 'عدد الإعجابات' },
-    { key: 'sectionid', title: 'القسم' }
+    { key: 'sectionid', title: 'القسم' },
+    { 
+      key: 'actions', 
+      title: 'الإجراءات',
+      render: (_, book) => (
+        <div>
+          <button className="btn-secondary" onClick={() => handleEditBook(book)}>تعديل</button>
+          <button className="btn-danger" onClick={() => handleDeleteBook(book)}>حذف</button>
+        </div>
+      )
+    }
   ];
 
   const handleRequests = () => setActiveSection('requests');
@@ -77,6 +87,14 @@ const BooksManagement = () => {
     setIsModalOpen(true);
   };
 
+  // حذف كتاب
+  const handleDeleteBook = (book) => {
+    if (window.confirm(`هل أنت متأكد من حذف الكتاب "${book.title}"؟`)) {
+      setBooks(books.filter(b => b.id !== book.id)); // محاكاة حذف الكتاب
+      alert('تم حذف الكتاب (محاكاة)');
+    }
+  };
+
   // حفظ بيانات الكتاب (إضافة أو تعديل)
   const handleSaveBook = () => {
     if (!formData.author || !formData.title || !formData.description || !formData.price) {
@@ -86,9 +104,12 @@ const BooksManagement = () => {
 
     if (editingBook) {
       console.log('تعديل الكتاب:', { id: editingBook.id, ...formData });
+      setBooks(books.map(b => b.id === editingBook.id ? { ...b, ...formData } : b));
       alert('تم تعديل بيانات الكتاب (محاكاة)');
     } else {
-      console.log('إضافة كتاب جديد:', formData);
+      const newBook = { id: Date.now(), ...formData };
+      console.log('إضافة كتاب جديد:', newBook);
+      setBooks([...books, newBook]);
       alert('تم إضافة الكتاب الجديد (محاكاة)');
     }
 
@@ -140,7 +161,6 @@ const BooksManagement = () => {
             columns={bookColumns}
             data={books}
             loading={loading}
-            onEdit={handleEditBook} // يفتح الفورم لتعديل الكتاب
           />
         </div>
       )}
