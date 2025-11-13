@@ -11,6 +11,7 @@ const BooksManagement = () => {
 
   // حالة المودال
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState(null);
   const [formData, setFormData] = useState({
     author: '',
     title: '',
@@ -46,6 +47,7 @@ const BooksManagement = () => {
 
   // فتح مودال إضافة كتاب جديد
   const handleAddBook = () => {
+    setEditingBook(null);
     setFormData({
       author: '',
       title: '',
@@ -59,19 +61,39 @@ const BooksManagement = () => {
     setIsModalOpen(true);
   };
 
-  // حفظ بيانات الكتاب (ستُرسل لاحقًا للباك)
+  // فتح مودال تعديل كتاب
+  const handleEditBook = (book) => {
+    setEditingBook(book);
+    setFormData({
+      author: book.author || '',
+      title: book.title || '',
+      description: book.description || '',
+      price: book.price || '',
+      is_free: book.is_free || 0,
+      book_type: book.book_type || '',
+      discount_rate: book.discount_rate || '',
+      sectionid: book.sectionid || ''
+    });
+    setIsModalOpen(true);
+  };
+
+  // حفظ بيانات الكتاب (إضافة أو تعديل)
   const handleSaveBook = () => {
-    // التحقق من الحقول المطلوبة
     if (!formData.author || !formData.title || !formData.description || !formData.price) {
       alert('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
 
-    // هنا سيتم ربط البيانات مع API الباك لاحقًا
-    console.log('سيتم إرسال البيانات للباك:', formData);
-    alert('تم حفظ بيانات الكتاب (محاكاة)');
+    if (editingBook) {
+      console.log('تعديل الكتاب:', { id: editingBook.id, ...formData });
+      alert('تم تعديل بيانات الكتاب (محاكاة)');
+    } else {
+      console.log('إضافة كتاب جديد:', formData);
+      alert('تم إضافة الكتاب الجديد (محاكاة)');
+    }
 
     setIsModalOpen(false);
+    setEditingBook(null);
   };
 
   return (
@@ -118,15 +140,16 @@ const BooksManagement = () => {
             columns={bookColumns}
             data={books}
             loading={loading}
+            onEdit={handleEditBook} // يفتح الفورم لتعديل الكتاب
           />
         </div>
       )}
 
-      {/* مودال إضافة كتاب جديد */}
+      {/* مودال إضافة / تعديل كتاب */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="إضافة كتاب جديد"
+        onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
+        title={editingBook ? "تعديل كتاب" : "إضافة كتاب جديد"}
       >
         <div className="book-form">
           <div className="form-group">
@@ -210,7 +233,7 @@ const BooksManagement = () => {
           </div>
 
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
+            <button className="btn-secondary" onClick={() => { setIsModalOpen(false); setEditingBook(null); }}>إلغاء</button>
             <button className="btn-primary" onClick={handleSaveBook}>حفظ</button>
           </div>
         </div>
