@@ -3,7 +3,7 @@ import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
 import '../styles/global.css'
 import '../styles/BooksManagement.css'
-
+import '../services/booksService'
 const BooksManagement = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [books, setBooks] = useState([]);
