@@ -30,7 +30,7 @@ const BooksManagement = () => {
   // --- مودال إضافة سؤال جديد ---
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [newQuestionText, setNewQuestionText] = useState('');
-  const [selectedBookId, setSelectedBookId] = useState(''); // لاختيار الكتاب للسؤال الجديد
+  const [selectedBookId, setSelectedBookId] = useState(''); 
 
   // --- مودال تعديل سؤال ---
   const [isEditQuestionModalOpen, setIsEditQuestionModalOpen] = useState(false);
@@ -61,7 +61,7 @@ const BooksManagement = () => {
     }
   ];
 
-  // أعمدة جدول الأسئلة
+  // أعمدة جدول الأسئلة مع زر تعديل وحذف
   const questionColumns = [
     { key: 'id', title: 'ID' },
     { key: 'text', title: 'السؤال' },
@@ -72,6 +72,7 @@ const BooksManagement = () => {
       render: (_, question) => (
         <div>
           <button className="btn-secondary" onClick={() => openEditQuestionModal(question)}>تعديل</button>
+          <button className="btn-danger" onClick={() => handleDeleteQuestion(question)}>حذف</button>
         </div>
       )
     }
@@ -106,7 +107,7 @@ const BooksManagement = () => {
 
   const handleDeleteBook = (book) => {
     if (window.confirm(`هل أنت متأكد من حذف الكتاب "${book.title}"؟`)) {
-      setBooks(books.filter(b => b.id !== book.id)); // محاكاة حذف الكتاب
+      setBooks(books.filter(b => b.id !== book.id));
       alert('تم حذف الكتاب (محاكاة)');
     }
   };
@@ -170,6 +171,14 @@ const BooksManagement = () => {
     setEditingQuestionText('');
   };
 
+  // --- حذف سؤال ---
+  const handleDeleteQuestion = (question) => {
+    if (window.confirm(`هل أنت متأكد من حذف السؤال "${question.text}"؟`)) {
+      setQuestions(questions.filter(q => q.id !== question.id));
+      alert('تم حذف السؤال (محاكاة)');
+    }
+  };
+
   return (
     <div className="books-management">
       <div className="page-header">
@@ -200,7 +209,7 @@ const BooksManagement = () => {
         </div>
       )}
 
-      {/* قسم إدارة الأسئلة (الدفعة الثالثة: إضافة زر تعديل السؤال) */}
+      {/* قسم إدارة الأسئلة */}
       {activeSection === 'questions' && (
         <div className="questions-section">
           <div className="section-header">
@@ -217,7 +226,7 @@ const BooksManagement = () => {
         onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
         title={editingBook ? "تعديل كتاب" : "إضافة كتاب جديد"}
       >
-        {/* فورم الكتاب كما كان سابقًا */}
+        {/* محتوى فورم الكتاب كما سابقًا */}
       </Modal>
 
       {/* مودال إضافة سؤال جديد */}
