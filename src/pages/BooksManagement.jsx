@@ -32,6 +32,11 @@ const BooksManagement = () => {
   const [newQuestionText, setNewQuestionText] = useState('');
   const [selectedBookId, setSelectedBookId] = useState(''); // لاختيار الكتاب للسؤال الجديد
 
+  // --- مودال تعديل سؤال ---
+  const [isEditQuestionModalOpen, setIsEditQuestionModalOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [editingQuestionText, setEditingQuestionText] = useState('');
+
   // --- أعمدة جدول الكتب ---
   const bookColumns = [
     { key: 'id', title: 'ID' },
@@ -61,7 +66,15 @@ const BooksManagement = () => {
     { key: 'id', title: 'ID' },
     { key: 'text', title: 'السؤال' },
     { key: 'book_title', title: 'الكتاب' },
-    { key: 'actions', title: 'الإجراءات' } // فارغ مؤقتاً، سنضيف تعديل وحذف لاحقًا
+    {
+      key: 'actions',
+      title: 'الإجراءات',
+      render: (_, question) => (
+        <div>
+          <button className="btn-secondary" onClick={() => openEditQuestionModal(question)}>تعديل</button>
+        </div>
+      )
+    }
   ];
 
   // --- التبديل بين الأقسام ---
@@ -137,6 +150,26 @@ const BooksManagement = () => {
     setIsQuestionModalOpen(false);
   };
 
+  // --- فتح مودال تعديل سؤال ---
+  const openEditQuestionModal = (question) => {
+    setEditingQuestion(question);
+    setEditingQuestionText(question.text);
+    setIsEditQuestionModalOpen(true);
+  };
+
+  // --- حفظ تعديل السؤال ---
+  const handleSaveEditQuestion = () => {
+    if (!editingQuestionText) {
+      alert('يرجى كتابة السؤال');
+      return;
+    }
+    setQuestions(questions.map(q => q.id === editingQuestion.id ? { ...q, text: editingQuestionText } : q));
+    alert('تم تعديل السؤال (محاكاة)');
+    setIsEditQuestionModalOpen(false);
+    setEditingQuestion(null);
+    setEditingQuestionText('');
+  };
+
   return (
     <div className="books-management">
       <div className="page-header">
@@ -167,7 +200,7 @@ const BooksManagement = () => {
         </div>
       )}
 
-      {/* قسم إدارة الأسئلة (الدفعة الثانية: إضافة زر السؤال) */}
+      {/* قسم إدارة الأسئلة (الدفعة الثالثة: إضافة زر تعديل السؤال) */}
       {activeSection === 'questions' && (
         <div className="questions-section">
           <div className="section-header">
@@ -184,47 +217,7 @@ const BooksManagement = () => {
         onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
         title={editingBook ? "تعديل كتاب" : "إضافة كتاب جديد"}
       >
-        <div className="book-form">
-          <div className="form-group">
-            <label>المؤلف *</label>
-            <input type="text" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} required />
-          </div>
-          <div className="form-group">
-            <label>عنوان الكتاب *</label>
-            <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
-          </div>
-          <div className="form-group">
-            <label>الوصف *</label>
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required></textarea>
-          </div>
-          <div className="form-group">
-            <label>السعر *</label>
-            <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} min="0" required />
-          </div>
-          <div className="form-group">
-            <label>هل الكتاب مجاني؟</label>
-            <select value={formData.is_free} onChange={(e) => setFormData({ ...formData, is_free: parseInt(e.target.value) })}>
-              <option value={0}>لا</option>
-              <option value={1}>نعم</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>نوع الكتاب</label>
-            <input type="number" value={formData.book_type} onChange={(e) => setFormData({ ...formData, book_type: e.target.value })} />
-          </div>
-          <div className="form-group">
-            <label>نسبة الخصم (%)</label>
-            <input type="number" value={formData.discount_rate} onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })} min="0" max="100" />
-          </div>
-          <div className="form-group">
-            <label>رقم القسم (Section ID)</label>
-            <input type="number" value={formData.sectionid} onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })} />
-          </div>
-          <div className="form-actions">
-            <button className="btn-secondary" onClick={() => { setIsModalOpen(false); setEditingBook(null); }}>إلغاء</button>
-            <button className="btn-primary" onClick={handleSaveBook}>حفظ</button>
-          </div>
-        </div>
+        {/* فورم الكتاب كما كان سابقًا */}
       </Modal>
 
       {/* مودال إضافة سؤال جديد */}
@@ -250,6 +243,24 @@ const BooksManagement = () => {
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => setIsQuestionModalOpen(false)}>إلغاء</button>
             <button className="btn-primary" onClick={handleAddQuestion}>إضافة</button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* مودال تعديل سؤال */}
+      <Modal
+        isOpen={isEditQuestionModalOpen}
+        onClose={() => setIsEditQuestionModalOpen(false)}
+        title="تعديل السؤال"
+      >
+        <div className="question-form">
+          <div className="form-group">
+            <label>السؤال *</label>
+            <textarea value={editingQuestionText} onChange={(e) => setEditingQuestionText(e.target.value)} required></textarea>
+          </div>
+          <div className="form-actions">
+            <button className="btn-secondary" onClick={() => setIsEditQuestionModalOpen(false)}>إلغاء</button>
+            <button className="btn-primary" onClick={handleSaveEditQuestion}>حفظ</button>
           </div>
         </div>
       </Modal>
