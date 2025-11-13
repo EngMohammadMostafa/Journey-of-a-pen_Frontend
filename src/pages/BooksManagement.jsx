@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import DataTable from '../components/common/DataTable'
+import Modal from '../components/common/Modal'
 import '../styles/global.css'
 import '../styles/BooksManagement.css'
 
@@ -7,6 +8,19 @@ const BooksManagement = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // حالة المودال
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    author: '',
+    title: '',
+    description: '',
+    price: '',
+    is_free: 0,
+    book_type: '',
+    discount_rate: '',
+    sectionid: ''
+  });
 
   // أعمدة جدول إدارة الكتب فقط
   const bookColumns = [
@@ -26,16 +40,38 @@ const BooksManagement = () => {
     { key: 'sectionid', title: 'القسم' }
   ];
 
-  const handleRequests = () => {
-    setActiveSection('requests');
+  const handleRequests = () => setActiveSection('requests');
+  const handleBooks = () => setActiveSection('books');
+  const handleQuestions = () => setActiveSection('questions');
+
+  // فتح مودال إضافة كتاب جديد
+  const handleAddBook = () => {
+    setFormData({
+      author: '',
+      title: '',
+      description: '',
+      price: '',
+      is_free: 0,
+      book_type: '',
+      discount_rate: '',
+      sectionid: ''
+    });
+    setIsModalOpen(true);
   };
 
-  const handleBooks = () => {
-    setActiveSection('books');
-  };
+  // حفظ بيانات الكتاب (ستُرسل لاحقًا للباك)
+  const handleSaveBook = () => {
+    // التحقق من الحقول المطلوبة
+    if (!formData.author || !formData.title || !formData.description || !formData.price) {
+      alert('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
 
-  const handleQuestions = () => {
-    setActiveSection('questions');
+    // هنا سيتم ربط البيانات مع API الباك لاحقًا
+    console.log('سيتم إرسال البيانات للباك:', formData);
+    alert('تم حفظ بيانات الكتاب (محاكاة)');
+
+    setIsModalOpen(false);
   };
 
   return (
@@ -44,6 +80,7 @@ const BooksManagement = () => {
         <h1>الإدارة العامة</h1>
       </div>
 
+      {/* الأزرار الرئيسية */}
       <div className="buttons-container">
         <button
           className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`}
@@ -67,10 +104,16 @@ const BooksManagement = () => {
         </button>
       </div>
 
-      {/* عرض جدول إدارة الكتب فقط */}
+      {/* قسم إدارة الكتب */}
       {activeSection === 'books' && (
         <div className="books-section">
-          <h2>قسم إدارة الكتب</h2>
+          <div className="section-header">
+            <h2>قسم إدارة الكتب</h2>
+            <button className="btn-primary" onClick={handleAddBook}>
+              + إضافة كتاب جديد
+            </button>
+          </div>
+
           <DataTable
             columns={bookColumns}
             data={books}
@@ -78,6 +121,100 @@ const BooksManagement = () => {
           />
         </div>
       )}
+
+      {/* مودال إضافة كتاب جديد */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="إضافة كتاب جديد"
+      >
+        <div className="book-form">
+          <div className="form-group">
+            <label>المؤلف *</label>
+            <input
+              type="text"
+              value={formData.author}
+              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>عنوان الكتاب *</label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>الوصف *</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              required
+            ></textarea>
+          </div>
+
+          <div className="form-group">
+            <label>السعر *</label>
+            <input
+              type="number"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              min="0"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>هل الكتاب مجاني؟</label>
+            <select
+              value={formData.is_free}
+              onChange={(e) => setFormData({ ...formData, is_free: parseInt(e.target.value) })}
+            >
+              <option value={0}>لا</option>
+              <option value={1}>نعم</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>نوع الكتاب</label>
+            <input
+              type="number"
+              value={formData.book_type}
+              onChange={(e) => setFormData({ ...formData, book_type: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>نسبة الخصم (%)</label>
+            <input
+              type="number"
+              value={formData.discount_rate}
+              onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })}
+              min="0"
+              max="100"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>رقم القسم (Section ID)</label>
+            <input
+              type="number"
+              value={formData.sectionid}
+              onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })}
+            />
+          </div>
+
+          <div className="form-actions">
+            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
+            <button className="btn-primary" onClick={handleSaveBook}>حفظ</button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
