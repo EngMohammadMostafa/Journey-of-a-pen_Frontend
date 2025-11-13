@@ -69,6 +69,15 @@ const Navbar = ({ onToggleSidebar }) => {
                 <span className="user-role">مدير النظام</span>
               </div>
             </div>
+            <div className="nav-item">
+  <button 
+    className="nav-icon-btn" 
+    onClick={() => navigate('/dashboard')}
+  >
+    <span className="icon">🏠</span>
+    <span className="label">العودة للوحة التحكم</span>
+  </button>
+</div>
 
             <div className="nav-item">
               <button className="nav-icon-btn" onClick={handleLogout}>
@@ -88,8 +97,8 @@ const Navbar = ({ onToggleSidebar }) => {
           className="hero-image"
         />
         <div className="hero-text">
-          <h1>مرحباً بك في لوحة التحكم</h1>
-          <p>هنا يمكنك إدارة جميع أنشطتك</p>
+        <h1>Welcome to the control panel</h1>
+        <p>Here you can manage all your activities</p>
         </div>
       </div>
     </>

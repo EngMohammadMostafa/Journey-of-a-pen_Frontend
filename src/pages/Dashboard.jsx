@@ -13,8 +13,8 @@ const Dashboard = () => {
       className="hero-image" 
     />
     <div className="hero-text">
-      <h1>مرحباً بك في لوحة التحكم</h1>
-      <p>نحن سعداء بعودتك!</p>
+      <h1>Welcome to the control panel</h1>
+      <p>We are happy you are back!</p>
     </div>
   </div>
  
