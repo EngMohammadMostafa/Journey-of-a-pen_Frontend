@@ -1,15 +1,16 @@
-import React, { useState } from 'react'
-import DataTable from '../components/common/DataTable'
-import Modal from '../components/common/Modal'
-import '../styles/global.css'
-import '../styles/BooksManagement.css'
-import '../services/booksService'
+import React, { useState } from 'react';
+import DataTable from '../components/common/DataTable';
+import Modal from '../components/common/Modal';
+import '../styles/global.css';
+import '../styles/BooksManagement.css';
+import '../services/booksService';
+
 const BooksManagement = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // حالة المودال
+  // --- مودال الكتب ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [formData, setFormData] = useState({
@@ -22,25 +23,25 @@ const BooksManagement = () => {
     discount_rate: '',
     sectionid: ''
   });
+ 
+  // حالة الأسئلة
+  const [questions, setQuestions] = useState([]); 
 
-  // أعمدة جدول إدارة الكتب فقط
+
+  // --- أعمدة جدول الكتب ---
   const bookColumns = [
     { key: 'id', title: 'ID' },
     { key: 'author', title: 'المؤلف' },
     { key: 'title', title: 'عنوان الكتاب' },
     { key: 'description', title: 'الوصف' },
     { key: 'price', title: 'السعر' },
-    { 
-      key: 'is_free', 
-      title: 'مجاني؟',
-      render: (value) => (value === 1 ? 'نعم' : 'لا')
-    },
+    { key: 'is_free', title: 'مجاني؟', render: (value) => (value === 1 ? 'نعم' : 'لا') },
     { key: 'book_type', title: 'نوع الكتاب' },
     { key: 'discount_rate', title: 'نسبة الخصم' },
     { key: 'number_of_likes', title: 'عدد الإعجابات' },
     { key: 'sectionid', title: 'القسم' },
-    { 
-      key: 'actions', 
+    {
+      key: 'actions',
       title: 'الإجراءات',
       render: (_, book) => (
         <div>
@@ -50,28 +51,29 @@ const BooksManagement = () => {
       )
     }
   ];
+  // أعمدة جدول الأسئلة
+  const questionColumns = [
+    { key: 'id', title: 'ID' },
+    { key: 'text', title: 'السؤال' },
+    { key: 'book_title', title: 'الكتاب' },
+    { key: 'actions', title: 'الإجراءات' } // سنتركها فارغة مؤقتاً
+  ];
 
+  // --- التبديل بين الأقسام ---
   const handleRequests = () => setActiveSection('requests');
   const handleBooks = () => setActiveSection('books');
   const handleQuestions = () => setActiveSection('questions');
 
-  // فتح مودال إضافة كتاب جديد
+
+  // --- دوال إدارة الكتب ---
+
+
   const handleAddBook = () => {
     setEditingBook(null);
-    setFormData({
-      author: '',
-      title: '',
-      description: '',
-      price: '',
-      is_free: 0,
-      book_type: '',
-      discount_rate: '',
-      sectionid: ''
-    });
+    setFormData({ author: '', title: '', description: '', price: '', is_free: 0, book_type: '', discount_rate: '', sectionid: '' });
     setIsModalOpen(true);
   };
 
-  // فتح مودال تعديل كتاب
   const handleEditBook = (book) => {
     setEditingBook(book);
     setFormData({
@@ -87,7 +89,6 @@ const BooksManagement = () => {
     setIsModalOpen(true);
   };
 
-  // حذف كتاب
   const handleDeleteBook = (book) => {
     if (window.confirm(`هل أنت متأكد من حذف الكتاب "${book.title}"؟`)) {
       setBooks(books.filter(b => b.id !== book.id)); // محاكاة حذف الكتاب
@@ -95,7 +96,6 @@ const BooksManagement = () => {
     }
   };
 
-  // حفظ بيانات الكتاب (إضافة أو تعديل)
   const handleSaveBook = () => {
     if (!formData.author || !formData.title || !formData.description || !formData.price) {
       alert('يرجى ملء جميع الحقول المطلوبة');
@@ -103,12 +103,10 @@ const BooksManagement = () => {
     }
 
     if (editingBook) {
-      console.log('تعديل الكتاب:', { id: editingBook.id, ...formData });
       setBooks(books.map(b => b.id === editingBook.id ? { ...b, ...formData } : b));
       alert('تم تعديل بيانات الكتاب (محاكاة)');
     } else {
       const newBook = { id: Date.now(), ...formData };
-      console.log('إضافة كتاب جديد:', newBook);
       setBooks([...books, newBook]);
       alert('تم إضافة الكتاب الجديد (محاكاة)');
     }
@@ -116,6 +114,10 @@ const BooksManagement = () => {
     setIsModalOpen(false);
     setEditingBook(null);
   };
+
+ 
+  // --- واجهة المستخدم ---
+ 
 
   return (
     <div className="books-management">
@@ -125,24 +127,13 @@ const BooksManagement = () => {
 
       {/* الأزرار الرئيسية */}
       <div className="buttons-container">
-        <button
-          className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`}
-          onClick={handleRequests}
-        >
+        <button className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`} onClick={handleRequests}>
           إدارة محتوى طلبات الكتب
         </button>
-
-        <button
-          className={`btn ${activeSection === 'books' ? 'btn-primary' : 'btn-outline'}`}
-          onClick={handleBooks}
-        >
+        <button className={`btn ${activeSection === 'books' ? 'btn-primary' : 'btn-outline'}`} onClick={handleBooks}>
           إدارة الكتب
         </button>
-
-        <button
-          className={`btn ${activeSection === 'questions' ? 'btn-primary' : 'btn-outline'}`}
-          onClick={handleQuestions}
-        >
+        <button className={`btn ${activeSection === 'questions' ? 'btn-primary' : 'btn-outline'}`} onClick={handleQuestions}>
           الأسئلة والأجوبة
         </button>
       </div>
@@ -152,16 +143,19 @@ const BooksManagement = () => {
         <div className="books-section">
           <div className="section-header">
             <h2>قسم إدارة الكتب</h2>
-            <button className="btn-primary" onClick={handleAddBook}>
-              + إضافة كتاب جديد
-            </button>
+            <button className="btn-primary" onClick={handleAddBook}>+ إضافة كتاب جديد</button>
           </div>
+          <DataTable columns={bookColumns} data={books} loading={loading} />
+        </div>
+      )}
 
-          <DataTable
-            columns={bookColumns}
-            data={books}
-            loading={loading}
-          />
+      {/* قسم إدارة الأسئلة (الدفعة الأولى) */}
+      {activeSection === 'questions' && (
+        <div className="questions-section">
+          <div className="section-header">
+            <h2>قسم الأسئلة والأجوبة</h2>
+          </div>
+          <DataTable columns={questionColumns} data={questions} loading={loading} />
         </div>
       )}
 
@@ -174,84 +168,39 @@ const BooksManagement = () => {
         <div className="book-form">
           <div className="form-group">
             <label>المؤلف *</label>
-            <input
-              type="text"
-              value={formData.author}
-              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              required
-            />
+            <input type="text" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} required />
           </div>
-
           <div className="form-group">
             <label>عنوان الكتاب *</label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-            />
+            <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
           </div>
-
           <div className="form-group">
             <label>الوصف *</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-            ></textarea>
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required></textarea>
           </div>
-
           <div className="form-group">
             <label>السعر *</label>
-            <input
-              type="number"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              min="0"
-              required
-            />
+            <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} min="0" required />
           </div>
-
           <div className="form-group">
             <label>هل الكتاب مجاني؟</label>
-            <select
-              value={formData.is_free}
-              onChange={(e) => setFormData({ ...formData, is_free: parseInt(e.target.value) })}
-            >
+            <select value={formData.is_free} onChange={(e) => setFormData({ ...formData, is_free: parseInt(e.target.value) })}>
               <option value={0}>لا</option>
               <option value={1}>نعم</option>
             </select>
           </div>
-
           <div className="form-group">
             <label>نوع الكتاب</label>
-            <input
-              type="number"
-              value={formData.book_type}
-              onChange={(e) => setFormData({ ...formData, book_type: e.target.value })}
-            />
+            <input type="number" value={formData.book_type} onChange={(e) => setFormData({ ...formData, book_type: e.target.value })} />
           </div>
-
           <div className="form-group">
             <label>نسبة الخصم (%)</label>
-            <input
-              type="number"
-              value={formData.discount_rate}
-              onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })}
-              min="0"
-              max="100"
-            />
+            <input type="number" value={formData.discount_rate} onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })} min="0" max="100" />
           </div>
-
           <div className="form-group">
             <label>رقم القسم (Section ID)</label>
-            <input
-              type="number"
-              value={formData.sectionid}
-              onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })}
-            />
+            <input type="number" value={formData.sectionid} onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })} />
           </div>
-
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => { setIsModalOpen(false); setEditingBook(null); }}>إلغاء</button>
             <button className="btn-primary" onClick={handleSaveBook}>حفظ</button>
