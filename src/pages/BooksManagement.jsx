@@ -23,10 +23,14 @@ const BooksManagement = () => {
     discount_rate: '',
     sectionid: ''
   });
- 
+
   // حالة الأسئلة
   const [questions, setQuestions] = useState([]); 
 
+  // --- مودال إضافة سؤال جديد ---
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [newQuestionText, setNewQuestionText] = useState('');
+  const [selectedBookId, setSelectedBookId] = useState(''); // لاختيار الكتاب للسؤال الجديد
 
   // --- أعمدة جدول الكتب ---
   const bookColumns = [
@@ -51,12 +55,13 @@ const BooksManagement = () => {
       )
     }
   ];
+
   // أعمدة جدول الأسئلة
   const questionColumns = [
     { key: 'id', title: 'ID' },
     { key: 'text', title: 'السؤال' },
     { key: 'book_title', title: 'الكتاب' },
-    { key: 'actions', title: 'الإجراءات' } // سنتركها فارغة مؤقتاً
+    { key: 'actions', title: 'الإجراءات' } // فارغ مؤقتاً، سنضيف تعديل وحذف لاحقًا
   ];
 
   // --- التبديل بين الأقسام ---
@@ -64,10 +69,7 @@ const BooksManagement = () => {
   const handleBooks = () => setActiveSection('books');
   const handleQuestions = () => setActiveSection('questions');
 
-
   // --- دوال إدارة الكتب ---
-
-
   const handleAddBook = () => {
     setEditingBook(null);
     setFormData({ author: '', title: '', description: '', price: '', is_free: 0, book_type: '', discount_rate: '', sectionid: '' });
@@ -115,9 +117,25 @@ const BooksManagement = () => {
     setEditingBook(null);
   };
 
- 
-  // --- واجهة المستخدم ---
- 
+  // --- إضافة سؤال جديد ---
+  const handleAddQuestion = () => {
+    if (!newQuestionText || !selectedBookId) {
+      alert('يرجى كتابة السؤال واختيار الكتاب');
+      return;
+    }
+    const book = books.find(b => b.id === parseInt(selectedBookId));
+    const newQuestion = {
+      id: Date.now(),
+      text: newQuestionText,
+      book_title: book?.title || 'غير محدد',
+      book_id: parseInt(selectedBookId)
+    };
+    setQuestions([...questions, newQuestion]);
+    alert('تم إضافة السؤال (محاكاة)');
+    setNewQuestionText('');
+    setSelectedBookId('');
+    setIsQuestionModalOpen(false);
+  };
 
   return (
     <div className="books-management">
@@ -149,11 +167,12 @@ const BooksManagement = () => {
         </div>
       )}
 
-      {/* قسم إدارة الأسئلة (الدفعة الأولى) */}
+      {/* قسم إدارة الأسئلة (الدفعة الثانية: إضافة زر السؤال) */}
       {activeSection === 'questions' && (
         <div className="questions-section">
           <div className="section-header">
             <h2>قسم الأسئلة والأجوبة</h2>
+            <button className="btn-primary" onClick={() => setIsQuestionModalOpen(true)}>+ إضافة سؤال جديد</button>
           </div>
           <DataTable columns={questionColumns} data={questions} loading={loading} />
         </div>
@@ -204,6 +223,33 @@ const BooksManagement = () => {
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => { setIsModalOpen(false); setEditingBook(null); }}>إلغاء</button>
             <button className="btn-primary" onClick={handleSaveBook}>حفظ</button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* مودال إضافة سؤال جديد */}
+      <Modal
+        isOpen={isQuestionModalOpen}
+        onClose={() => setIsQuestionModalOpen(false)}
+        title="إضافة سؤال جديد"
+      >
+        <div className="question-form">
+          <div className="form-group">
+            <label>السؤال *</label>
+            <textarea value={newQuestionText} onChange={(e) => setNewQuestionText(e.target.value)} required></textarea>
+          </div>
+          <div className="form-group">
+            <label>اختر الكتاب *</label>
+            <select value={selectedBookId} onChange={(e) => setSelectedBookId(e.target.value)}>
+              <option value="">-- اختر كتاب --</option>
+              {books.map(book => (
+                <option key={book.id} value={book.id}>{book.title}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-actions">
+            <button className="btn-secondary" onClick={() => setIsQuestionModalOpen(false)}>إلغاء</button>
+            <button className="btn-primary" onClick={handleAddQuestion}>إضافة</button>
           </div>
         </div>
       </Modal>
