@@ -10,16 +10,21 @@ const Navbar = ({ onToggleSidebar }) => {
   const [isHeroVisible, setIsHeroVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
+  // ✅ تمت إضافته لإخفاء النافبار
+  const [hideNavbar, setHideNavbar] = useState(false)
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       
-      // إذا كان المستخدم يمرر لأسفل ويبتعد عن الأعلى
+      // إذا كان المستخدم يمرر لأسفل → إخفاء النافبار والهيرو
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHideNavbar(true)
         setIsHeroVisible(false)
       } 
-      // إذا كان المستخدم يمرر لأعلى
+      // إذا كان المستخدم يمرر لأعلى → إظهار النافبار والهيرو
       else if (currentScrollY < lastScrollY) {
+        setHideNavbar(false)
         setIsHeroVisible(true)
       }
       
@@ -40,7 +45,8 @@ const Navbar = ({ onToggleSidebar }) => {
 
   return (
     <>
-      <nav className="navbar">
+      {/* ✅ إضافة كلاس hidden للنافبار */}
+      <nav className={`navbar ${hideNavbar ? "hidden" : ""}`}>
         <div className="navbar-left">
           <div className="navbar-brand">
             <h1>DASHPORD ADMIN</h1>
@@ -69,15 +75,16 @@ const Navbar = ({ onToggleSidebar }) => {
                 <span className="user-role">مدير النظام</span>
               </div>
             </div>
+
             <div className="nav-item">
-  <button 
-    className="nav-icon-btn" 
-    onClick={() => navigate('/dashboard')}
-  >
-    <span className="icon">🏠</span>
-    <span className="label">العودة للوحة التحكم</span>
-  </button>
-</div>
+              <button 
+                className="nav-icon-btn" 
+                onClick={() => navigate('/dashboard')}
+              >
+                <span className="icon">🏠</span>
+                <span className="label">العودة للوحة التحكم</span>
+              </button>
+            </div>
 
             <div className="nav-item">
               <button className="nav-icon-btn" onClick={handleLogout}>
@@ -89,7 +96,7 @@ const Navbar = ({ onToggleSidebar }) => {
         </div>
       </nav>
 
-      {/* ✅ الجزء المعدل للصورة الثابتة */}
+      {/* الهيرو سكشن */}
       <div className={`hero-section ${isHeroVisible ? '' : 'hidden'}`}>
         <img 
           src={navbarImage} 
@@ -97,8 +104,8 @@ const Navbar = ({ onToggleSidebar }) => {
           className="hero-image"
         />
         <div className="hero-text">
-        <h1>Welcome to the control panel</h1>
-        <p>Here you can manage all your activities</p>
+          <h1>Welcome to the control panel</h1>
+          <p>Here you can manage all your activities</p>
         </div>
       </div>
     </>

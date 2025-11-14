@@ -255,11 +255,23 @@ flex-grow: 1;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   background-color: #ffffff; /* خلفية مناسبة */
 }
-/* إضافة كلاس الإخفاء */
+.navbar {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+/*  إضافة كلاس الإخفاء للصورة*/
 .hero-section.hidden {
   transform: translateY(-70%);
   opacity: 0;
   pointer-events: none; /* لمنع التفاعل عندما تكون مخفية */
+}
+
+/*إضافة كلاس الإخفاء للنافبار */
+
+.navbar.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .hero-image {
