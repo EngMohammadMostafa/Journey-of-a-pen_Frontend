@@ -36,6 +36,15 @@ const bookStats = {
   // حالة الأسئلة
   const [questions, setQuestions] = useState([]); 
 
+  //لاضافه احصائيات لقسم ادارة الاسءله والاجوبة
+  // حساب الإحصائيات للأسئلة
+const questionStats = {
+  totalQuestions: questions.length,
+  correctAnswers: questions.filter(q => q.is_correct === 1).length, // نفترض أن لديك is_correct
+  totalPoints: questions.reduce((sum, q) => sum + (q.points || 0), 0) // نقاط كل إجابة صحيحة
+};
+
+
   // --- مودال إضافة سؤال جديد ---
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [newQuestionText, setNewQuestionText] = useState('');
@@ -255,6 +264,23 @@ const bookStats = {
             <h2>قسم الأسئلة والأجوبة</h2>
             
           </div>
+
+ {/* --- مربعات الإحصائيات --- */}
+ <div className="question-stats">
+      <div className="stat-card">
+        <h3>عدد الأسئلة الكلي</h3>
+        <span className="stat-number">{questionStats.totalQuestions}</span>
+      </div>
+      <div className="stat-card">
+        <h3>عدد الإجابات الصحيحة</h3>
+        <span className="stat-number">{questionStats.correctAnswers}</span>
+      </div>
+      <div className="stat-card">
+        <h3>عدد النقاط الكلي المكتسب</h3>
+        <span className="stat-number">{questionStats.totalPoints}</span>
+      </div>
+    </div>
+
           <DataTable columns={questionColumns} data={questions} loading={loading} />
         </div>
       )}
