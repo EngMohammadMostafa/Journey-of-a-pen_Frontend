@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import '../styles/global.css';
@@ -9,7 +9,10 @@ const BooksManagement = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  //لاضافه البحث والفلترة سواء ككتاب او مؤلف لقسم الكتب
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredBooks, setFilteredBooks] = useState([]);
+  const [searchType, setSearchType] = useState('title');
 
 //لاضافه احصائيات لادارة كتب
 const bookStats = {
@@ -197,7 +200,27 @@ const questionStats = {
     }
   };
 
-  return (
+//هذا من اجل اضافه الفلترة والبحث لقسم الكتب
+useEffect(() => {
+  let filtered = books;
+
+  if (searchTerm) {
+    if (searchType === 'title') {
+      filtered = books.filter(book =>
+        book.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    } else if (searchType === 'author') {
+      filtered = books.filter(book =>
+        book.author?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  }
+
+  setFilteredBooks(filtered);
+}, [books, searchTerm, searchType]);
+
+
+return (
     <div className="books-management">
       <div className="page-header">
   <h1>الإدارة العامة</h1>
@@ -253,7 +276,50 @@ const questionStats = {
       </div>
     </div>
 
-          <DataTable columns={bookColumns} data={books} loading={loading} />
+      {/*بحث وفلترة لقسم الكتب*/}
+      <div className="books-filters">
+  <div className="search-section">
+    <input
+      type="text"
+      placeholder="ابحث بالعنوان أو المؤلف"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="search-input"
+    />
+  </div>
+
+  <div className="filter-section">
+    <select
+      value={searchType}
+      onChange={(e) => setSearchType(e.target.value)}
+      className="filter-select"
+    >
+      <option value="title">بحث بالعنوان</option>
+      <option value="author">بحث بالمؤلف</option>
+    </select>
+  </div>
+
+  <div className="filter-section">
+    <button className="btn-secondary" onClick={() => setSearchTerm('')}>
+      عرض كل الكتب
+    </button>
+  </div>
+
+  <div className="results-count">
+    عرض {filteredBooks.length} من أصل {books.length} كتاب
+  </div>
+</div>
+
+{/*هذا يضمن ان عند البحث بكون فارغ 
+        يعرض كل الكتب
+      وعندما يكتب بحث معين كتاب
+    يظهر فقط الكتاب اللي يبحث عنه*/}
+<DataTable 
+  columns={bookColumns} 
+  data={searchTerm ? filteredBooks : books} 
+  loading={loading} 
+/>
+
         </div>
       )}
 

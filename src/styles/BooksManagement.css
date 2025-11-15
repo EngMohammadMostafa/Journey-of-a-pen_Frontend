@@ -200,7 +200,67 @@
   margin-top: 10px;
 }
 
-  
+  /* شريط البحث والفلترة للكتب */
+.books-filters {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 1px 8px #4C869F;
+}
+
+.books-filters .search-section {
+  flex: 1;
+  min-width: 250px;
+}
+
+.books-filters .search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.books-filters .search-input:focus {
+  outline: none;
+  border-color: #4C869F;
+  box-shadow: 0 0 0 2px rgba(76, 134, 159, 0.1);
+}
+
+.books-filters .filter-section {
+  min-width: 150px;
+}
+
+.books-filters .filter-select {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.books-filters .results-count {
+  color: #666;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.btn-secondary {
+  background: #4C869F;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #1C597B;
+}
+
+
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
