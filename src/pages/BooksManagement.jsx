@@ -248,15 +248,15 @@ useEffect(() => {
 return (
     <div className="books-management">
       <div className="page-header">
-  <h1>الإدارة العامة</h1>
+  <h1>Books Management</h1>
 
   {/* زر الإضافة يظهر فقط إذا كان القسم مفعل */}
   {activeSection === 'books' && (
-    <button className="btn-primary add-book-btn" onClick={handleAddBook}>+ إضافة كتاب جديد</button>
+    <button className="btn-primary add-book-btn" onClick={handleAddBook}>+  Add New Book</button>
   )}
 
   {activeSection === 'questions' && (
-    <button className="btn-primary add-book-btn" onClick={() => setIsQuestionModalOpen(true)}>+ إضافة سؤال جديد</button>
+    <button className="btn-primary add-book-btn" onClick={() => setIsQuestionModalOpen(true)}>+ Add New Question</button>
   )}
 
   {/* يمكنك إضافة أي زر إضافي لبقية الأقسام هنا */}
@@ -266,13 +266,13 @@ return (
       {/* الأزرار الرئيسية */}
       <div className="buttons-container">
         <button className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`} onClick={handleRequests}>
-          إدارة محتوى طلبات الكتب
+          Book Order Content Management
         </button>
         <button className={`btn ${activeSection === 'books' ? 'btn-primary' : 'btn-outline'}`} onClick={handleBooks}>
-          إدارة الكتب
+          Book Management
         </button>
         <button className={`btn ${activeSection === 'questions' ? 'btn-primary' : 'btn-outline'}`} onClick={handleQuestions}>
-          الأسئلة والأجوبة
+          Questions And Answers
         </button>
       </div>
 
@@ -280,7 +280,7 @@ return (
       {activeSection === 'books' && (
         <div className="books-section">
           <div className="section-header">
-            <h2>قسم إدارة الكتب</h2>
+            <h2>Book Management Section</h2>
             
           </div>
           
@@ -288,15 +288,15 @@ return (
            {/* --- مربعات الإحصائيات --- */}
     <div className="book-stats">
       <div className="stat-card">
-        <h3>إجمالي عدد الكتب</h3>
+        <h3>Total Number Of Books</h3>
         <span className="stat-number">{bookStats.total}</span>
       </div>
       <div className="stat-card">
-        <h3>عدد الكتب المجانية</h3>
+        <h3>Numper Of Free Books </h3>
         <span className="stat-number">{bookStats.free}</span>
       </div>
       <div className="stat-card">
-        <h3>عدد الكتب المدفوعة</h3>
+      <h3> Numper Of Non-Free Books </h3>
         <span className="stat-number">{bookStats.paid}</span>
       </div>
     </div>
@@ -306,7 +306,7 @@ return (
   <div className="search-section">
     <input
       type="text"
-      placeholder="ابحث بالعنوان أو المؤلف"
+      placeholder="Search For The Book Title  Or Auther's Name "
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       className="search-input"
@@ -319,19 +319,19 @@ return (
       onChange={(e) => setSearchType(e.target.value)}
       className="filter-select"
     >
-      <option value="title">بحث بالعنوان</option>
-      <option value="author">بحث بالمؤلف</option>
+      <option value="title">Search For The Book Title  </option>
+      <option value="author">Search For The Auther's Name</option>
     </select>
   </div>
 
   <div className="filter-section">
     <button className="btn-secondary" onClick={() => setSearchTerm('')}>
-      عرض كل الكتب
+                  View All Books  
     </button>
   </div>
 
   <div className="results-count">
-    عرض {filteredBooks.length} من أصل {books.length} كتاب
+  Show {filteredBooks.length} Out Of  {books.length} Books
   </div>
 </div>
 
