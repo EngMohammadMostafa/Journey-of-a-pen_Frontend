@@ -234,12 +234,97 @@ const BooksManagement = () => {
 
       {/* مودال إضافة / تعديل كتاب */}
       <Modal
-        isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
-        title={editingBook ? "تعديل كتاب" : "إضافة كتاب جديد"}
+  isOpen={isModalOpen}
+  onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
+  title={editingBook ? "تعديل كتاب" : "إضافة كتاب جديد"}
+>
+  <div className="book-form">
+    <div className="form-group">
+      <label>المؤلف *</label>
+      <input
+        type="text"
+        value={formData.author}
+        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+        required
+      />
+    </div>
+
+    <div className="form-group">
+      <label>عنوان الكتاب *</label>
+      <input
+        type="text"
+        value={formData.title}
+        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+        required
+      />
+    </div>
+
+    <div className="form-group">
+      <label>الوصف *</label>
+      <textarea
+        value={formData.description}
+        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        required
+      />
+    </div>
+
+    <div className="form-group">
+      <label>السعر *</label>
+      <input
+        type="number"
+        value={formData.price}
+        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+        required
+      />
+    </div>
+
+    <div className="form-group">
+      <label>مجاني؟</label>
+      <select
+        value={formData.is_free}
+        onChange={(e) => setFormData({ ...formData, is_free: parseInt(e.target.value) })}
       >
-        {/* محتوى فورم الكتاب كما سابقًا */}
-      </Modal>
+        <option value={0}>لا</option>
+        <option value={1}>نعم</option>
+      </select>
+    </div>
+
+    <div className="form-group">
+      <label>نوع الكتاب</label>
+      <input
+        type="text"
+        value={formData.book_type}
+        onChange={(e) => setFormData({ ...formData, book_type: e.target.value })}
+      />
+    </div>
+
+    <div className="form-group">
+      <label>نسبة الخصم</label>
+      <input
+        type="number"
+        value={formData.discount_rate}
+        onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })}
+      />
+    </div>
+
+    <div className="form-group">
+      <label>القسم</label>
+      <input
+        type="text"
+        value={formData.sectionid}
+        onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })}
+      />
+    </div>
+
+    <div className="form-actions">
+      <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
+      <button className="btn-primary" onClick={handleSaveBook}>
+        {editingBook ? "حفظ التعديل" : "إضافة كتاب"}
+      </button>
+    </div>
+  </div>
+</Modal>
+
 
       {/* مودال إضافة سؤال جديد */}
       <Modal
