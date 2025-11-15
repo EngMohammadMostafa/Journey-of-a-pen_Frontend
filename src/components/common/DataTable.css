@@ -14,7 +14,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #e67d50;
+  border-bottom: 2px solid #1C597B;
 }
 
 .table-title {
@@ -39,13 +39,14 @@
 }
 
 .add-btn:hover {
-  background: #7199AA;
+  background: #aa8b71;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(247, 247, 247, 0.3);
 }
 
 .table-container {
   overflow-x: auto;
+
 }
 
 .data-table {
@@ -140,6 +141,8 @@
   .add-btn {
     width: 100%;
     justify-content: center;
+    
+    
   }
   
   .actions-buttons {

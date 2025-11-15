@@ -182,8 +182,20 @@ const BooksManagement = () => {
   return (
     <div className="books-management">
       <div className="page-header">
-        <h1>الإدارة العامة</h1>
-      </div>
+  <h1>الإدارة العامة</h1>
+
+  {/* زر الإضافة يظهر فقط إذا كان القسم مفعل */}
+  {activeSection === 'books' && (
+    <button className="btn-primary add-book-btn" onClick={handleAddBook}>+ إضافة كتاب جديد</button>
+  )}
+
+  {activeSection === 'questions' && (
+    <button className="btn-primary add-book-btn" onClick={() => setIsQuestionModalOpen(true)}>+ إضافة سؤال جديد</button>
+  )}
+
+  {/* يمكنك إضافة أي زر إضافي لبقية الأقسام هنا */}
+</div>
+
 
       {/* الأزرار الرئيسية */}
       <div className="buttons-container">
@@ -203,7 +215,7 @@ const BooksManagement = () => {
         <div className="books-section">
           <div className="section-header">
             <h2>قسم إدارة الكتب</h2>
-            <button className="btn-primary" onClick={handleAddBook}>+ إضافة كتاب جديد</button>
+            
           </div>
           <DataTable columns={bookColumns} data={books} loading={loading} />
         </div>
@@ -214,7 +226,7 @@ const BooksManagement = () => {
         <div className="questions-section">
           <div className="section-header">
             <h2>قسم الأسئلة والأجوبة</h2>
-            <button className="btn-primary" onClick={() => setIsQuestionModalOpen(true)}>+ إضافة سؤال جديد</button>
+            
           </div>
           <DataTable columns={questionColumns} data={questions} loading={loading} />
         </div>
