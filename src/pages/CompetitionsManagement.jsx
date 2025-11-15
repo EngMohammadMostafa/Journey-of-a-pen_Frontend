@@ -121,32 +121,43 @@ const CompetitionsManagement = () => {
   const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'إضافة مسابقة جديدة'
 
   return (
+
     <div className="competitions-management">
+
+
       <div className="page-header">
-        <h1>لوحة الإدارة</h1>
-        <div className="admin-buttons">
-          <button
-            className="btn-primary"
-            onClick={() => setShowCompetitionsTable(true)}
-          >
-            إدارة المسابقات
-          </button>
-          <button
-            className="btn-secondary"
-            onClick={() => setShowCompetitionsTable(false)}
-          >
-            إدارة المشاركين والكتب
-          </button>
-        </div>
-      </div>
+  <h1>لوحة الإدارة</h1>
+
+  {/* زر إضافة مسابقة يظهر فقط في حالة عرض قسم المسابقات */}
+  {showCompetitionsTable && (
+    <button
+      className="btn-primary add-book-btn"
+      onClick={handleAddCompetition}
+    >
+      + إضافة مسابقة
+    </button>
+  )}
+</div>
+
+      <div className="buttons-container">
+  <button
+    className={`btn ${showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
+    onClick={() => setShowCompetitionsTable(true)}
+  >
+    إدارة المسابقات
+  </button>
+
+  <button
+    className={`btn ${!showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
+    onClick={() => setShowCompetitionsTable(false)}
+  >
+    إدارة المشاركين والكتب
+  </button>
+</div>
 
       {showCompetitionsTable && (
         <>
-          <div className="page-header">
-            <button className="btn-primary" onClick={handleAddCompetition}>
-              + إضافة مسابقة
-            </button>
-          </div>
+          
 
           {/* جدول المسابقات */}
           <DataTable

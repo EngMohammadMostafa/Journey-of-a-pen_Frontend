@@ -7,14 +7,7 @@
     margin-bottom: 30px;
     text-align: center;
   }
-  
-  .buttons-container {
-    display: flex;
-    gap: 80px;
-    margin-bottom: 50px;
-    justify-content: center;
-  }
-  
+ 
   .main-btn {
     background: #1C597B;
     color: white;
@@ -42,3 +35,51 @@
     visibility: visible ;
     opacity: 1 ;
   }
+  
+
+  /* أزرار التبويب الخاصة بالمسابقات – نفس ألوان الكتب تمامًا */
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  margin: 20px 0;
+}
+
+.btn {
+  padding: 12px 20px;
+  font-size: 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 0;
+  white-space: nowrap;
+  flex: 1;
+  max-width: 260px;
+}
+
+/* ✔ زر نشط – مطابق للكتب */
+.btn-primary {
+  background: #4C869F !important;
+  color: white !important;
+  border-color: #4C869F !important;
+}
+
+/* ✔ زر غير نشط – مطابق للكتب */
+.btn-outline {
+  background: white !important;
+  color: #4C869F !important;
+  border-color: #7199AA !important;
+}
+
+/* زر إضافة مسابقة (+) */
+.btn-secondary {
+  background: #4C869F;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #1C597B;
+}
