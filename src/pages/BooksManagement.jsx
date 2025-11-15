@@ -39,6 +39,14 @@ const bookStats = {
   // حالة الأسئلة
   const [questions, setQuestions] = useState([]); 
 
+
+// فلترة الأسئلة حسب الكتاب أو نص السؤال
+const [searchTypeQuestion, setSearchTypeQuestion] = useState('text'); // نوع البحث: 'text' أو 'book'
+const [searchQuestionTerm, setSearchQuestionTerm] = useState(''); // النص المراد البحث عنه
+const [searchBookId, setSearchBookId] = useState(''); // الكتاب المحدد عند البحث بالكتاب
+const [filteredQuestions, setFilteredQuestions] = useState([]);
+
+
   //لاضافه احصائيات لقسم ادارة الاسءله والاجوبة
   // حساب الإحصائيات للأسئلة
 const questionStats = {
@@ -220,6 +228,23 @@ useEffect(() => {
 }, [books, searchTerm, searchType]);
 
 
+//هذا من اجل اضافه الفلترة والبحث لقسم الاسئله والاجوبة
+useEffect(() => {
+  let filtered = questions;
+
+  if (searchTypeQuestion === 'text' && searchQuestionTerm) {
+    filtered = questions.filter(q =>
+      q.text.toLowerCase().includes(searchQuestionTerm.toLowerCase())
+    );
+  } else if (searchTypeQuestion === 'book' && searchBookId) {
+    filtered = questions.filter(q => q.book_id === parseInt(searchBookId));
+  }
+
+  setFilteredQuestions(filtered);
+}, [questions, searchTypeQuestion, searchQuestionTerm, searchBookId]);
+
+
+
 return (
     <div className="books-management">
       <div className="page-header">
@@ -347,7 +372,61 @@ return (
       </div>
     </div>
 
-          <DataTable columns={questionColumns} data={questions} loading={loading} />
+      {/*بحث وفلترة لقسم الاسءله والاجوبة*/}
+      <div className="questions-filters">
+  <div className="filter-section">
+    <select
+      value={searchTypeQuestion}
+      onChange={(e) => setSearchTypeQuestion(e.target.value)}
+      className="filter-select"
+    >
+      <option value="text">بحث بالنص</option>
+      <option value="book">بحث بالكتاب</option>
+    </select>
+  </div>
+
+  {searchTypeQuestion === 'text' && (
+    <div className="filter-section">
+      <input
+        type="text"
+        placeholder="ابحث عن سؤال"
+        value={searchQuestionTerm}
+        onChange={(e) => setSearchQuestionTerm(e.target.value)}
+        className="search-input"
+      />
+      <button className="btn-secondary" onClick={() => setSearchQuestionTerm('')}>عرض كل الأسئلة</button>
+    </div>
+  )}
+
+  {searchTypeQuestion === 'book' && (
+    <div className="filter-section">
+      <select
+        value={searchBookId}
+        onChange={(e) => setSearchBookId(e.target.value)}
+        className="filter-select"
+      >
+        <option value="">-- كل الكتب --</option>
+        {books.map(book => (
+          <option key={book.id} value={book.id}>{book.title}</option>
+        ))}
+      </select>
+      <button className="btn-secondary" onClick={() => setSearchBookId('')}>عرض كل الأسئلة</button>
+    </div>
+  )}
+</div>
+
+
+{/*هذا يضمن ان عند البحث بكون فارغ 
+        يعرض كل اللاسئله
+        وعندما يكتب بحث  عن اسئله كتاب معين
+  يظهر فقط الاسئله الخاصه بهذا الكتاب */}
+<DataTable 
+  columns={questionColumns} 
+  data={filteredQuestions} 
+  loading={loading} 
+/>
+
+
         </div>
       )}
 
