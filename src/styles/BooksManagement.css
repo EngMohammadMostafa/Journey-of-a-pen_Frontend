@@ -261,10 +261,11 @@
 }
 
 
+
 /* شريط البحث والفلترة للأسئلة */
 .questions-filters {
   display: flex;
-  gap: 15px;
+  gap: 15px; /* مطابقة للكتب */
   align-items: center;
   margin-bottom: 25px;
   flex-wrap: wrap;
@@ -275,7 +276,7 @@
 }
 
 .questions-filters .search-section {
-  flex: 1;
+  flex: 1 1 250px; 
   min-width: 250px;
 }
 
@@ -311,6 +312,15 @@
   color: #666;
   font-size: 0.9rem;
   white-space: nowrap;
+}
+
+.questions-filters .btn-secondary {
+  background: #4C869F; /* مطابقة للكتب */
+  color: white;
+}
+
+.questions-filters .btn-secondary:hover {
+  background: #1C597B;
 }
 
 
