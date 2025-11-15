@@ -296,7 +296,7 @@ return (
         <span className="stat-number">{bookStats.free}</span>
       </div>
       <div className="stat-card">
-      <h3> Numper Of Non-Free Books </h3>
+      <h3>Numper Of Non-Free Books </h3>
         <span className="stat-number">{bookStats.paid}</span>
       </div>
     </div>
@@ -352,22 +352,22 @@ return (
       {activeSection === 'questions' && (
         <div className="questions-section">
           <div className="section-header">
-            <h2>قسم الأسئلة والأجوبة</h2>
+            <h2>Questions and Answers Section  </h2>
             
           </div>
 
  {/* --- مربعات الإحصائيات --- */}
  <div className="question-stats">
       <div className="stat-card">
-        <h3>عدد الأسئلة الكلي</h3>
+        <h3>Total Number Of Questions </h3>
         <span className="stat-number">{questionStats.totalQuestions}</span>
       </div>
       <div className="stat-card">
-        <h3>عدد الإجابات الصحيحة</h3>
+        <h3>Number Of Correct Answers</h3>
         <span className="stat-number">{questionStats.correctAnswers}</span>
       </div>
       <div className="stat-card">
-        <h3>عدد النقاط الكلي المكتسب</h3>
+        <h3>Total Numer Of Points Earned</h3>
         <span className="stat-number">{questionStats.totalPoints}</span>
       </div>
     </div>
@@ -380,8 +380,8 @@ return (
       onChange={(e) => setSearchTypeQuestion(e.target.value)}
       className="filter-select"
     >
-      <option value="text">بحث بالنص</option>
-      <option value="book">بحث بالكتاب</option>
+      <option value="text">Search For A Question </option>
+      <option value="book"> Search For An Auther</option>
     </select>
   </div>
 
@@ -389,12 +389,12 @@ return (
     <div className="filter-section">
       <input
         type="text"
-        placeholder="ابحث عن سؤال"
+        placeholder=" Search For A Question "
         value={searchQuestionTerm}
         onChange={(e) => setSearchQuestionTerm(e.target.value)}
         className="search-input"
       />
-      <button className="btn-secondary" onClick={() => setSearchQuestionTerm('')}>عرض كل الأسئلة</button>
+      <button className="btn-secondary" onClick={() => setSearchQuestionTerm('')}>View All Questions</button>
     </div>
   )}
 
