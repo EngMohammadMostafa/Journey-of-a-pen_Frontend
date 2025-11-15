@@ -10,6 +10,15 @@ const BooksManagement = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
 
+
+//لاضافه احصائيات لادارة كتب
+const bookStats = {
+  total: books.length,
+  free: books.filter(b => b.is_free === 1).length,
+  paid: books.filter(b => b.is_free === 0).length
+};
+
+
   // --- مودال الكتب ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
@@ -217,6 +226,24 @@ const BooksManagement = () => {
             <h2>قسم إدارة الكتب</h2>
             
           </div>
+          
+
+           {/* --- مربعات الإحصائيات --- */}
+    <div className="book-stats">
+      <div className="stat-card">
+        <h3>إجمالي عدد الكتب</h3>
+        <span className="stat-number">{bookStats.total}</span>
+      </div>
+      <div className="stat-card">
+        <h3>عدد الكتب المجانية</h3>
+        <span className="stat-number">{bookStats.free}</span>
+      </div>
+      <div className="stat-card">
+        <h3>عدد الكتب المدفوعة</h3>
+        <span className="stat-number">{bookStats.paid}</span>
+      </div>
+    </div>
+
           <DataTable columns={bookColumns} data={books} loading={loading} />
         </div>
       )}
