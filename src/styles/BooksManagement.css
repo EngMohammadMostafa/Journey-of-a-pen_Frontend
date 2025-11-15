@@ -159,7 +159,7 @@
   }
   
 
-/*تنسيقات لمربع الاحصائيات */
+/* تنسيقات لمربع الاحصائيات للكتب*/
 .book-stats {
   display: flex;
   gap: 20px;
@@ -179,7 +179,26 @@
   font-weight: bold;
   margin-top: 10px;
 }
+/* تنسيقات لمربع الاحصائيات للاسئله والاجوبة*/
+.question-stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
 
+ .stat-card {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1;
+  text-align: center;
+}
+
+ .stat-number {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 10px;
+}
 
   
   @keyframes spin {
