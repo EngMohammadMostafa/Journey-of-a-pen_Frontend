@@ -9,6 +9,11 @@ import '../styles/CompetitionsManagement.css'
 const CompetitionsManagement = () => {
   const [competitions, setCompetitions] = useState([])
   const [loading, setLoading] = useState(false)
+
+  //عن مسابقه معينه البحث
+const [searchTerm, setSearchTerm] = useState('');
+const [filteredCompetitions, setFilteredCompetitions] = useState([]);
+ //تكمله م قبل البحث
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCompetition, setEditingCompetition] = useState(null)
   const [showCompetitionsTable, setShowCompetitionsTable] = useState(false) // لإظهار جدول المسابقات
@@ -50,6 +55,8 @@ const competitionStats = {
     try {
       const response = await competitionsService.getAllCompetitions(token)
       setCompetitions(response.competitions || [])
+      setFilteredCompetitions(response.competitions || [])  // ←  هذا السطر المهم للبحث عن مسباقة معينه
+
     } catch (error) {
       console.error('Error fetching competitions:', error)
       alert('حدث خطأ في جلب بيانات المسابقات')
@@ -63,6 +70,21 @@ const competitionStats = {
       fetchCompetitions()
     }
   }, [showCompetitionsTable])
+
+
+  // فلترة حسب اسم المسابقة
+useEffect(() => {
+  let filtered = competitions;
+
+  if (searchTerm) {
+    filtered = filtered.filter(c =>
+      c.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  setFilteredCompetitions(filtered);
+}, [searchTerm, competitions]);
+
 
   // فتح مودال الإضافة
   const handleAddCompetition = () => {
@@ -187,10 +209,28 @@ const competitionStats = {
 </div>
 
 
+{/* شريط البحث */}
+<div style={{ margin: '20px 0' }}>
+  <input
+    type="text"
+    placeholder="ابحث عن اسم مسابقة..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    style={{
+      padding: '10px',
+      width: '300px',
+      borderRadius: '8px',
+      border: '1px solid #ccc'
+    }}
+  />
+</div>
+
+
           {/* جدول المسابقات */}
           <DataTable
             columns={columns}
-            data={competitions}
+            data={filteredCompetitions}
+
             loading={loading}
             onEdit={handleEdit}
             onDelete={handleDelete}
