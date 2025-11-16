@@ -40,34 +40,56 @@
     display: inline-block;
   }
   
-  /* إحصائيات */
-  .notifications-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+/* إحصائيات الإشعارات */
+.notification-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(113, 153, 170, 0.2);
+  text-align: center;
+  border-right: 4px solid #4C869F;
+}
+
+.stat-card h3 {
+  color: #2c3e50;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1C597B;
+}
+
+/* تحسين الاستجابة */
+@media (max-width: 768px) {
+  .notification-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-stats {
+    grid-template-columns: 1fr;
   }
   
   .stat-card {
-    background: linear-gradient(135deg,#000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
-    color: white;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 15px;
   }
   
   .stat-number {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 8px;
+    font-size: 1.5rem;
   }
-  
-  .stat-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
-  }
-  
+}
+
   /* حالة التحميل */
   .loading-container {
     text-align: center;
