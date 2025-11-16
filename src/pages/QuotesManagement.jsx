@@ -13,6 +13,10 @@ const QuotesManagement = () => {
   const [error, setError] = useState('');
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, quote: null });
 
+  //للفلترة
+  const [searchTerm, setSearchTerm] = useState(''); // لتخزين النص الذي يكتبه المستخدم
+const [filterType, setFilterType] = useState('all'); // نوع الفلترة: الكل / نص الاقتباس / اسم الكتاب
+
   // أعمدة الجدول
   const columns = [
     { key: 'id', label: 'ID' },
@@ -47,6 +51,28 @@ const QuotesManagement = () => {
     fetchQuotes();
   }, []);
 
+//هذا يجلب البينات من الباك بينما اللي بعده للفلترة
+  useEffect(() => {
+    fetchQuotes(); // جلب البيانات عند تحميل الصفحة
+  }, []);
+  
+  //  هنا ضع useEffect الجديد للتصفية والبحث
+  useEffect(() => {
+    let filtered = quotes; // نبدأ بالبيانات كلها
+  
+    if (searchTerm) { // إذا كتب المستخدم شيء
+      filtered = filtered.filter(quote => {
+        const term = searchTerm.toLowerCase(); // نحول كل شيء لصغير لتسهيل البحث
+        if (filterType === 'text') return quote.text.toLowerCase().includes(term);
+        if (filterType === 'book') return quote.book_name.toLowerCase().includes(term);
+        // إذا كان الاختيار "الكل"
+        return quote.text.toLowerCase().includes(term) || quote.book_name.toLowerCase().includes(term);
+      });
+    }
+  
+    setFilteredQuotes(filtered); // نعرض النتائج بعد التصفية
+  }, [quotes, searchTerm, filterType]);
+  
   // البحث والتصفية
   const handleSearch = (searchTerm) => {
     if (!searchTerm) {
@@ -147,12 +173,36 @@ const QuotesManagement = () => {
         </div>
       )}
 
-      <div className="table-controls">
-        <SearchBar onSearch={handleSearch} placeholder="ابحث في الاقتباسات..." />
-        <div className="table-info">
-          <span>إجمالي الاقتباسات: {filteredQuotes.length}</span>
-        </div>
-      </div>
+
+
+{/*للفلترة والبحث */}
+<div className="quotes-filters">
+  <div className="search-section">
+    <input
+      type="text"
+      placeholder="ابحث في الاقتباسات..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="search-input"
+    />
+  </div>
+
+  <div className="filter-section">
+    <select
+      value={filterType}
+      onChange={(e) => setFilterType(e.target.value)}
+      className="filter-select"
+    >
+      <option value="all">الكل</option>
+      <option value="text">حسب نص الاقتباس</option>
+      <option value="book">حسب اسم الكتاب</option>
+    </select>
+  </div>
+
+  <div className="results-count">
+    <span>عرض {filteredQuotes.length} من أصل {quotes.length} اقتباسات</span>
+  </div>
+</div>
 
       <DataTable
         columns={columns}
