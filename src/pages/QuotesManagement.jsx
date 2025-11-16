@@ -166,12 +166,7 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
   </div>
 </div>
 
-      {error && (
-        <div className="alert alert-error">
-          {error}
-          <button onClick={() => setError('')} className="close-btn">×</button>
-        </div>
-      )}
+    
 
 
 

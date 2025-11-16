@@ -217,3 +217,67 @@
       width: 100%;
     }
   }
+
+  /* شريط البحث والتصفية */
+.quotes-filters {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 8px #4C869F;
+
+.search-section {
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(55, 156, 223, 0.1);
+}
+
+.filter-section {
+  min-width: 150px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+}
+
+.results-count {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* تجاوب مع الشاشات الصغيرة */
+@media (max-width: 768px) {
+  .quotes-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-section,
+  .filter-section {
+    min-width: auto;
+  }
+}
