@@ -160,7 +160,7 @@ useEffect(() => {
 
 
       <div className="page-header">
-  <h1>لوحة الإدارة</h1>
+  <h1>Competitions Management</h1>
 
   {/* زر إضافة مسابقة يظهر فقط في حالة عرض قسم المسابقات */}
   {showCompetitionsTable && (
@@ -168,7 +168,7 @@ useEffect(() => {
       className="btn-primary add-book-btn"
       onClick={handleAddCompetition}
     >
-      + إضافة مسابقة
+      + Add New Competitions
     </button>
   )}
 </div>
@@ -178,14 +178,14 @@ useEffect(() => {
     className={`btn ${showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
     onClick={() => setShowCompetitionsTable(true)}
   >
-    إدارة المسابقات
+    Competitions Management
   </button>
 
   <button
     className={`btn ${!showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
     onClick={() => setShowCompetitionsTable(false)}
   >
-    إدارة المشاركين والكتب
+    Pareicipant & Book Managemnt
   </button>
 </div>
 
@@ -193,18 +193,18 @@ useEffect(() => {
         <>
           <div className="user-stats">
   <div className="stat-card">
-    <h3>إجمالي عدد المسابقات</h3>
+    <h3>Total Number Of Competitions</h3>
     <span className="stat-number">{competitionStats.total}</span>
   </div>
 
   <div className="stat-card">
-    <h3>عدد المسابقات المكتملة</h3>
+    <h3> Number Of Completed Competitions</h3>
     <span className="stat-number">{competitionStats.completed}</span>
   </div>
 
   <div className="stat-card">
-    <h3>عدد المسابقات المتوقفة / غير المكتملة</h3>
-    <span className="stat-number">{competitionStats.stopped}</span>
+  <h3> Number Of Non Completed Competitions</h3>
+  <span className="stat-number">{competitionStats.stopped}</span>
   </div>
 </div>
 
@@ -214,7 +214,7 @@ useEffect(() => {
   <div className="competition-search-section">
     <input
       type="text"
-      placeholder="ابحث عن اسم مسابقة..."
+      placeholder="Search For A Competition..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       className="competition-search-input"
