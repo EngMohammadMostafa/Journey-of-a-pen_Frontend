@@ -32,6 +32,18 @@ const CompetitionsManagement = () => {
     { key: 'max_users', title: 'الحد الأقصى للمستخدمين' }
   ]
 
+// إحصائيات المسابقات
+const competitionStats = {
+  total: competitions.length,
+  completed: competitions.filter(c => c.status === 'completed').length,
+  stopped: competitions.filter(c => {
+    const ended = new Date(c.end_date) < new Date();
+    return ended && c.status !== 'completed';
+  }).length
+};
+
+
+
   // جلب المسابقات
   const fetchCompetitions = async () => {
     setLoading(true)
@@ -157,7 +169,23 @@ const CompetitionsManagement = () => {
 
       {showCompetitionsTable && (
         <>
-          
+          <div className="user-stats">
+  <div className="stat-card">
+    <h3>إجمالي عدد المسابقات</h3>
+    <span className="stat-number">{competitionStats.total}</span>
+  </div>
+
+  <div className="stat-card">
+    <h3>عدد المسابقات المكتملة</h3>
+    <span className="stat-number">{competitionStats.completed}</span>
+  </div>
+
+  <div className="stat-card">
+    <h3>عدد المسابقات المتوقفة / غير المكتملة</h3>
+    <span className="stat-number">{competitionStats.stopped}</span>
+  </div>
+</div>
+
 
           {/* جدول المسابقات */}
           <DataTable
