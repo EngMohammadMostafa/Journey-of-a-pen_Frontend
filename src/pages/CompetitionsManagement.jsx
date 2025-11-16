@@ -210,20 +210,18 @@ useEffect(() => {
 
 
 {/* شريط البحث */}
-<div style={{ margin: '20px 0' }}>
-  <input
-    type="text"
-    placeholder="ابحث عن اسم مسابقة..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    style={{
-      padding: '10px',
-      width: '300px',
-      borderRadius: '8px',
-      border: '1px solid #ccc'
-    }}
-  />
+<div className="competitions-filters">
+  <div className="competition-search-section">
+    <input
+      type="text"
+      placeholder="ابحث عن اسم مسابقة..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="competition-search-input"
+    />
+  </div>
 </div>
+
 
 
           {/* جدول المسابقات */}
