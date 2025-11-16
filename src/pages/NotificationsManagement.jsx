@@ -10,6 +10,11 @@ const NotificationsManagement = () => {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // البحث عن إشعار الفلترة
+const [searchTerm, setSearchTerm] = useState('')
+const [filteredNotifications, setFilteredNotifications] = useState([])
+
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -41,6 +46,9 @@ const notificationStats = {
     try {
       const response = await notificationsService.getAllNotifications(token)
       setNotifications(response.notifications || [])
+      //من اجل الفلترة عن اشعار معين
+      setFilteredNotifications(response.notifications || []) // ← هذا السطر مهم للبحث
+
     } catch (error) {
       console.error('Error fetching notifications:', error)
       alert('حدث خطأ في جلب بيانات الإشعارات')
@@ -48,11 +56,22 @@ const notificationStats = {
       setLoading(false)
     }
   }
-
+//لجلب الاشعارات من الباك
   useEffect(() => {
     fetchNotifications()
   }, [])
 
+//للفلتره عن اعشار معين
+  useEffect(() => {
+    let filtered = notifications
+    if (searchTerm) {
+      filtered = filtered.filter(n =>
+        n.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+    setFilteredNotifications(filtered)
+  }, [searchTerm, notifications])
+  
   const handleAddNotification = () => {
     setFormData({
       title: '',
@@ -89,6 +108,7 @@ const notificationStats = {
         </button>
       </div>
 
+
 {/*  أزرار الإحصائيات */}
 <div className="notification-stats">
   <div className="stat-card">
@@ -102,9 +122,25 @@ const notificationStats = {
 </div>
 
 
+{/* شريط البحث */}
+<div className="notifications-filters">
+  <div className="notification-search-section">
+    <input
+      type="text"
+      placeholder="ابحث عن إشعار..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="notification-search-input"
+    />
+  </div>
+</div>
+
+
+
       <DataTable
         columns={columns}
-        data={notifications}
+        //تم تغيير هذا من اجل الفلتر كان  data={notifications}
+        data={filteredNotifications} // ← هنا استخدام البيانات المفلترة
         loading={loading}
         actions={[]}
       />
