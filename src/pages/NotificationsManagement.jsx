@@ -18,6 +18,15 @@ const NotificationsManagement = () => {
   })
   const { token } = useAuth()
 
+
+ //  إحصائيات الإشعارات
+const notificationStats = {
+  total: notifications.length,
+  // الإشعارات المعلقة انتبه ان ياخد بعين الاعتبار ان 2 هي معلقه
+  pending: notifications.filter(n => n.status === 2).length 
+}
+
+
   const columns = [
     { key: 'notification_id', title: 'ID' },
     { key: 'title', title: 'عنوان الإشعار' },
@@ -79,6 +88,19 @@ const NotificationsManagement = () => {
           + إضافة إشعار جديد
         </button>
       </div>
+
+{/*  أزرار الإحصائيات */}
+<div className="notification-stats">
+  <div className="stat-card">
+    <h3>إجمالي الإشعارات</h3>
+    <span className="stat-number">{notificationStats.total}</span>
+  </div>
+  <div className="stat-card">
+    <h3>الإشعارات المعلقة</h3>
+    <span className="stat-number">{notificationStats.pending}</span>
+  </div>
+</div>
+
 
       <DataTable
         columns={columns}
