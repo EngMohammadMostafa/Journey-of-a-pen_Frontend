@@ -116,6 +116,30 @@ const QuotesManagement = () => {
         <p>إدارة وعرض جميع الاقتباسات في النظام</p>
       </div>
 
+
+{/* قسم الإحصائيات مثل صفحة المستخدمين */}
+<div className="quotes-stats">
+  <div className="stat-card">
+    <h3>إجمالي عدد الاقتباسات</h3>
+    <span className="stat-number">{quotes.length}</span>
+  </div>
+
+  <div className="stat-card">
+    <h3>أكثر كتاب يحتوي على اقتباسات تاكد من مشكلهربط </h3>
+    <span className="stat-number">
+      {(() => {
+        if (quotes.length === 0) return "لا يوجد بيانات";
+        const countMap = {};
+        quotes.forEach(q => {
+          countMap[q.book_name] = (countMap[q.book_name] || 0) + 1;
+        });
+        const topBook = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0];
+        return `${topBook[0]} (${topBook[1]} اقتباسات)`;
+      })()}
+    </span>
+  </div>
+</div>
+
       {error && (
         <div className="alert alert-error">
           {error}
