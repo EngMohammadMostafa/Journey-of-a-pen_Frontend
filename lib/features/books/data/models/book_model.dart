@@ -5,7 +5,7 @@ class BookModel {
   final String? imageUrl;
   final bool isPaid;
   final String category;
-  final String? description; // ✨ تمت الإضافة هنا
+  final String? description;
 
   BookModel({
     required this.id,
@@ -14,7 +14,7 @@ class BookModel {
     this.imageUrl,
     required this.isPaid,
     required this.category,
-    this.description, // ✨ تمت الإضافة هنا
+    this.description,
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -22,10 +22,10 @@ class BookModel {
       id: json['id'],
       title: json['title'],
       author: json['author'],
-      imageUrl: json['image_url'], // حسب API
+      imageUrl: json['image_url'] ?? '', // يتوافق مع API
       isPaid: json['is_paid'] ?? false,
       category: json['category'] ?? 'غير محدد',
-      description: json['description'] ?? 'لا يوجد وصف متاح.', // ✨ تمت الإضافة هنا
+      description: json['description'] ?? 'لا يوجد وصف متاح.',
     );
   }
 }
