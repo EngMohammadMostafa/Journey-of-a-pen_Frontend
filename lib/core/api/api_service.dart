@@ -10,7 +10,7 @@ class ApiService {
   ApiService({this.isMockMode = false}) {
     BaseOptions options = BaseOptions(
       // ✅ استبدل بـ IP الخاص بالباك اند و أضف /api إن كانت موجودة
-      baseUrl: "http://192.168.0.103:8000/api",
+      baseUrl: "http://192.168.0.105:8000/api",
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       headers: {
