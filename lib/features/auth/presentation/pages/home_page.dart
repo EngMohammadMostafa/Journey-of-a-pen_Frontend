@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/profile/presentation/pages/profile_page.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
 import '../../../../core/api/api_service.dart';
-import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/utils/prefs_helper.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
 import '../widgets/bottom_nav_bar.dart';
@@ -141,49 +140,84 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   String searchQuery = "";
   List<BookModel> _books = [];
-  List<String> categories = [];
   bool _isLoading = true;
-  String selectedCategory = "";
+  String selectedCategory = "Action";
+
+  final List<String> categories = [
+    'Action', 'Romance', 'Science Fiction', 'Horror', 'Fantasy',
+    'Mystery', 'Drama', 'Comedy', 'Adventure', 'Thriller',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _fetchCategoriesAndBooks();
+    _loadDummyBooks();
   }
 
-  Future<void> _fetchCategoriesAndBooks() async {
-    try {
-      // جلب الأقسام
-      final categoriesResponse = await ApiService().get(ApiEndpoints.categories);
-      if (categoriesResponse['success']) {
-        categories = List<String>.from(
-          categoriesResponse['data'].map((cat) => cat['name']),
-        );
-        if (categories.isNotEmpty) selectedCategory = categories[0];
-      }
+  void _loadDummyBooks() {
+    _books = [
+      BookModel(
+        id: 1,
+        title: "The Hero's Journey",
+        author: "John Smith",
+        category: "Action",
+        isPaid: false,
+        imageUrl: "https://picsum.photos/200/300?random=1",
+        description: "رحلة مثيرة لبطل يسعى لإنقاذ العالم وسط مغامرات مشوقة.",
+      ),
+      BookModel(
+        id: 2,
+        title: "Love in Paris",
+        author: "Emily Rose",
+        category: "Romance",
+        isPaid: true,
+        imageUrl: "https://picsum.photos/200/300?random=2",
+        description: "قصة حب دافئة تدور أحداثها في شوارع باريس الجميلة.",
+      ),
+      BookModel(
+        id: 3,
+        title: "Galaxy Wars",
+        author: "Mark Sky",
+        category: "Romance",
+        isPaid: false,
+        imageUrl: "https://picsum.photos/200/300?random=3",
+        description: "ملحمة فضائية بين المجرات، تجمع بين الشجاعة والتكنولوجيا.",
+      ),
+      BookModel(
+        id: 4,
+        title: "Haunted Nights",
+        author: "Lucy Grey",
+        category: "Romance",
+        isPaid: true,
+        imageUrl: "https://picsum.photos/200/300?random=4",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
+      ),
+      BookModel(
+        id: 5,
+        title: "Mystic Forest",
+        author: "Alan Woods",
+        category: "Fantasy",
+        isPaid: false,
+        imageUrl: "https://picsum.photos/200/300?random=5",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
+      ),
+      BookModel(
+        id: 6,
+        title: "Comedy Central",
+        author: "Tom Hanks",
+        category: "Comedy",
+        isPaid: false,
+        imageUrl: "https://picsum.photos/200/300?random=6",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
+      ),
+    ];
 
-      // جلب الكتب للقسم المحدد
-      if (selectedCategory.isNotEmpty) {
-        final categoryIndex = categoriesResponse['data']
-            .indexWhere((cat) => cat['name'] == selectedCategory);
-        final categoryId = categoriesResponse['data'][categoryIndex]['id'];
-
-        final booksResponse =
-        await ApiService().get(ApiEndpoints.booksByCategory(categoryId));
-
-        if (booksResponse['success']) {
-          _books = List<BookModel>.from(
-            booksResponse['books'].map((b) => BookModel.fromJson(b)),
-          );
-        }
-      }
-    } catch (e) {
-      print('Error fetching categories or books: $e');
-    } finally {
+    // لتأخير العرض لمحاكاة التحميل
+    Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         _isLoading = false;
       });
-    }
+    });
   }
 
   List<BookModel> getBooksByCategory(String category) {
@@ -219,6 +253,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 16),
+
             TextField(
               onChanged: (value) {
                 setState(() {
@@ -236,6 +271,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 16),
+
             SizedBox(
               height: 50,
               child: ListView.builder(
@@ -245,30 +281,20 @@ class _HomeContentState extends State<HomeContent> {
                   final category = categories[index];
                   final isSelected = category == selectedCategory;
                   return GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selectedCategory = category;
-                        _isLoading = true;
-                      });
-                      await _fetchBooksForSelectedCategory();
-                    },
+                    onTap: () => setState(() => selectedCategory = category),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF1C597B)
-                            : Colors.grey[300],
+                        color: isSelected ? const Color(0xFF1C597B) : Colors.grey[300],
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Center(
                         child: Text(
                           category,
                           style: TextStyle(
-                            color:
-                            isSelected ? Colors.white : Colors.black87,
+                            color: isSelected ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -280,26 +306,23 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 20),
+
             getBooksByCategory(selectedCategory).isEmpty
                 ? Center(
               child: Text(
                 "لا توجد كتب في هذا التصنيف",
-                style:
-                TextStyle(color: Colors.grey[700], fontSize: 16),
+                style: TextStyle(color: Colors.grey[700], fontSize: 16),
               ),
             )
                 : ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount:
-              getBooksByCategory(selectedCategory).length,
+              itemCount: getBooksByCategory(selectedCategory).length,
               itemBuilder: (context, index) {
-                final book =
-                getBooksByCategory(selectedCategory)[index];
+                final book = getBooksByCategory(selectedCategory)[index];
 
                 return TweenAnimationBuilder<double>(
-                  duration:
-                  Duration(milliseconds: 500 + 100 * index),
+                  duration: Duration(milliseconds: 500 + 100 * index),
                   curve: Curves.easeOut,
                   tween: Tween<double>(begin: 0, end: 1),
                   builder: (context, double value, child) {
@@ -313,8 +336,7 @@ class _HomeContentState extends State<HomeContent> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              BookDetailsPage(book: book),
+                          builder: (context) => BookDetailsPage(book: book),
                         ),
                       );
                     },
@@ -347,11 +369,9 @@ class _HomeContentState extends State<HomeContent> {
                           ),
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     book.title,
@@ -363,21 +383,15 @@ class _HomeContentState extends State<HomeContent> {
                                   ),
                                   const SizedBox(height: 6),
                                   ShaderMask(
-                                    shaderCallback: (bounds) =>
-                                        const LinearGradient(
-                                          colors: [
-                                            Color(0xFF1C597B),
-                                            Color(0xFF4C869F)
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ).createShader(bounds),
+                                    shaderCallback: (bounds) => const LinearGradient(
+                                      colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ).createShader(bounds),
                                     child: Text(
-                                      book.description ??
-                                          "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
+                                      book.description ?? "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
                                       maxLines: 3,
-                                      overflow:
-                                      TextOverflow.ellipsis,
+                                      overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white,
@@ -387,34 +401,26 @@ class _HomeContentState extends State<HomeContent> {
                                   ),
                                   const SizedBox(height: 10),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: book.isPaid
                                           ? Colors.red.withOpacity(0.1)
                                           : Colors.green.withOpacity(0.1),
-                                      borderRadius:
-                                      BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          book.isPaid
-                                              ? Icons.lock
-                                              : Icons.check_circle,
-                                          color: book.isPaid
-                                              ? Colors.red
-                                              : Colors.green,
+                                          book.isPaid ? Icons.lock : Icons.check_circle,
+                                          color: book.isPaid ? Colors.red : Colors.green,
                                           size: 18,
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
                                           book.isPaid ? "مدفوع" : "مجاني",
                                           style: TextStyle(
-                                            color: book.isPaid
-                                                ? Colors.red
-                                                : Colors.green,
+                                            color: book.isPaid ? Colors.red : Colors.green,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -436,33 +442,5 @@ class _HomeContentState extends State<HomeContent> {
         ),
       ),
     );
-  }
-
-  Future<void> _fetchBooksForSelectedCategory() async {
-    setState(() {
-      _books = [];
-    });
-
-    try {
-      final categoriesResponse = await ApiService().get(ApiEndpoints.categories);
-      final categoryIndex = categoriesResponse['data']
-          .indexWhere((cat) => cat['name'] == selectedCategory);
-      final categoryId = categoriesResponse['data'][categoryIndex]['id'];
-
-      final booksResponse =
-      await ApiService().get(ApiEndpoints.booksByCategory(categoryId));
-
-      if (booksResponse['success']) {
-        _books = List<BookModel>.from(
-          booksResponse['books'].map((b) => BookModel.fromJson(b)),
-        );
-      }
-    } catch (e) {
-      print('Error fetching books: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 }
