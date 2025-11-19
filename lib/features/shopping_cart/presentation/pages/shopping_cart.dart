@@ -112,24 +112,89 @@ class ShoppingCartPage extends StatelessWidget {
 
                       return GestureDetector(
                         onTap: () {
-                          // تحويل Map إلى BookModel
-                          final bookModel = BookModel(
-                            id: bookMap['book_id'] as int? ?? 0,
-                            title: title,
-                            author: author,
-                            imageUrl: imageUrl,
-                            isPaid: price > 0,
-                            category: category,
-                            description: description,
-                          );
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookDetailsPage(book: bookModel),
-                            ),
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFF1C597B),
+                                        Color(0xFF4C869F),
+                                        Color(0xFF77A9C4),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.info_outline,
+                                        size: 50,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(height: 15),
+                                      const Text(
+                                        "تنبيه",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      const Text(
+                                        "يمكنك قراءة الكتاب من خلال صفحة البروفايل.\n"
+                                            "هذه الصفحة مخصصة فقط لعرض الكتب التي قمت بشرائها.",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          height: 1.5,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: Color(0xFF1C597B),
+                                            elevation: 3,
+                                            padding: const EdgeInsets.symmetric(vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            "حسناً",
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
+
+
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(

@@ -1,5 +1,5 @@
 import 'package:book_worm_haven/features/quotes/presentation/pages/quote.dart';
-import 'package:book_worm_haven/features/auth/presentation/pages/shopping_cart.dart';
+import 'package:book_worm_haven/features/shopping_cart/presentation/pages/shopping_cart.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/writing_competitions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -135,7 +135,7 @@ class _HomeContentState extends State<HomeContent> {
   CategoryModel? selectedCategory;
 
   final CategoryRepository categoryRepository =
-  CategoryRepository(CategoryService(Dio()));
+  CategoryRepository(CategoryService(Dio())); // تأكد من Dio مهيأ
 
   @override
   void initState() {
@@ -168,17 +168,44 @@ class _HomeContentState extends State<HomeContent> {
         id: 3,
         title: "Galaxy Wars",
         author: "Mark Sky",
-        category: "Science Fiction",
+        category: "Romance",
         isPaid: false,
         imageUrl: "https://picsum.photos/200/300?random=3",
         description: "ملحمة فضائية بين المجرات، تجمع بين الشجاعة والتكنولوجيا.",
       ),
-      // أضف باقي الكتب حسب الحاجة
+      BookModel(
+        id: 4,
+        title: "Haunted Nights",
+        author: "Lucy Grey",
+        category: "Romance",
+        isPaid: true,
+        imageUrl: "https://picsum.photos/200/300?random=4",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
+      ),
+      BookModel(
+        id: 5,
+        title: "Mystic Forest",
+        author: "Alan Woods",
+        category: "Fantasy",
+        isPaid: false,
+        imageUrl: "https://picsum.photos/200/300?random=5",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
+      ),
+      BookModel(
+        id: 6,
+        title: "Comedy Central",
+        author: "Tom Hanks",
+        category: "Comedy",
+        isPaid: false,
+        imageUrl: "https://picsum.photos/200/300?random=6",
+        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
+      ),
     ];
 
-    // تأخير بسيط لمحاكاة التحميل
     Future.delayed(const Duration(milliseconds: 500), () {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     });
   }
 
@@ -190,6 +217,7 @@ class _HomeContentState extends State<HomeContent> {
         _categories = categories;
         if (categories.isNotEmpty) selectedCategory = categories[0];
       });
+      print("Categories loaded: $_categories"); // للتأكد في الكونسول
     } catch (e) {
       print("Error loading categories: $e");
     } finally {
@@ -197,14 +225,15 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  List<BookModel> getBooksByCategory(String categoryName) {
+  List<BookModel> getBooksByCategory(String category) {
+    if (searchQuery.isEmpty) {
+      return _books.where((book) => book.category == category).toList();
+    }
     return _books.where((book) {
-      final matchesCategory = book.category == categoryName;
-      final matchesSearch = searchQuery.isEmpty ||
-          book.title.toLowerCase().contains(searchQuery) ||
+      final matchesSearch = book.title.toLowerCase().contains(searchQuery) ||
           book.author.toLowerCase().contains(searchQuery) ||
           (book.description?.toLowerCase().contains(searchQuery) ?? false);
-      return matchesCategory && matchesSearch;
+      return matchesSearch;
     }).toList();
   }
 
@@ -218,7 +247,6 @@ class _HomeContentState extends State<HomeContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // صورة تحفيزية
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(
@@ -229,22 +257,17 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 16),
-            // شريط البحث
             TextField(
-              onChanged: (value) =>
-                  setState(() => searchQuery = value.toLowerCase()),
+              onChanged: (value) => setState(() => searchQuery = value.toLowerCase()),
               decoration: InputDecoration(
                 hintText: "ابحث عن كتاب...",
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
                 fillColor: Colors.white,
               ),
             ),
             const SizedBox(height: 16),
-            // قائمة التصنيفات
             SizedBox(
               height: 50,
               child: _isLoadingCategories
@@ -254,29 +277,22 @@ class _HomeContentState extends State<HomeContent> {
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   final category = _categories[index];
-                  final isSelected =
-                      category.id == selectedCategory?.id;
+                  final isSelected = category.id == selectedCategory?.id;
                   return GestureDetector(
-                    onTap: () =>
-                        setState(() => selectedCategory = category),
+                    onTap: () => setState(() => selectedCategory = category),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF1C597B)
-                            : Colors.grey[300],
+                        color: isSelected ? const Color(0xFF1C597B) : Colors.grey[300],
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Center(
                         child: Text(
                           category.name,
                           style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.black87,
+                            color: isSelected ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -288,30 +304,23 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 20),
-            // عرض الكتب حسب التصنيف
-            selectedCategory == null ||
-                getBooksByCategory(selectedCategory!.name).isEmpty
+            getBooksByCategory(selectedCategory?.name ?? "").isEmpty
                 ? Center(
               child: Text(
                 "لا توجد كتب في هذا التصنيف",
-                style: TextStyle(
-                    color: Colors.grey[700], fontSize: 16),
+                style: TextStyle(color: Colors.grey[700], fontSize: 16),
               ),
             )
                 : ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount:
-              getBooksByCategory(selectedCategory!.name).length,
+              itemCount: getBooksByCategory(selectedCategory?.name ?? "").length,
               itemBuilder: (context, index) {
-                final book =
-                getBooksByCategory(selectedCategory!.name)[index];
+                final book = getBooksByCategory(selectedCategory?.name ?? "")[index];
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) =>
-                            BookDetailsPage(book: book)),
+                    MaterialPageRoute(builder: (_) => BookDetailsPage(book: book)),
                   ),
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -342,11 +351,9 @@ class _HomeContentState extends State<HomeContent> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   book.title,
@@ -358,8 +365,7 @@ class _HomeContentState extends State<HomeContent> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  book.description ??
-                                      "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
+                                  book.description ?? "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -369,42 +375,27 @@ class _HomeContentState extends State<HomeContent> {
                                 ),
                                 const SizedBox(height: 10),
                                 Container(
-                                  padding:
-                                  const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: book.isPaid
-                                        ? Colors.red
-                                        .withOpacity(0.1)
-                                        : Colors.green
-                                        .withOpacity(0.1),
-                                    borderRadius:
-                                    BorderRadius.circular(12),
+                                        ? Colors.red.withOpacity(0.1)
+                                        : Colors.green.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        book.isPaid
-                                            ? Icons.lock
-                                            : Icons.check_circle,
-                                        color: book.isPaid
-                                            ? Colors.red
-                                            : Colors.green,
+                                        book.isPaid ? Icons.lock : Icons.check_circle,
+                                        color: book.isPaid ? Colors.red : Colors.green,
                                         size: 18,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
-                                        book.isPaid
-                                            ? "مدفوع"
-                                            : "مجاني",
+                                        book.isPaid ? "مدفوع" : "مجاني",
                                         style: TextStyle(
-                                          color: book.isPaid
-                                              ? Colors.red
-                                              : Colors.green,
-                                          fontWeight:
-                                          FontWeight.bold,
+                                          color: book.isPaid ? Colors.red : Colors.green,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ],
