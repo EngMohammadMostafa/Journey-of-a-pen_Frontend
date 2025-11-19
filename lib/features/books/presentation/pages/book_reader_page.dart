@@ -26,11 +26,11 @@ class BookReaderPage extends StatelessWidget {
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
+                  /*child: Image.network(
                     book.imageUrl ?? '',
                     height: 250,
                     fit: BoxFit.cover,
-                  ),
+                  ),*/
                 ),
               ),
               const SizedBox(height: 20),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:book_worm_haven/features/auth/presentation/pages/home_page.dart';
+import 'package:book_worm_haven/features/home/presentation/pages/home_page.dart';
 
 
 class SuccessPage extends StatelessWidget {

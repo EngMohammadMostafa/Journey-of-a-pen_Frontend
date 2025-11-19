@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 // صفحات التطبيق
 import 'features/auth/presentation/pages/auth_choice_page.dart';
-import 'features/auth/presentation/pages/home_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/welcome_page.dart';
