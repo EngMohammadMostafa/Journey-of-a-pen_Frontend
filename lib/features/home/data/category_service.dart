@@ -12,9 +12,9 @@ class CategoryService {
 
     final data = response.data;
 
-    return (data['categories'] as List)
+    // تعديل هنا: الأقسام موجودة تحت المفتاح 'data' حسب الباك اند
+    return (data['data'] as List)
         .map((e) => CategoryModel.fromJson(e))
         .toList();
   }
 }
-
