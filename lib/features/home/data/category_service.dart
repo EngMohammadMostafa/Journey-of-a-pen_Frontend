@@ -1,20 +1,20 @@
-import '../../../../../core/api/api_service.dart';
+import 'package:dio/dio.dart';
 import '../../../core/constants/api_endpoints.dart';
 import 'models/category_model.dart';
 
 class CategoryService {
-  final ApiService api;
+  final Dio dio;
 
-  CategoryService(this.api);
+  CategoryService(this.dio);
 
   Future<List<CategoryModel>> getCategories() async {
-    final response = await api.get(ApiEndpoints.categories);
-    final Map<String, dynamic> data = response.data as Map<String, dynamic>;
+    final response = await dio.get(ApiEndpoints.categories);
 
-    if (data['success'] == true) {
-      final list = data['categories'] ?? data['data'] ?? [];
-      return (list as List).map((e) => CategoryModel.fromJson(e)).toList();
-    }
-    return [];
+    final data = response.data;
+
+    return (data['categories'] as List)
+        .map((e) => CategoryModel.fromJson(e))
+        .toList();
   }
 }
+

@@ -6,50 +6,33 @@ import 'models/purchase_model.dart';
 class BooksService {
   final ApiService _api = ApiService();
 
-  // ----------------------------
-  // 1) Fetch all books
-  // ----------------------------
+  // جلب كل الكتب
   Future<List<BookModel>> fetchBooks() async {
     final response = await _api.get('/api/books');
+    // Dio already decodes JSON in response.data
     final data = response.data as Map<String, dynamic>;
 
     final booksList = data['books'] as List<dynamic>;
     return booksList.map((json) => BookModel.fromJson(json)).toList();
   }
 
-  // ----------------------------
-  // 2) Fetch single book
-  // ----------------------------
+  // جلب كتاب محدد حسب ID
   Future<BookModel> fetchBookById(int id) async {
     final response = await _api.get('/api/books/$id');
     final data = response.data as Map<String, dynamic>;
 
+    // API قد ترجع 'book' وليس 'books'
     return BookModel.fromJson(data['book']);
   }
 
-  // ----------------------------
-  // 3) Fetch books by category
-  // ----------------------------
-  Future<List<BookModel>> fetchBooksByCategory(int categoryId) async {
-    final response =
-    await _api.get('/api/categories/$categoryId/books');
-    final data = response.data as Map<String, dynamic>;
-
-    final booksList = data['books'] as List<dynamic>;
-    return booksList.map((json) => BookModel.fromJson(json)).toList();
-  }
-
-  // ----------------------------
-  // 4) Purchase a book
-  // ----------------------------
+  // شراء كتاب (Purchase)
   Future<PurchaseModel> purchaseBook(int id) async {
     final response = await _api.post('/api/books/$id/purchase');
-    return PurchaseModel.fromJson(response.data);
+    final data = response.data as Map<String, dynamic>;
+    return PurchaseModel.fromJson(data);
   }
 
-  // ----------------------------
-  // 5) Create purchase
-  // ----------------------------
+  // إنشاء عملية شراء جديدة
   Future<PurchaseModel> createPurchase({
     required int bookId,
     required String paymentMethod,
@@ -58,7 +41,15 @@ class BooksService {
       'book_id': bookId,
       'payment_method': paymentMethod,
     });
+    final data = response.data as Map<String, dynamic>;
+    return PurchaseModel.fromJson(data);
+  }
 
-    return PurchaseModel.fromJson(response.data);
+  // جلب الكتب حسب القسم
+  Future<List<BookModel>> fetchBooksByCategory(int categoryId) async {
+    final response = await _api.get('/api/categories/$categoryId/books');
+    final data = response.data as Map<String, dynamic>;
+    final booksList = data['books'] as List<dynamic>;
+    return booksList.map((json) => BookModel.fromJson(json)).toList();
   }
 }
