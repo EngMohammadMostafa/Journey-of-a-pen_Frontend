@@ -295,10 +295,22 @@ const BooksManagement = () => {
   
       {/* قسم إدارة الكتب */}
       {activeSection === 'books' && (
-        <div className="books-section">
-          <div className="section-header">
-            <h2>Book Management Section</h2>
-          </div>
+  <div className="books-section">
+
+    <div className="section-header">
+      <h2>Book Management Section</h2>
+
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <button className="btn-primary add-book-btn" onClick={handleAddBook}>
+          + Add New Book
+        </button>
+
+        <button className="btn-primary add-book-btn" onClick={handleAddCategory}>
+          + إضافة قسم جديد
+        </button>
+      </div>
+    </div>
+
   
           <div className="book-stats">
             <div className="stat-card">
@@ -343,22 +355,23 @@ const BooksManagement = () => {
           </div>
   
           <DataTable columns={bookColumns} data={searchTerm ? filteredBooks : books} loading={loading} />
+
+
+          {/* جدول الأقسام */}
+<div className="section-header" style={{ marginTop: '40px' }}>
+  <h3>الأقسام المتوفرة</h3>
+</div>
+
+<DataTable
+  columns={categoryColumns}
+  data={categories}
+  loading={false}
+/>
+
         </div>
       )}
   
-      {/* قسم إدارة الأقسام */}
-      {activeSection === 'categories' && (
-        <div className="categories-section">
-          <div className="section-header">
-            <h2>إدارة الأقسام</h2>
-            <button className="btn-primary add-book-btn" onClick={handleAddCategory}>
-              + إضافة قسم جديد
-            </button>
-          </div>
-  
-          <DataTable columns={categoryColumns} data={categories} loading={false} />
-        </div>
-      )}
+     
   
       {/* قسم إدارة الأسئلة */}
       {activeSection === 'questions' && (
