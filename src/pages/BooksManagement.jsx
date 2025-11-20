@@ -288,9 +288,7 @@ const BooksManagement = () => {
         <button className={`btn ${activeSection === 'questions' ? 'btn-primary' : 'btn-outline'}`} onClick={handleQuestions}>
           Questions And Answers
         </button>
-        <button className={`btn ${activeSection === 'categories' ? 'btn-primary' : 'btn-outline'}`} onClick={handleCategories}>
-          إدارة الأقسام
-        </button>
+        
       </div>
   
       {/* قسم إدارة الكتب */}
