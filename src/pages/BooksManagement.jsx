@@ -268,15 +268,28 @@ const BooksManagement = () => {
 
   return (
     <div className="books-management">
-      <div className="page-header">
-        <h1>Books Management</h1>
-        {activeSection === 'books' && (
-          <button className="btn-primary add-book-btn" onClick={handleAddBook}>+ Add New Book</button>
-        )}
-        {activeSection === 'questions' && (
-          <button className="btn-primary add-book-btn" onClick={() => setIsQuestionModalOpen(true)}>+ Add New Question</button>
-        )}
-      </div>
+    <div className="page-header">
+      <h1>Books Management</h1>
+
+      {activeSection === 'books' && (
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-primary add-book-btn" onClick={handleAddBook}>
+            + Add New Book
+          </button>
+
+          <button className="btn-primary add-book-btn" onClick={handleAddCategory}>
+            + add new category
+          </button>
+        </div>
+      )}
+
+      {activeSection === 'questions' && (
+        <button className="btn-primary add-book-btn" onClick={() => setIsQuestionModalOpen(true)}>
+          + Add New Question
+        </button>
+      )}
+
+    </div>
   
       <div className="buttons-container">
         <button className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`} onClick={handleRequests}>
@@ -299,13 +312,7 @@ const BooksManagement = () => {
       <h2>Book Management Section</h2>
 
       <div style={{ display: 'flex', gap: '10px' }}>
-        <button className="btn-primary add-book-btn" onClick={handleAddBook}>
-          + Add New Book
-        </button>
-
-        <button className="btn-primary add-book-btn" onClick={handleAddCategory}>
-          + إضافة قسم جديد
-        </button>
+        
       </div>
     </div>
 
