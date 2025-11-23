@@ -319,6 +319,25 @@ const BooksManagement = () => {
     fetchCategories();
   }, []);
   
+  // --- جلب الكتب عند فتح قسم Book Management ---
+useEffect(() => {
+  if (activeSection === 'books') {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        const booksData = await booksService.getAllBooks();
+        setBooks(booksData.books || booksData);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }
+}, [activeSection]);
+
   useEffect(() => {
     let filtered = books;
     if (searchTerm) {
