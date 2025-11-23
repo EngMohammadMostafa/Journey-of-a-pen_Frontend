@@ -22,11 +22,13 @@ const BooksManagement = () => {
     title: '',
     description: '',
     price: '',
-    is_free: 0,
-    book_type: '',
+    //is_free: 0,
+    book_type: 'paid', 
     discount_rate: '',
     sectionid: ''
   });
+
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const bookStats = {
     total: books.length,
@@ -58,8 +60,7 @@ const BooksManagement = () => {
     correctAnswers: questions.filter(q => q.is_correct === 1).length,
     totalPoints: questions.reduce((sum, q) => sum + (q.points || 0), 0)
   };
-
-  // --- أعمدة الجداول ---
+/* // --- أعمدة الجداول ---
   const bookColumns = [
     { key: 'id', title: 'ID' },
     { key: 'author', title: 'المؤلف' },
@@ -71,6 +72,38 @@ const BooksManagement = () => {
     { key: 'discount_rate', title: 'نسبة الخصم' },
     { key: 'number_of_likes', title: 'عدد الإعجابات' },
     { key: 'sectionid', title: 'القسم' },
+    {
+      key: 'actions',
+      title: 'الإجراءات',
+      render: (_, book) => (
+        <div>
+          <button className="btn-secondary" onClick={() => handleEditBook(book)}>تعديل</button>
+          <button className="btn-danger" onClick={() => handleDeleteBook(book)}>حذف</button>
+        </div>
+      )
+    }
+  ];*/
+  const bookColumns = [
+    { key: 'id', title: 'ID' },
+    { key: 'author', title: 'المؤلف' },
+    { key: 'title', title: 'عنوان الكتاب' },
+    { key: 'description', title: 'الوصف' },
+    { key: 'price', title: 'السعر' },
+    { 
+      key: 'book_type', 
+      title: 'نوع الكتاب', 
+      render: (value) => value === 'paid' ? 'مدفوع' : 'مجاني' 
+    },
+    { key: 'discount_rate', title: 'نسبة الخصم' },
+    { key: 'number_of_likes', title: 'عدد الإعجابات' },
+    { 
+      key: 'category_id', 
+      title: 'القسم',
+      render: (value) => {
+        const category = categories.find(cat => cat.id === value);
+        return category ? category.name : value;
+      }
+    },
     {
       key: 'actions',
       title: 'الإجراءات',
@@ -148,38 +181,73 @@ const BooksManagement = () => {
     }
   };
 
-  const handleSaveBook = () => {
-    if (!formData.author || !formData.title || !formData.description || !formData.price) {
-      alert('يرجى ملء جميع الحقول المطلوبة');
+  const handleSaveBook = async () => {
+    if (!formData.author || !formData.title || !formData.description || !formData.price || !formData.sectionid || !selectedFile) {
+      alert('يرجى ملء جميع الحقول المطلوبة ورفع ملف الكتاب');
       return;
     }
-    if (editingBook) {
-      setBooks(books.map(b => b.id === editingBook.id ? { ...b, ...formData } : b));
-      alert('تم تعديل بيانات الكتاب (محاكاة)');
-    } else {
-      const newBook = { id: Date.now(), ...formData };
-      setBooks([...books, newBook]);
-      alert('تم إضافة الكتاب الجديد (محاكاة)');
+  
+    try {
+      // إنشاء FormData لرفع الملف
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('author', formData.author);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', Number(formData.price));
+      formDataToSend.append('book_type', formData.book_type);
+      formDataToSend.append('discount_rate', Number(formData.discount_rate) || 0);
+      formDataToSend.append('file', selectedFile); // إضافة الملف
+  
+      console.log("بيانات الكتاب المرسلة:", {
+        title: formData.title,
+        author: formData.author,
+        price: formData.price,
+        book_type: formData.book_type,
+        file: selectedFile.name
+      });
+  
+      if (editingBook) {
+        // تعديل كتاب موجود
+        await booksService.updateBook(editingBook.id, formDataToSend);
+        alert('تم تعديل الكتاب بنجاح');
+      } else {
+        // إضافة كتاب جديد
+        await booksService.addBookToCategory(formData.sectionid, formDataToSend);
+        alert('تم إضافة الكتاب بنجاح');
+      }
+  
+      // إعادة تحميل الكتب
+      const updatedBooks = await booksService.getAllBooks();
+      setBooks(updatedBooks.books || updatedBooks);
+  
+      setIsModalOpen(false);
+      setEditingBook(null);
+      setSelectedFile(null);
+  
+    } catch (error) {
+      console.error('خطأ في حفظ الكتاب:', error);
+      alert('حدث خطأ أثناء حفظ الكتاب: ' + (error.message || 'خطأ غير معروف'));
     }
-    setIsModalOpen(false);
-    setEditingBook(null);
   };
-
+  
   // --- دوال إدارة الأقسام ---
   const handleAddCategory = () => {
     setEditingCategory(null);
     setFormCategoryData({ name: '' });
     setIsCategoryModalOpen(true);
   };
-
   const handleSaveCategory = async () => {
     if (!formCategoryData.name) {
       alert('يرجى كتابة اسم القسم');
       return;
     }
     try {
-      const data = await booksService.addCategory({ name: formCategoryData.name });
-      setCategories([...categories, data.category]);
+      await booksService.addCategory({ name: formCategoryData.name });
+  
+      // بعد عملية الإضافة يجب جلب الأقسام من جديد
+      const updated = await booksService.getAllCategories();
+      setCategories(updated.categories || []);
+  
       alert('تم إضافة القسم الجديد بنجاح');
       setIsCategoryModalOpen(false);
       setFormCategoryData({ name: '' });
@@ -188,6 +256,7 @@ const BooksManagement = () => {
       alert('حدث خطأ أثناء إضافة القسم');
     }
   };
+  
 
   const handleDeleteCategory = (category) => {
     if (window.confirm(`هل أنت متأكد من حذف القسم "${category.name}"؟`)) {
@@ -240,15 +309,16 @@ const BooksManagement = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await booksService.getAllCategories();
-        setCategories(data.categories || []);
+        const categoriesData = await booksService.getAllCategories();
+        setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       }
     };
+  
     fetchCategories();
   }, []);
-
+  
   useEffect(() => {
     let filtered = books;
     if (searchTerm) {
@@ -468,10 +538,19 @@ const BooksManagement = () => {
               <option value={1}>نعم</option>
             </select>
           </div>
+
           <div className="form-group">
-            <label>نوع الكتاب</label>
-            <input type="text" value={formData.book_type} onChange={(e) => setFormData({ ...formData, book_type: e.target.value })} />
-          </div>
+  <label>نوع الكتاب</label>
+  <select 
+    value={formData.book_type} 
+    onChange={(e) => setFormData({...formData, book_type: e.target.value})}
+    className="form-input"
+  >
+    <option value="paid">مدفوع</option>
+    <option value="free">مجاني</option>
+  </select>
+</div>
+
           <div className="form-group">
             <label>نسبة الخصم</label>
             <input type="number" value={formData.discount_rate} onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })} />
@@ -482,6 +561,19 @@ const BooksManagement = () => {
               <option value="">-- اختر قسم --</option>
               {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
             </select>
+          </div>
+          
+          {/* حقل رفع الملف المضاف */}
+          <div className="form-group">
+            <label>رفع ملف الكتاب (PDF) *</label>
+            <input 
+              type="file" 
+              accept=".pdf"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+              className="form-input"
+              required
+            />
+            {selectedFile && <span style={{color: 'green'}}>✓ تم اختيار: {selectedFile.name}</span>}
           </div>
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
