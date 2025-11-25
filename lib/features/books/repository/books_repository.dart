@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/books_service.dart';
 import '../data/models/book_model.dart';
 import '../data/models/purchase_model.dart';
@@ -26,21 +27,31 @@ class BooksRepository extends ChangeNotifier {
   Future<List<BookModel>> getBooksByCategory(int categoryId) =>
       _service.fetchBooksByCategory(categoryId);
 
-  // 🔹 دالة للحصول على رابط التحميل لكل كتاب
-  Future<String?> getDownloadLink(BookModel book, String userToken) async {
+  // 🔹 دالة للحصول على رابط التحميل لكل كتاب مع التحقق من تسجيل الدخول
+  Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
     try {
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $userToken';
+      // إذا لم يتم تمرير التوكن، نحاول جلبه من SharedPreferences
+      String? token = userToken;
+      if (token == null) {
+        final prefs = await SharedPreferences.getInstance();
+        token = prefs.getString('token');
+      }
 
-      // استدعاء API توليد رابط التحميل
+      if (token == null) {
+        print("❌ لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
+        return null;
+      }
+
+      final dio = Dio();
+      dio.options.headers['Authorization'] = 'Bearer $token';
+
       final res = await dio.get(
         'https://your-api.com/api/books/${book.id}/generateDownloadLink',
       );
 
       if (res.statusCode == 200 && res.data['success'] == true) {
-        // تحديث الـ downloadUrl في الكتاب
         book.downloadUrl = res.data['download_url'];
-        notifyListeners(); // يمكن تحديث UI إذا كان هناك زر يعتمد على الرابط
+        notifyListeners(); // لتحديث أي واجهة تعتمد على الرابط
         return book.downloadUrl;
       }
 
