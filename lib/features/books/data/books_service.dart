@@ -8,7 +8,7 @@ class BooksService {
 
   // جلب كل الكتب
   Future<List<BookModel>> fetchBooks() async {
-    final response = await _api.get('/api/books');
+    final response = await _api.get('/books');
     // Dio already decodes JSON in response.data
     final data = response.data as Map<String, dynamic>;
 
@@ -18,7 +18,7 @@ class BooksService {
 
   // جلب كتاب محدد حسب ID
   Future<BookModel> fetchBookById(int id) async {
-    final response = await _api.get('/api/books/$id');
+    final response = await _api.get('/books/$id');
     final data = response.data as Map<String, dynamic>;
 
     // API قد ترجع 'book' وليس 'books'
@@ -27,7 +27,7 @@ class BooksService {
 
   // شراء كتاب (Purchase)
   Future<PurchaseModel> purchaseBook(int id) async {
-    final response = await _api.post('/api/books/$id/purchase');
+    final response = await _api.post('/books/$id/purchase');
     final data = response.data as Map<String, dynamic>;
     return PurchaseModel.fromJson(data);
   }
@@ -47,7 +47,7 @@ class BooksService {
 
   // جلب الكتب حسب القسم
   Future<List<BookModel>> fetchBooksByCategory(int categoryId) async {
-    final response = await _api.get('/api/categories/$categoryId/books');
+    final response = await _api.get('/categories/$categoryId/books');
     final data = response.data as Map<String, dynamic>;
     final booksList = data['books'] as List<dynamic>;
     return booksList.map((json) => BookModel.fromJson(json)).toList();

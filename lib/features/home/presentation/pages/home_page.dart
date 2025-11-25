@@ -4,14 +4,15 @@ import 'package:book_worm_haven/features/auth/presentation/pages/writing_competi
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
+import 'package:provider/provider.dart';
+import '../../../books/data/books_service.dart';
+import '../../../books/data/models/book_model.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../data/category_service.dart';
 import '../../data/models/category_model.dart';
 import '../../repository/category_repository.dart';
 import '../widgets/bottom_nav_bar.dart';
-import 'package:book_worm_haven/features/books/repository/books_repository.dart';
-import 'package:book_worm_haven/features/books/data/models/book_model.dart';
 
 // ============================
 // الصفحة الرئيسية
@@ -33,7 +34,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     const WritingCompetitionsPage(),
     const NotificationsPage(),
     const ProfilePage(),
-
   ];
 
   late AnimationController _introController;
@@ -53,10 +53,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       curve: Curves.easeInOut,
     );
 
-    _introController.forward().then((value) {
-      setState(() {
-        _showIntro = false;
-      });
+    _introController.forward().then((_) {
+      setState(() => _showIntro = false);
     });
   }
 
@@ -87,29 +85,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
           ),
 
-          // 🧩 محتوى الصفحة
           _pages[_selectedIndex],
 
-          // 🌟 شاشة المقدمة المؤقتة
           if (_showIntro && _selectedIndex == 0)
-            IgnorePointer(
-              ignoring: !_showIntro,
-              child: FadeTransition(
-                opacity: _introAnimation,
-                child: Container(
-                  color: Colors.black.withOpacity(0.6),
-                ),
-              ),
+            FadeTransition(
+              opacity: _introAnimation,
+              child: Container(color: Colors.black.withOpacity(0.6)),
             ),
-
         ],
       ),
+
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          setState(() => _selectedIndex = index);
         },
       ),
     );
@@ -117,7 +106,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 }
 
 // ============================
-// محتوى الصفحة الرئيسية (مع التصنيفات الجديدة)
+// محتوى الصفحة الرئيسية
 // ============================
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
@@ -135,89 +124,43 @@ class _HomeContentState extends State<HomeContent> {
   CategoryModel? selectedCategory;
 
   final CategoryRepository categoryRepository =
-  CategoryRepository(CategoryService(Dio())); // تأكد من Dio مهيأ
+  CategoryRepository(CategoryService(Dio()));
+  final BooksService booksService = BooksService();
 
   @override
   void initState() {
     super.initState();
-    _loadDummyBooks();
+    _loadBooks();
     _loadCategories();
   }
 
-  void _loadDummyBooks() {
-    _books = [
-      BookModel(
-        id: 1,
-        title: "The Hero's Journey",
-        author: "John Smith",
-        category: "Action",
-        isPaid: false,
-        imageUrl: "https://picsum.photos/200/300?random=1",
-        description: "رحلة مثيرة لبطل يسعى لإنقاذ العالم وسط مغامرات مشوقة.",
-      ),
-      BookModel(
-        id: 2,
-        title: "Love in Paris",
-        author: "Emily Rose",
-        category: "Romance",
-        isPaid: true,
-        imageUrl: "https://picsum.photos/200/300?random=2",
-        description: "قصة حب دافئة تدور أحداثها في شوارع باريس الجميلة.",
-      ),
-      BookModel(
-        id: 3,
-        title: "Galaxy Wars",
-        author: "Mark Sky",
-        category: "Romance",
-        isPaid: false,
-        imageUrl: "https://picsum.photos/200/300?random=3",
-        description: "ملحمة فضائية بين المجرات، تجمع بين الشجاعة والتكنولوجيا.",
-      ),
-      BookModel(
-        id: 4,
-        title: "Haunted Nights",
-        author: "Lucy Grey",
-        category: "Romance",
-        isPaid: true,
-        imageUrl: "https://picsum.photos/200/300?random=4",
-        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
-      ),
-      BookModel(
-        id: 5,
-        title: "Mystic Forest",
-        author: "Alan Woods",
-        category: "Fantasy",
-        isPaid: false,
-        imageUrl: "https://picsum.photos/200/300?random=5",
-        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
-      ),
-      BookModel(
-        id: 6,
-        title: "Comedy Central",
-        author: "Tom Hanks",
-        category: "Comedy",
-        isPaid: false,
-        imageUrl: "https://picsum.photos/200/300?random=6",
-        description: "ليالٍ مرعبة في قصر قديم يخفي أسرارًا غامضة ومخيفة.",
-      ),
-    ];
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
+  // ============================
+  // تحميل الكتب
+  // ============================
+  Future<void> _loadBooks() async {
+    setState(() => _isLoading = true);
+    try {
+      final booksFromApi = await booksService.fetchBooks();
+      setState(() => _books = booksFromApi);
+    } catch (e) {
+      print("Error loading books: $e");
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
+  // ============================
+  // تحميل التصنيفات
+  // ============================
   Future<void> _loadCategories() async {
-    setState(() => _isLoadingCategories = true);
     try {
-      final categories = await categoryRepository.fetchCategories();
+      await context.read<CategoryRepository>().fetchCategories();
+      final categories = context.read<CategoryRepository>().categories;
+// استدعاء الدالة فقط
       setState(() {
-        _categories = categories;
-        if (categories.isNotEmpty) selectedCategory = categories[0];
+        _categories = categoryRepository.categories; // استخدم getter للوصول للبيانات
+        if (_categories.isNotEmpty) selectedCategory = _categories.first;
       });
-      print("Categories loaded: $_categories"); // للتأكد في الكونسول
     } catch (e) {
       print("Error loading categories: $e");
     } finally {
@@ -225,20 +168,35 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  List<BookModel> getBooksByCategory(String category) {
-    if (searchQuery.isEmpty) {
-      return _books.where((book) => book.category == category).toList();
+
+  // ============================
+  // فلترة الكتب حسب التصنيف والبحث
+  // ============================
+  List<BookModel> getFilteredBooks() {
+    List<BookModel> list = _books;
+
+    // فلترة حسب التصنيف
+    if (selectedCategory != null) {
+      list = list.where((book) => book.categoryId == selectedCategory!.id).toList();
     }
-    return _books.where((book) {
-      final matchesSearch = book.title.toLowerCase().contains(searchQuery) ||
-          book.author.toLowerCase().contains(searchQuery) ||
-          (book.description?.toLowerCase().contains(searchQuery) ?? false);
-      return matchesSearch;
-    }).toList();
+
+    // فلترة حسب البحث
+    if (searchQuery.isNotEmpty) {
+      final query = searchQuery.toLowerCase();
+      list = list.where((book) {
+        return book.title.toLowerCase().contains(query) ||
+            book.author.toLowerCase().contains(query) ||
+            (book.description?.toLowerCase().contains(query) ?? false);
+      }).toList();
+    }
+
+    return list;
   }
 
   @override
   Widget build(BuildContext context) {
+    final books = getFilteredBooks();
+
     return SafeArea(
       child: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -247,6 +205,7 @@ class _HomeContentState extends State<HomeContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // صورة العنوان
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(
@@ -257,17 +216,22 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // مربع البحث
             TextField(
-              onChanged: (value) => setState(() => searchQuery = value.toLowerCase()),
+              onChanged: (value) => setState(() => searchQuery = value),
               decoration: InputDecoration(
                 hintText: "ابحث عن كتاب...",
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 filled: true,
                 fillColor: Colors.white,
               ),
             ),
             const SizedBox(height: 16),
+
+            // التصنيفات
             SizedBox(
               height: 50,
               child: _isLoadingCategories
@@ -278,21 +242,29 @@ class _HomeContentState extends State<HomeContent> {
                 itemBuilder: (context, index) {
                   final category = _categories[index];
                   final isSelected = category.id == selectedCategory?.id;
+
                   return GestureDetector(
-                    onTap: () => setState(() => selectedCategory = category),
+                    onTap: () =>
+                        setState(() => selectedCategory = category),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
+                      duration:
+                      const Duration(milliseconds: 300),
                       margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF1C597B) : Colors.grey[300],
+                        color: isSelected
+                            ? const Color(0xFF1C597B)
+                            : Colors.grey[300],
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Center(
                         child: Text(
                           category.name,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.black87,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -304,32 +276,41 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             const SizedBox(height: 20),
-            getBooksByCategory(selectedCategory?.name ?? "").isEmpty
+
+            // عرض الكتب
+            books.isEmpty
                 ? Center(
               child: Text(
                 "لا توجد كتب في هذا التصنيف",
-                style: TextStyle(color: Colors.grey[700], fontSize: 16),
+                style: TextStyle(
+                    color: Colors.grey[700], fontSize: 16),
               ),
             )
                 : ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount: getBooksByCategory(selectedCategory?.name ?? "").length,
+              itemCount: books.length,
               itemBuilder: (context, index) {
-                final book = getBooksByCategory(selectedCategory?.name ?? "")[index];
+                final book = books[index];
+
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => BookDetailsPage(book: book)),
+                    MaterialPageRoute(
+                      builder: (_) => BookDetailsPage(book: book),
+                    ),
                   ),
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin:
+                    const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius:
+                      BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black
+                              .withOpacity(0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -338,34 +319,43 @@ class _HomeContentState extends State<HomeContent> {
                     child: Row(
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.only(
+                          borderRadius:
+                          const BorderRadius.only(
                             topLeft: Radius.circular(20),
                             bottomLeft: Radius.circular(20),
                           ),
-                          child: Image.network(
-                            book.imageUrl ?? '',
+                          child: Image.asset(
+                            "assets/images/default.jpg",
                             width: 100,
                             height: 140,
                             fit: BoxFit.cover,
                           ),
                         ),
+
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding:
+                            const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   book.title,
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1C597B),
+                                    fontWeight:
+                                    FontWeight.bold,
+                                    color:
+                                    Color(0xFF1C597B),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  book.description ?? "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
+                                  book.description ??
+                                      "كتاب رائع يأخذك في رحلة مليئة بالتشويق والإثارة.",
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -374,28 +364,55 @@ class _HomeContentState extends State<HomeContent> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
+
+                                // حالة الكتاب (مجاني / مدفوع)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding:
+                                  const EdgeInsets
+                                      .symmetric(
+                                      horizontal: 10,
+                                      vertical: 6),
                                   decoration: BoxDecoration(
                                     color: book.isPaid
-                                        ? Colors.red.withOpacity(0.1)
-                                        : Colors.green.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
+                                        ? Colors.red
+                                        .withOpacity(
+                                        0.1)
+                                        : Colors.green
+                                        .withOpacity(
+                                        0.1),
+                                    borderRadius:
+                                    BorderRadius
+                                        .circular(12),
                                   ),
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisSize:
+                                    MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        book.isPaid ? Icons.lock : Icons.check_circle,
-                                        color: book.isPaid ? Colors.red : Colors.green,
+                                        book.isPaid
+                                            ? Icons.lock
+                                            : Icons
+                                            .check_circle,
+                                        color: book.isPaid
+                                            ? Colors.red
+                                            : Colors.green,
                                         size: 18,
                                       ),
-                                      const SizedBox(width: 6),
+                                      const SizedBox(
+                                          width: 6),
                                       Text(
-                                        book.isPaid ? "مدفوع" : "مجاني",
+                                        book.isPaid
+                                            ? "مدفوع"
+                                            : "مجاني",
                                         style: TextStyle(
-                                          color: book.isPaid ? Colors.red : Colors.green,
-                                          fontWeight: FontWeight.bold,
+                                          color: book
+                                              .isPaid
+                                              ? Colors.red
+                                              : Colors
+                                              .green,
+                                          fontWeight:
+                                          FontWeight
+                                              .bold,
                                         ),
                                       ),
                                     ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 
 // صفحات التطبيق
 import 'features/auth/presentation/pages/auth_choice_page.dart';
@@ -16,6 +17,14 @@ import 'features/quotes/presentation/pages/quote.dart';
 import 'features/profile/provider/profile_provider.dart';
 import 'features/profile/repository/profile_repository.dart';
 
+// إضافة الـ Providers الجديدة
+import 'features/home/provider/home_provider.dart';
+import 'features/books/repository/books_repository.dart';
+import 'features/books/data/books_service.dart';
+
+import 'features/home/repository/category_repository.dart';
+import 'features/home/data/category_service.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -29,15 +38,32 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        /// 🔹 إعداد ProfileProvider مرة واحدة
-        /// وضعنا mockMode = true فقط للتجربة داخل صفحة البروفايل
-        ChangeNotifierProvider(
+        /// 🔹 Profile Provider
+        ChangeNotifierProvider<ProfileProvider>(
           create: (_) => ProfileProvider(
             repository: profileRepo,
-            mockMode: true, // ✅ يجعل الصفحة وهمية دون التأثير على باقي الصفحات
+            mockMode: true,
           ),
         ),
+
+        /// 🔹 Books Repository
+        ChangeNotifierProvider<BooksRepository>(
+          create: (_) => BooksRepository(), // ✅ بدون تمرير معاملات إضافية
+        ),
+
+        /// 🔹 Categories Repository
+        ChangeNotifierProvider<CategoryRepository>(
+          create: (_) => CategoryRepository(
+            CategoryService(Dio()), // تمرير الخدمة المطلوبة فقط
+          ),
+        ),
+
+        /// 🔹 Home Provider
+        ChangeNotifierProvider<HomeProvider>(
+          create: (_) => HomeProvider(),
+        ),
       ],
+
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Readify',

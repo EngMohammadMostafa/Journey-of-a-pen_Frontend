@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/book_model.dart';
+import '../../repository/books_repository.dart';
 import 'payment_page.dart';
 import 'book_reader_page.dart';
 
@@ -14,16 +16,38 @@ class BookDetailsPage extends StatefulWidget {
 class _BookDetailsPageState extends State<BookDetailsPage> {
   double _rating = 0;
 
-  void _onBuyPressed() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PaymentPage(book: widget.book),
-      ),
-    );
+  void _onBuyPressed() async {
+    final booksRepo = context.read<BooksRepository>();
+    final userToken = "USER_TOKEN_HERE"; // استبدله بالتوكن الفعلي للمستخدم
+
+    // جلب رابط التحميل وتحديث BookModel.downloadUrl
+    final downloadUrl = await booksRepo.getDownloadLink(widget.book, userToken);
+
+    if (downloadUrl != null) {
+      // انتقل لصفحة الدفع
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentPage(book: widget.book),
+        ),
+      );
+    } else {
+      // في حال فشل الحصول على الرابط
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("فشل الحصول على رابط التحميل")),
+      );
+    }
   }
 
-  void _onReadPressed() {
+  void _onReadPressed() async {
+    if (widget.book.downloadUrl == null) {
+      final booksRepo = context.read<BooksRepository>();
+      final userToken = "USER_TOKEN_HERE"; // استبدله بالتوكن الفعلي
+
+      // جلب رابط التحميل إذا لم يكن موجود
+      await booksRepo.getDownloadLink(widget.book, userToken);
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -31,6 +55,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
