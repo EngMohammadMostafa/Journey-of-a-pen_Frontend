@@ -37,12 +37,11 @@ class BookModel {
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
     final category = json['category'];
-
     return BookModel(
       id: json['id'],
       title: json['title'],
       author: json['author'],
-      imageUrl: json['image_url'], // إذا لم يكن موجود يمكن تركه null
+      imageUrl: json['image_url'], // إذا موجود
       isPaid: (json['book_type'] ?? 'free') == 'paid',
       categoryId: category != null ? category['id'] : 0,
       categoryName: category != null ? category['name'] : "غير محدد",
@@ -53,9 +52,10 @@ class BookModel {
       filePath: json['file_path'],
       fileType: json['file_type'],
       fileSize: json['file_size'],
-      downloadUrl: json['download_url'], // يمكن تحديثه لاحقًا
+      downloadUrl: json['download_url'],
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {

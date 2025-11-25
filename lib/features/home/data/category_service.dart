@@ -9,12 +9,12 @@ class CategoryService {
 
   Future<List<CategoryModel>> getCategories() async {
     final response = await dio.get(ApiEndpoints.categories);
-
     final data = response.data;
 
-    // تعديل هنا: الأقسام موجودة تحت المفتاح 'data' حسب الباك اند
+    // أخذ القائمة من المفتاح 'data'
     return (data['data'] as List)
         .map((e) => CategoryModel.fromJson(e))
         .toList();
   }
+
 }
