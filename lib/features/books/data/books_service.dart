@@ -36,7 +36,7 @@ class BooksService {
     required String paymentMethod,
   }) async {
     final response = await _api.post(
-      '/api/purchases',
+      '/purchases',
       data: {
         'book_id': bookId,
         'payment_method': paymentMethod,
@@ -52,5 +52,20 @@ class BooksService {
     final data = response.data as Map<String, dynamic>;
     final booksList = data['books'] as List<dynamic>;
     return booksList.map((json) => BookModel.fromJson(json)).toList();
+  }
+
+  // تحميل الكتاب (يحتاج توكن)
+  Future<String?> downloadBook(int bookId) async {
+    try {
+      final response = await _api.post('/books/$bookId/download');
+      final data = response.data as Map<String, dynamic>;
+      if (data['success'] == true && data.containsKey('download_url')) {
+        return data['download_url'] as String;
+      }
+      return null;
+    } catch (e) {
+      print("Error downloading book $bookId: $e");
+      return null;
+    }
   }
 }
