@@ -1,20 +1,19 @@
-import 'package:dio/dio.dart';
+import 'package:book_worm_haven/core/api/api_service.dart';
 import '../../../core/constants/api_endpoints.dart';
 import 'models/category_model.dart';
 
 class CategoryService {
-  final Dio dio;
+  final ApiService api;
 
-  CategoryService(this.dio);
+  CategoryService(this.api);
 
   Future<List<CategoryModel>> getCategories() async {
-    final response = await dio.get(ApiEndpoints.categories);
+    final response = await api.get(ApiEndpoints.categories);
+
     final data = response.data;
 
-    // أخذ القائمة من المفتاح 'data'
     return (data['data'] as List)
         .map((e) => CategoryModel.fromJson(e))
         .toList();
   }
-
 }
