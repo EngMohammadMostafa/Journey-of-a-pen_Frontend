@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/api/api_service.dart';
 import '../../../books/data/books_service.dart';
 import '../../../books/data/models/book_model.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
@@ -116,6 +117,9 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
+  // ============================
+  // متغيرات الحالة
+  // ============================
   String searchQuery = "";
   List<BookModel> _books = [];
   List<CategoryModel> _categories = [];
@@ -123,13 +127,20 @@ class _HomeContentState extends State<HomeContent> {
   bool _isLoadingCategories = true;
   CategoryModel? selectedCategory;
 
-  final CategoryRepository categoryRepository =
-  CategoryRepository(CategoryService(Dio()));
-  final BooksService booksService = BooksService();
+  // ============================
+  // الخدمات
+  // ============================
+  late CategoryRepository categoryRepository;
+  late BooksService booksService;
 
   @override
   void initState() {
     super.initState();
+
+    final apiService = ApiService();
+    categoryRepository = CategoryRepository(CategoryService(apiService));
+    booksService = BooksService(apiService);
+
     _loadBooks();
     _loadCategories();
   }
@@ -153,12 +164,11 @@ class _HomeContentState extends State<HomeContent> {
   // تحميل التصنيفات
   // ============================
   Future<void> _loadCategories() async {
+    setState(() => _isLoadingCategories = true);
     try {
-      await context.read<CategoryRepository>().fetchCategories();
-      final categories = context.read<CategoryRepository>().categories;
-// استدعاء الدالة فقط
+      await categoryRepository.fetchCategories();
       setState(() {
-        _categories = categoryRepository.categories; // استخدم getter للوصول للبيانات
+        _categories = categoryRepository.categories;
         if (_categories.isNotEmpty) selectedCategory = _categories.first;
       });
     } catch (e) {
@@ -168,19 +178,16 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-
   // ============================
-  // فلترة الكتب حسب التصنيف والبحث
+  // فلترة الكتب
   // ============================
   List<BookModel> getFilteredBooks() {
     List<BookModel> list = _books;
 
-    // فلترة حسب التصنيف
     if (selectedCategory != null) {
       list = list.where((book) => book.categoryId == selectedCategory!.id).toList();
     }
 
-    // فلترة حسب البحث
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
       list = list.where((book) {
@@ -192,6 +199,8 @@ class _HomeContentState extends State<HomeContent> {
 
     return list;
   }
+
+
 
   @override
   Widget build(BuildContext context) {

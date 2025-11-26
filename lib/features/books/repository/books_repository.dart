@@ -1,14 +1,15 @@
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/books_service.dart';
 import '../data/models/book_model.dart';
 import '../data/models/purchase_model.dart';
+import '../../../../../core/api/api_service.dart';
 
 class BooksRepository extends ChangeNotifier {
-  final BooksService _service = BooksService();
+  final BooksService _service;
 
-  BooksRepository();
+  BooksRepository(ApiService api) : _service = BooksService(api);
 
   // 🔹 جلب كل الكتب
   Future<List<BookModel>> getAllBooks() => _service.fetchBooks();
@@ -51,7 +52,7 @@ class BooksRepository extends ChangeNotifier {
 
       if (res.statusCode == 200 && res.data['success'] == true) {
         book.downloadUrl = res.data['download_url'];
-        notifyListeners(); // لتحديث أي واجهة تعتمد على الرابط
+        notifyListeners();
         return book.downloadUrl;
       }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dio/dio.dart';
+
+// ApiService
+import 'core/api/api_service.dart';
 
 // صفحات التطبيق
 import 'features/auth/presentation/pages/auth_choice_page.dart';
@@ -17,7 +19,7 @@ import 'features/quotes/presentation/pages/quote.dart';
 import 'features/profile/provider/profile_provider.dart';
 import 'features/profile/repository/profile_repository.dart';
 
-// إضافة الـ Providers الجديدة
+// Providers جديدة
 import 'features/home/provider/home_provider.dart';
 import 'features/books/repository/books_repository.dart';
 import 'features/books/data/books_service.dart';
@@ -34,36 +36,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // إنشاء ApiService واحد فقط لإعادة استخدامه
+    final apiService = ApiService();
     final profileRepo = ProfileRepository();
 
     return MultiProvider(
       providers: [
-        /// 🔹 Profile Provider
+        // Profile Provider
         ChangeNotifierProvider<ProfileProvider>(
-          create: (_) => ProfileProvider(
-            repository: profileRepo,
-            mockMode: true,
-          ),
+          create: (_) => ProfileProvider(repository: profileRepo, mockMode: true),
         ),
 
-        /// 🔹 Books Repository
+        // Books Repository
         ChangeNotifierProvider<BooksRepository>(
-          create: (_) => BooksRepository(), // ✅ بدون تمرير معاملات إضافية
+          create: (_) => BooksRepository(BooksService(apiService) as ApiService),
         ),
 
-        /// 🔹 Categories Repository
+        // Categories Repository
         ChangeNotifierProvider<CategoryRepository>(
-          create: (_) => CategoryRepository(
-            CategoryService(Dio()), // تمرير الخدمة المطلوبة فقط
-          ),
+          create: (_) => CategoryRepository(CategoryService(apiService)),
         ),
 
-        /// 🔹 Home Provider
+        // Home Provider
         ChangeNotifierProvider<HomeProvider>(
-          create: (_) => HomeProvider(),
+          create: (_) => HomeProvider(BooksService(apiService)),
         ),
       ],
-
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Readify',
