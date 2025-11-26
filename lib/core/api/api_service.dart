@@ -4,12 +4,10 @@ import 'package:book_worm_haven/core/constants/api_endpoints.dart';
 class ApiService {
   late Dio _dio;
 
-  // 👇 للتحكم في وضع المحاكاة (Mock Mode)
   final bool isMockMode;
 
   ApiService({this.isMockMode = false}) {
     BaseOptions options = BaseOptions(
-      // ✅ استبدل بـ IP الخاص بالباك اند و أضف /api إن كانت موجودة
       baseUrl: "http://192.168.0.105:8000/api",
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
@@ -20,20 +18,55 @@ class ApiService {
     );
 
     _dio = Dio(options);
+
+    // ====================================================
+    // 🔥 إضافة Interceptor لعرض كل الطلبات والردود والأخطاء
+    // ====================================================
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          print("======================================");
+          print("🚀 API REQUEST");
+          print("➡ URL: ${options.baseUrl}${options.path}");
+          print("➡ METHOD: ${options.method}");
+          print("➡ HEADERS: ${options.headers}");
+          print("➡ QUERY PARAMS: ${options.queryParameters}");
+          print("➡ DATA: ${options.data}");
+          print("======================================");
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          print("======================================");
+          print("✅ API RESPONSE");
+          print("⬅ STATUS: ${response.statusCode}");
+          print("⬅ DATA: ${response.data}");
+          print("======================================");
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          print("======================================");
+          print("❌ API ERROR");
+          print("❗ MESSAGE: ${error.message}");
+          print("❗ STATUS: ${error.response?.statusCode}");
+          print("❗ DATA: ${error.response?.data}");
+          print("======================================");
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
-  // 🔹 إضافة التوكن للطلبات المحمية
+  // إضافة التوكن للطلبات المحمية
   void setAuthToken(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
 
-  // 🔹 دوال عامة
+  // دوال عامة
   Future<Response> get(String endpoint, {Map<String, dynamic>? params}) async {
     return await _dio.get(endpoint, queryParameters: params);
   }
 
   Future<Response> post(String endpoint, {Map<String, dynamic>? data}) async {
-    // ✅ تحويل أي Map إلى JSON صريح قبل الإرسال
     return await _dio.post(endpoint, data: data);
   }
 
@@ -45,10 +78,7 @@ class ApiService {
     return await _dio.delete(endpoint, data: data);
   }
 
-  // ==============================
-  // 👇 دوال تسجيل الدخول والتسجيل
-  // ==============================
-
+  // تسجيل الدخول
   Future<Map<String, dynamic>> login(Map<String, dynamic> credentials) async {
     if (isMockMode) {
       print('🧩 Mock Login Enabled → skipping real API call');
@@ -63,7 +93,6 @@ class ApiService {
       final response = await _dio.post(ApiEndpoints.login, data: credentials);
       return Map<String, dynamic>.from(response.data);
     } on DioException catch (e) {
-      // ✅ طباعة الخطأ التفصيلي لتعرف السبب
       print('⚠️ Login Exception: ${e.message}');
       if (e.response != null) {
         print('Response data: ${e.response?.data}');
@@ -73,6 +102,7 @@ class ApiService {
     }
   }
 
+  // التسجيل
   Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
     if (isMockMode) {
       print('🧩 Mock Register Enabled → skipping real API call');
@@ -88,7 +118,6 @@ class ApiService {
       final response = await _dio.post(ApiEndpoints.register, data: userData);
       return Map<String, dynamic>.from(response.data);
     } on DioException catch (e) {
-      // ✅ طباعة الخطأ التفصيلي لتعرف السبب
       print('⚠️ Register Exception: ${e.message}');
       if (e.response != null) {
         print('Response data: ${e.response?.data}');
@@ -98,10 +127,7 @@ class ApiService {
     }
   }
 
-  // ==============================
-  // 👇 دالة معالجة الأخطاء
-  // ==============================
-
+  // دالة معالجة الأخطاء
   String _handleError(DioException e) {
     if (e.response != null) {
       return 'Error ${e.response?.statusCode}: ${e.response?.data}';

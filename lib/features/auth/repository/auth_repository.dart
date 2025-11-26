@@ -79,39 +79,34 @@ class AuthRepository {
 
   Future<bool> login(String email, String password) async {
     try {
-      final Map<String, dynamic> body = {
-        'email': email,
-        'password': password,
-      };
-      final Response response = await _apiService.post(
+      final response = await _apiService.post(
         ApiEndpoints.login,
-        data: body,
+        data: {
+          'email': email,
+          'password': password,
+        },
       );
 
       final status = response.statusCode ?? 0;
 
       if (status == 200) {
-        final dynamic raw = response.data;
+        final raw = response.data;
         final Map<String, dynamic> data =
-        (raw is String) ? jsonDecode(raw) as Map<String, dynamic> : Map<String, dynamic>.from(raw);
+        (raw is String) ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
 
-        String? token;
-        try {
-          final loginResponse = LoginResponse.fromJson(data);
-          token = loginResponse.token ?? data['token']?.toString();
-        } catch (_) {
-          token = data['token']?.toString();
-        }
+        String? token = data['token']?.toString();
 
         print('✅ Login Success → Token: $token');
 
         if (token != null) {
-          // 🟢 حفظ التوكن في SharedPreferences
+          // 1️⃣ حفظ التوكن
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
 
-          // 🟢 تعيينه في ApiService فورًا
+          // 2️⃣ ربط التوكن مع ApiService (مهم جداً)
           _apiService.setAuthToken(token);
+
+          print("🔗 Token added to API headers successfully");
         }
 
         return true;
@@ -124,5 +119,6 @@ class AuthRepository {
       return false;
     }
   }
+
 
 }
