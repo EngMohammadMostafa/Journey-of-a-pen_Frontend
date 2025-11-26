@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/api/api_service.dart';
 import '../../../../core/utils/validators.dart';
 import 'package:book_worm_haven/core/utils/prefs_helper.dart';
 import '../../repository/auth_repository.dart';
@@ -22,7 +23,8 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
 
-      final success = await AuthRepository().login(
+      // ✅ تمرير نسخة ApiService
+      final success = await AuthRepository(ApiService()).login(
         emailController.text.trim(),
         passwordController.text.trim(),
       );
@@ -34,14 +36,12 @@ class _LoginPageState extends State<LoginPage> {
           const SnackBar(content: Text('Login successful!')),
         );
 
-        // ✅ التحقق مما إذا كان المستخدم قد اختار الاهتمامات سابقًا
+        // التحقق مما إذا كان المستخدم قد اختار الاهتمامات سابقًا
         final hasChosen = await PrefsHelper.hasChosenInterests();
 
         if (hasChosen) {
-          // 🔹 إذا اختار الاهتمامات مسبقًا → الصفحة الرئيسية
           Navigator.pushReplacementNamed(context, '/home');
         } else {
-          // 🔹 إذا لم يختر الاهتمامات → صفحة اختيار الاهتمامات
           Navigator.pushReplacementNamed(context, '/choose-interests');
         }
       } else {

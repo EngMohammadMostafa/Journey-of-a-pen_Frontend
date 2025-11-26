@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/books_service.dart';
@@ -8,8 +7,11 @@ import '../../../../../core/api/api_service.dart';
 
 class BooksRepository extends ChangeNotifier {
   final BooksService _service;
+  final ApiService _api;
 
-  BooksRepository(ApiService api) : _service = BooksService(api);
+  BooksRepository(ApiService api)
+      : _service = BooksService(api),
+        _api = api;
 
   // 🔹 جلب كل الكتب
   Future<List<BookModel>> getAllBooks() => _service.fetchBooks();
@@ -43,12 +45,11 @@ class BooksRepository extends ChangeNotifier {
         return null;
       }
 
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
+      // إضافة التوكن للـ ApiService قبل الطلب
+      _api.setAuthToken(token);
 
-      final res = await dio.get(
-        'https://your-api.com/api/books/${book.id}/generateDownloadLink',
-      );
+      // استدعاء الـ endpoint باستخدام ApiService مباشرة
+      final res = await _api.post('/books/${book.id}/download');
 
       if (res.statusCode == 200 && res.data['success'] == true) {
         book.downloadUrl = res.data['download_url'];

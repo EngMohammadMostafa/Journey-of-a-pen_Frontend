@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/api/api_service.dart';
 import '../../repository/auth_repository.dart';
 import '../../../../core/utils/validators.dart';
 
@@ -53,7 +54,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => isLoading = true);
 
-    final errorMessage = await AuthRepository().register(
+    // ✅ تمرير نسخة ApiService
+    final errorMessage = await AuthRepository(ApiService()).register(
       nameController.text.trim(),
       emailController.text.trim(),
       passwordController.text.trim(),
@@ -75,6 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
       );
     }
   }
+
 
 
   @override

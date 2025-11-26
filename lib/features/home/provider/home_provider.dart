@@ -19,9 +19,11 @@ class HomeProvider extends ChangeNotifier {
     try {
       final response = await _booksService.fetchBooks();
       _books = response;
-      notifyListeners();
     } catch (e) {
       print("Error fetching books: $e");
+      _books = []; // تعيين قائمة فارغة عند الخطأ
+    } finally {
+      notifyListeners();
     }
   }
 
@@ -57,5 +59,18 @@ class HomeProvider extends ChangeNotifier {
     }
 
     return result;
+  }
+
+  // ==============================
+  // دالة للحصول على رابط تحميل الكتاب
+  // ==============================
+  Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
+    try {
+      final link = await _booksService.getDownloadLink(book, userToken: userToken);
+      return link;
+    } catch (e) {
+      print("Error getting download link for book ${book.id}: $e");
+      return null;
+    }
   }
 }

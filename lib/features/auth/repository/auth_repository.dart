@@ -7,7 +7,10 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  // 🔹 تمرير ApiService من الخارج لضمان مشاركة نفس التوكن
+  AuthRepository(this._apiService);
 
   // ==============================
   // 🔹 تسجيل المستخدم الجديد
@@ -46,6 +49,15 @@ class AuthRepository {
           final registerResponse = RegisterResponse.fromJson(data);
           print('✅ Register Success → Token: ${registerResponse.token}');
           print('👤 User: ${registerResponse.user.username}');
+
+          if (registerResponse.token != null) {
+            // حفظ التوكن وربطه مع ApiService
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('token', registerResponse.token);
+            _apiService.setAuthToken(registerResponse.token);
+            print("🔗 Token added to API headers successfully");
+          }
+
         } catch (_) {
           print('✅ Register Success: ${data['message'] ?? 'Registered (no message field)'}');
         }
@@ -54,10 +66,8 @@ class AuthRepository {
       } else {
         print('❌ Register Failed → Status: $status, Body: ${response.data}');
 
-        // محاولة جلب رسالة الخطأ من الباك اند
         if (response.data is Map<String, dynamic> && response.data.containsKey('errors')) {
           final errors = response.data['errors'] as Map<String, dynamic>;
-          // نأخذ أول رسالة خطأ موجودة
           final firstError = errors.values.first;
           if (firstError is List && firstError.isNotEmpty) {
             return firstError.first.toString();
@@ -71,12 +81,9 @@ class AuthRepository {
     }
   }
 
-
   // ==============================
   // 🔹 تسجيل الدخول
   // ==============================
-
-
   Future<bool> login(String email, String password) async {
     try {
       final response = await _apiService.post(
@@ -119,6 +126,4 @@ class AuthRepository {
       return false;
     }
   }
-
-
 }
