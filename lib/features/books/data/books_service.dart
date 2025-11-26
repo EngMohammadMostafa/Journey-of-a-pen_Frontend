@@ -5,7 +5,7 @@ import 'models/purchase_model.dart';
 class BooksService {
   final ApiService _api;
 
-  BooksService(this._api); // <-- تم تمرير ApiService من الخارج
+  BooksService(this._api); // <-- تمرير ApiService من الخارج
 
   // جلب كل الكتب
   Future<List<BookModel>> fetchBooks() async {

@@ -3,6 +3,7 @@ import 'package:book_worm_haven/core/constants/api_endpoints.dart';
 
 class ApiService {
   late Dio _dio;
+  String? _authToken;
 
   final bool isMockMode;
 
@@ -20,11 +21,14 @@ class ApiService {
     _dio = Dio(options);
 
     // ====================================================
-    // 🔥 إضافة Interceptor لعرض كل الطلبات والردود والأخطاء
+    // 🔥 Interceptor لعرض كل الطلبات والردود والأخطاء
     // ====================================================
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          if (_authToken != null) {
+            options.headers['Authorization'] = 'Bearer $_authToken';
+          }
           print("======================================");
           print("🚀 API REQUEST");
           print("➡ URL: ${options.baseUrl}${options.path}");
@@ -56,8 +60,9 @@ class ApiService {
     );
   }
 
-  // إضافة التوكن للطلبات المحمية
+  // تعيين توكن المصادقة لجميع الطلبات
   void setAuthToken(String token) {
+    _authToken = token;
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
 
@@ -91,7 +96,11 @@ class ApiService {
 
     try {
       final response = await _dio.post(ApiEndpoints.login, data: credentials);
-      return Map<String, dynamic>.from(response.data);
+      final data = Map<String, dynamic>.from(response.data);
+      if (data.containsKey('token')) {
+        setAuthToken(data['token']); // ✅ حفظ التوكن مباشرة بعد تسجيل الدخول
+      }
+      return data;
     } on DioException catch (e) {
       print('⚠️ Login Exception: ${e.message}');
       if (e.response != null) {
@@ -127,7 +136,7 @@ class ApiService {
     }
   }
 
-  // دالة معالجة الأخطاء
+  // معالجة الأخطاء
   String _handleError(DioException e) {
     if (e.response != null) {
       return 'Error ${e.response?.statusCode}: ${e.response?.data}';

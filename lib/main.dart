@@ -43,13 +43,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // Profile Provider
-        ChangeNotifierProvider<ProfileProvider>(
+        ChangeNotifierProvider(
           create: (_) => ProfileProvider(repository: profileRepo, mockMode: true),
         ),
 
         // Books Repository
         ChangeNotifierProvider<BooksRepository>(
-          create: (_) => BooksRepository(BooksService(apiService) as ApiService),
+          create: (_) => BooksRepository(apiService),
         ),
 
         // Categories Repository
