@@ -174,18 +174,30 @@ const BooksManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteBook = (book) => {
-    if (window.confirm(`هل أنت متأكد من حذف الكتاب "${book.title}"؟`)) {
-      setBooks(books.filter(b => b.id !== book.id));
-      alert('تم حذف الكتاب (محاكاة)');
+  const handleDeleteBook = async (book) => {
+    const confirmDelete = window.confirm(
+      `هل أنت متأكد من حذف الكتاب "${book.title}"؟`
+    );
+    if (!confirmDelete) return;
+  
+    try {
+      await booksService.deleteBook(book.id);
+  
+      setBooks(prev => prev.filter(b => b.id !== book.id));
+  
+      alert("تم حذف الكتاب بنجاح");
+    } catch (error) {
+      console.error("خطأ أثناء حذف الكتاب:", error);
+      alert("حدث خطأ أثناء حذف الكتاب");
     }
   };
+  
 
   const handleSaveBook = async () => {
-    if (!formData.author || !formData.title || !formData.description || !formData.price || !formData.sectionid || !selectedFile) {
-      alert('يرجى ملء جميع الحقول المطلوبة ورفع ملف الكتاب');
+    if (!formData.author || !formData.title || !formData.description || !formData.price || !formData.sectionid) {
+      alert('يرجى ملء جميع الحقول المطلوبة');
       return;
-    }
+  }
   
     try {
       // إنشاء FormData لرفع الملف
@@ -196,8 +208,10 @@ const BooksManagement = () => {
       formDataToSend.append('price', Number(formData.price));
       formDataToSend.append('book_type', formData.book_type);
       formDataToSend.append('discount_rate', Number(formData.discount_rate) || 0);
-      formDataToSend.append('file', selectedFile); // إضافة الملف
-  
+      formDataToSend.append('category_id', formData.sectionid); // ← هنا التعديل
+if (selectedFile) {
+  formDataToSend.append('file', selectedFile);
+}
       console.log("بيانات الكتاب المرسلة:", {
         title: formData.title,
         author: formData.author,
