@@ -6,6 +6,7 @@ import 'core/api/api_service.dart';
 
 // صفحات التطبيق
 import 'features/auth/presentation/pages/auth_choice_page.dart';
+import 'features/auth/repository/auth_repository.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -42,6 +43,14 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        // ApiService (مزود مرة واحدة)
+        Provider<ApiService>.value(value: apiService),
+
+        // Auth Repository
+        Provider<AuthRepository>(
+          create: (_) => AuthRepository(apiService),
+        ),
+
         // Profile Provider
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(repository: profileRepo, mockMode: true),
@@ -79,5 +88,6 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+
   }
 }

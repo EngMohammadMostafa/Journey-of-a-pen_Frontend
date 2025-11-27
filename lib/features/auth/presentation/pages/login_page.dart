@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/utils/validators.dart';
 import 'package:book_worm_haven/core/utils/prefs_helper.dart';
@@ -20,37 +21,39 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = false;
 
   void login() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => isLoading = true);
+    if (!_formKey.currentState!.validate()) return;
 
-      // ✅ تمرير نسخة ApiService
-      final success = await AuthRepository(ApiService()).login(
-        emailController.text.trim(),
-        passwordController.text.trim(),
+    setState(() => isLoading = true);
+
+    // ✅ جلب AuthRepository من Provider
+    final authRepo = Provider.of<AuthRepository>(context, listen: false);
+
+    final success = await authRepo.login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
+
+    setState(() => isLoading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login successful!')),
       );
 
-      setState(() => isLoading = false);
+      final hasChosen = await PrefsHelper.hasChosenInterests();
 
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
-
-        // التحقق مما إذا كان المستخدم قد اختار الاهتمامات سابقًا
-        final hasChosen = await PrefsHelper.hasChosenInterests();
-
-        if (hasChosen) {
-          Navigator.pushReplacementNamed(context, '/home');
-        } else {
-          Navigator.pushReplacementNamed(context, '/choose-interests');
-        }
+      if (hasChosen) {
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login failed. Try again.')),
-        );
+        Navigator.pushReplacementNamed(context, '/choose-interests');
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login failed. Try again.')),
+      );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
