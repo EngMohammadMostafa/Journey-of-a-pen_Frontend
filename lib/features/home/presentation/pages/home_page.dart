@@ -3,7 +3,7 @@ import 'package:book_worm_haven/features/shopping_cart/presentation/pages/shoppi
 import 'package:book_worm_haven/features/auth/presentation/pages/writing_competitions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:book_worm_haven/features/auth/presentation/pages/notifications_page.dart';
+import 'package:book_worm_haven/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../books/data/books_service.dart';
