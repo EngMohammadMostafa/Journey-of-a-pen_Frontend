@@ -41,7 +41,7 @@ dependencies:
   provider: ^6.0.0
 
   intl: ^0.18.1
-  advance_pdf_viewer: ^2.0.1
+
 
 
 

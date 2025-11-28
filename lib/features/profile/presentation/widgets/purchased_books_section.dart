@@ -1,12 +1,21 @@
+// Flutter code with quiz button for each book
+// This is a full example integrating: quiz button, answering flow, locking button after completion
+// You can merge it into your project
+
 import 'package:flutter/material.dart';
 
-class PurchasedBooksSection extends StatelessWidget {
-  final List<Map<String, dynamic>> books; // ✅ بيانات الكتب (اسم، صورة، حالة تحميل)
+class PurchasedBooksSection extends StatefulWidget {
+  final List<Map<String, dynamic>> books;
 
-  const PurchasedBooksSection({
-    Key? key,
-    required this.books,
-  }) : super(key: key);
+  const PurchasedBooksSection({super.key, required this.books});
+
+  @override
+  State<PurchasedBooksSection> createState() => _PurchasedBooksSectionState();
+}
+
+class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
+  // تخزين حالة كل كتاب: هل أنهى الأسئلة أم لا
+  Map<int, bool> quizCompleted = {};
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +27,7 @@ class PurchasedBooksSection extends StatelessWidget {
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFF1C597B),
-                Color(0xFF4C869F),
-                Color(0xFF7199AA),
-              ],
+              colors: [Color(0xFF1C597B), Color(0xFF4C869F), Color(0xFF7199AA)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -52,18 +57,11 @@ class PurchasedBooksSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: books.isEmpty
-                      ? const Center(
-                    child: Text(
-                      'لا توجد كتب مدفوعة بعد',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
-                  )
-                      : ListView.builder(
+                  child: ListView.builder(
                     controller: scrollController,
-                    itemCount: books.length,
+                    itemCount: widget.books.length,
                     itemBuilder: (context, index) {
-                      final book = books[index];
+                      final book = widget.books[index];
                       return Card(
                         color: Colors.white.withOpacity(0.15),
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -71,22 +69,19 @@ class PurchasedBooksSection extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14)),
                         child: ListTile(
                           title: Text(
-                            book['title'] ?? 'كتاب بدون عنوان',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            book['title'],
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                           ),
-                          subtitle: Text(
-                            book['author'] ?? 'مؤلف غير معروف',
-                            style: const TextStyle(color: Colors.white70),
+                          subtitle: Text(book['author'], style: const TextStyle(color: Colors.white70)),
+                          trailing: quizCompleted[index] == true
+                              ? const Icon(Icons.check_circle, color: Colors.greenAccent)
+                              : ElevatedButton(
+                            onPressed: () {
+                              if (quizCompleted[index] == true) return;
+                              _openQuiz(context, index);
+                            },
+                            child: const Text('Quiz'),
                           ),
-                          trailing: book['downloaded'] == true
-                              ? const Icon(Icons.download_done, color: Colors.greenAccent)
-                              : const Icon(Icons.download, color: Colors.white54),
-                          onTap: () {
-                            // عند النقر على الكتاب يمكنك فتحه مثلاً
-                          },
                         ),
                       );
                     },
@@ -98,5 +93,143 @@ class PurchasedBooksSection extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _openQuiz(BuildContext context, int bookIndex) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuizScreen(
+          onCompleted: () {
+            setState(() => quizCompleted[bookIndex] = true);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------- QUIZ SCREEN -----------------
+
+class QuizScreen extends StatefulWidget {
+  final VoidCallback onCompleted;
+
+  const QuizScreen({super.key, required this.onCompleted});
+
+  @override
+  State<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen> {
+  int currentQuestion = 0;
+  int score = 0;
+  bool answered = false;
+  int? selectedOption;
+
+  final List<Map<String, dynamic>> questions = [
+    {
+      'question': 'ما هو الموضوع الرئيسي للكتاب؟',
+      'options': ['الخيار A', 'الخيار B', 'الخيار C'],
+      'correct': 1
+    },
+    {
+      'question': 'من هو البطل في القصة؟',
+      'options': ['الخيار A', 'الخيار B', 'الخيار C'],
+      'correct': 0
+    },
+    {
+      'question': 'ماذا تعلّم القارئ من الكتاب؟',
+      'options': ['الخيار A', 'الخيار B', 'الخيار C'],
+      'correct': 2
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final q = questions[currentQuestion];
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF1C597B),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('Quiz'),
+        automaticallyImplyLeading: false,
+      ),
+
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              q['question'],
+              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+
+            ...List.generate(q['options'].length, (i) {
+              return RadioListTile<int>(
+                value: i,
+                groupValue: selectedOption,
+                onChanged: answered ? null : (value) {
+                  setState(() => selectedOption = value);
+                },
+                title: Text(q['options'][i], style: const TextStyle(color: Colors.white)),
+              );
+            }),
+
+            const SizedBox(height: 20),
+
+            if (!answered)
+              ElevatedButton(
+                onPressed: selectedOption == null ? null : _checkAnswer,
+                child: const Text('تحقق'),
+              ),
+
+            if (answered)
+              Text(
+                selectedOption == q['correct'] ? '✔ إجابة صحيحة' : '✘ إجابة خاطئة',
+                style: const TextStyle(fontSize: 20, color: Colors.yellow),
+              ),
+
+            const Spacer(),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: answered ? null : () => Navigator.pop(context),
+                  child: const Text('Exit'),
+                ),
+
+                ElevatedButton(
+                  onPressed: answered ? _next : null,
+                  child: const Text('التالي'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _checkAnswer() {
+    final correct = questions[currentQuestion]['correct'];
+    if (selectedOption == correct) score++;
+    setState(() => answered = true);
+  }
+
+  void _next() {
+    if (currentQuestion == questions.length - 1) {
+      widget.onCompleted();
+      Navigator.pop(context);
+      return;
+    }
+    setState(() {
+      currentQuestion++;
+      answered = false;
+      selectedOption = null;
+    });
   }
 }

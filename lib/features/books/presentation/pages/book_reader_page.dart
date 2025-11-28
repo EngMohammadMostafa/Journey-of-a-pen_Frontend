@@ -13,35 +13,15 @@ class BookReaderPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1C597B),
         title: Text(book.title),
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: book.content == null || book.content!.isEmpty
-            ? const Center(
-          child: Text(
-            "لا يوجد محتوى متاح لهذا الكتاب بعد.",
-            style: TextStyle(fontSize: 18, color: Colors.black54),
-          ),
-        )
-            : SingleChildScrollView(
+        child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🖼️ صورة الغلاف (اختياري)
-              if (book.imageUrl != null && book.imageUrl!.isNotEmpty)
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      book.imageUrl!,
-                      height: 250,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              if (book.imageUrl != null && book.imageUrl!.isNotEmpty)
-                const SizedBox(height: 20),
 
               // 📖 العنوان والمؤلف
               Text(
@@ -62,10 +42,23 @@ class BookReaderPage extends StatelessWidget {
               ),
               const Divider(height: 30, thickness: 1),
 
-              // ✍️ محتوى الكتاب الحقيقي
-              Text(
-                book.content!,
-                style: const TextStyle(
+              // ✍️ محتوى تجريبي للكتاب
+              const Text(
+                """في عالمٍ تملؤه الأحلام والخيال، وُلد بطلنا الصغير وهو يحمل شغفًا غريبًا بالكتب. 
+كان يجد في الصفحات عوالم لا تنتهي، يسافر بينها وكأنه يعبر إلى أبعادٍ أخرى. 
+وذات يوم، وبينما كان يتصفح إحدى الكتب القديمة، عثر على عبارة غامضة تقول: 
+"من يقرأ هذه الكلمات، يمتلك مفاتيح العوالم السبعة"...""",
+                style: TextStyle(
+                  fontSize: 18,
+                  height: 1.8,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.justify,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                """واصل القراءة ليتعمق في المغامرة، ويكتشف أسرار تلك الكلمات السحرية التي غيّرت حياته إلى الأبد...""",
+                style: TextStyle(
                   fontSize: 18,
                   height: 1.8,
                   color: Colors.black87,
