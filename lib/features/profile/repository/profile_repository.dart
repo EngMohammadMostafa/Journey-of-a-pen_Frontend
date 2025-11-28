@@ -5,21 +5,18 @@ import '../data/models/user_model.dart';
 import '../../../core/constants/api_endpoints.dart';
 
 class ProfileRepository {
-  final ApiService _api = ApiService(isMockMode: true);
+  // ✅ استخدام Singleton ApiService
+  final ApiService _api = ApiService();
 
   /// 🟩 جلب بيانات المستخدم الحالي
   Future<UserModel> getCurrentUser() async {
     try {
       final response = await _api.get(ApiEndpoints.currentUser);
-
-      // إذا كان response.data نصي JSON، حوّله إلى Map
       final Map<String, dynamic> data = response.data is String
           ? jsonDecode(response.data)
           : response.data as Map<String, dynamic>;
-
       return UserModel.fromJson(data);
     } on DioException catch (e) {
-      // 🔸 في حال فشل الاتصال أو التوكن غير صالح
       throw Exception(_handleError(e));
     }
   }
@@ -31,11 +28,9 @@ class ProfileRepository {
         ApiEndpoints.currentUser,
         data: user.toJson(),
       );
-
       final Map<String, dynamic> data = response.data is String
           ? jsonDecode(response.data)
           : response.data as Map<String, dynamic>;
-
       return UserModel.fromJson(data);
     } on DioException catch (e) {
       throw Exception(_handleError(e));
@@ -46,8 +41,6 @@ class ProfileRepository {
   Future<void> logout() async {
     try {
       final response = await _api.post(ApiEndpoints.logout);
-
-      // تحقق أن الخروج تم بنجاح من السيرفر
       if (response.statusCode != 200) {
         throw Exception('فشل تسجيل الخروج (${response.statusCode})');
       }
@@ -56,12 +49,11 @@ class ProfileRepository {
     }
   }
 
-  /// 🔒 إعداد التوكن (في حال كان عندك نظام تسجيل دخول)
+  /// 🔒 إعداد التوكن
   void setAuthToken(String token) {
-    _api.setAuthToken(token);
+    _api.setAuthToken(token); // الآن كل الطلبات بعد تسجيل الدخول ستحتوي التوكن تلقائيًا
   }
 
-  /// 🧩 دالة لتفسير الأخطاء من Dio
   String _handleError(DioException e) {
     if (e.response != null) {
       return 'Server error: ${e.response?.statusCode} → ${e.response?.data}';

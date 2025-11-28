@@ -12,6 +12,7 @@ import '../../../books/presentation/pages/book_details_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../data/category_service.dart';
 import '../../data/models/category_model.dart';
+import '../../provider/home_provider.dart';
 import '../../repository/category_repository.dart';
 import '../widgets/bottom_nav_bar.dart';
 
@@ -44,6 +45,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+
+    // ▶️ تحميل الكتب من HomeProvider عند فتح الصفحة (موجود ضمن نطاق _HomePageState)
+    Future.microtask(() {
+      try {
+        Provider.of<HomeProvider>(context, listen: false).fetchAllBooks();
+      } catch (e) {
+        // في حال لم يكن الـ Provider جاهزًا بعد، نتجاهل الخطأ بأمان
+        print('Error calling fetchAllBooks from initState: $e');
+      }
+    });
+
     _introController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -58,6 +70,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       setState(() => _showIntro = false);
     });
   }
+
 
   @override
   void dispose() {
@@ -334,7 +347,7 @@ class _HomeContentState extends State<HomeContent> {
                             bottomLeft: Radius.circular(20),
                           ),
                           child: Image.asset(
-                            "assets/images/default.jpg",
+                            "assets/images/kids.png",
                             width: 100,
                             height: 140,
                             fit: BoxFit.cover,

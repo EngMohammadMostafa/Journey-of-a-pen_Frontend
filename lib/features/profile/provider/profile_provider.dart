@@ -7,46 +7,25 @@ import '../repository/profile_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _repository;
-  final bool mockMode; // ✅ إضافة وضع وهمي لتجربة الصفحة بدون API
 
   ProfileProvider({
     required ProfileRepository repository,
-    this.mockMode = false, // افتراضيًا مغلق
   }) : _repository = repository;
 
   UserModel? user;
   bool loading = false;
   String? error;
 
-  /// 🔹 تحميل بيانات المستخدم
+  /// 🔹 تحميل بيانات المستخدم من الباك اند
   Future<void> loadUser() async {
     try {
       loading = true;
       error = null;
       notifyListeners();
 
-      if (mockMode) {
-        // 🧩 بيانات وهمية لتجربة واجهة الملف الشخصي
-        await Future.delayed(const Duration(seconds: 1));
-        user = UserModel(
-          id: 1,
-          username: "محمد أحمد",
-          email: "mohamed@example.com",
-          userType: 1,
-          points: 2450,
-          purchasesCount: 7,
-          age: 23,
-          gender: 1,
-        );
-        loading = false;
-        notifyListeners();
-        return;
-      }
-
-      // في الحالة الحقيقية (API)
       final token = await PrefsHelper.getToken();
-      if (token != null) {
-        _repository.setAuthToken(token);
+      if (token != null && token.isNotEmpty) {
+        _repository.setAuthToken(token.trim());
       }
 
       user = await _repository.getCurrentUser();
@@ -60,7 +39,8 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// ✏️ تحديث بيانات المستخدم
+
+  /// ✏️ تحديث بيانات المستخدم عبر الباك اند
   Future<bool> updateUser(Map<String, dynamic> body) async {
     if (user == null) return false;
 
@@ -69,20 +49,7 @@ class ProfileProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      if (mockMode) {
-        // ✅ تحديث محلي فقط (بدون API)
-        await Future.delayed(const Duration(milliseconds: 500));
-        user = user!.copyWith(
-          username: body['username'] ?? user!.username,
-          age: body['age'] ?? user!.age,
-          gender: body['gender'] ?? user!.gender,
-        );
-        loading = false;
-        notifyListeners();
-        return true;
-      }
-
-      // 🔸 تحديث فعلي عبر الريبو
+      // إنشاء نسخة من المستخدم مع التعديلات
       final updatedUser = UserModel(
         id: user!.id,
         username: body['username'] ?? user!.username,
@@ -94,6 +61,7 @@ class ProfileProvider extends ChangeNotifier {
         gender: body['gender'] ?? user!.gender,
       );
 
+      // إرسال التحديث إلى الباك اند
       user = await _repository.updateProfile(updatedUser);
 
       loading = false;
@@ -106,26 +74,23 @@ class ProfileProvider extends ChangeNotifier {
       return false;
     }
   }
+
   /// 🚪 تسجيل الخروج
   Future<void> logout(BuildContext context) async {
     try {
       loading = true;
       notifyListeners();
 
-      if (mockMode) {
-        // 🧩 في الوضع التجريبي لا نتصل بالخادم
-        await Future.delayed(const Duration(milliseconds: 500));
-      } else {
-        await _repository.logout();
-      }
+      // تسجيل الخروج من الباك اند
+      await _repository.logout();
 
-      // 🗑 حذف التوكن من التخزين
+      // حذف التوكن من التخزين
       await PrefsHelper.clearToken();
 
       loading = false;
       notifyListeners();
 
-      // ✅ عرض رسالة نجاح بعد تسجيل الخروج
+      // ✅ عرض رسالة نجاح
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم تسجيل الخروج بنجاح'),
@@ -135,7 +100,7 @@ class ProfileProvider extends ChangeNotifier {
         ),
       );
 
-      // 🔁 الانتقال إلى صفحة AuthChoicePage بعد لحظة قصيرة
+      // 🔁 الانتقال إلى صفحة اختيار الحساب
       await Future.delayed(const Duration(milliseconds: 400));
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/auth_choice',
@@ -145,9 +110,6 @@ class ProfileProvider extends ChangeNotifier {
       loading = false;
       error = e.toString();
       notifyListeners();
-
     }
   }
-
-
 }

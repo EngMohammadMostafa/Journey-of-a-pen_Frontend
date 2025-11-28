@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../data/models/user_model.dart';
 import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
@@ -21,7 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     provider = Provider.of<ProfileProvider>(context, listen: false);
-    provider.loadUser();
+    provider.loadUser(); // جلب بيانات المستخدم من الباك اند
   }
 
   @override
@@ -52,18 +51,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   username: user.username,
                   points: user.points,
                   onEditProfile: () {
-                    _openEditProfileSheet(context, user);
+                    _openEditProfileSheet(context);
                   },
                   actions: [
                     {'icon': 'assets/icons/star_filled.png', 'onTap': () {}},
                     {'icon': 'assets/icons/edit.png', 'onTap': () {
-                      _openEditProfileSheet(context, user);
+                      _openEditProfileSheet(context);
                     }},
                     {'icon': 'assets/icons/book_open.png', 'onTap': () {}},
                     {'icon': 'assets/icons/book.png', 'onTap': () {
                       _showPurchasedBooks(context);
                     }},
-
                     {'icon': 'assets/icons/gift.png', 'onTap': () {}},
                     {
                       'icon': 'assets/icons/logout.png',
@@ -115,14 +113,21 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// 🔹 فتح واجهة التعديل (نصف شاشة من الأسفل)
-  void _openEditProfileSheet(BuildContext context, UserModel user) {
+  _openEditProfileSheet(BuildContext context) {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    if (provider.user == null) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => EditProfileSection(user: user),
+      builder: (_) => EditProfileSection(
+        user: provider.user, // ✅ تمرير بيانات المستخدم إذا موجودة
+      ),
     );
   }
+
+
 
   void _showPurchasedBooks(BuildContext context) {
     final purchasedBooks = [
@@ -153,5 +158,4 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => PurchasedBooksSection(books: purchasedBooks),
     );
   }
-
 }

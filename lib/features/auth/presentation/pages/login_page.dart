@@ -23,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   void login() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (!mounted) return;
     setState(() => isLoading = true);
 
     // ✅ جلب AuthRepository من Provider
@@ -33,26 +34,31 @@ class _LoginPageState extends State<LoginPage> {
       passwordController.text.trim(),
     );
 
+    if (!mounted) return; // تحقق أن الصفحة ما زالت موجودة
     setState(() => isLoading = false);
 
     if (success) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login successful!')),
       );
 
       final hasChosen = await PrefsHelper.hasChosenInterests();
 
+      if (!mounted) return;
       if (hasChosen) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         Navigator.pushReplacementNamed(context, '/choose-interests');
       }
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login failed. Try again.')),
       );
     }
   }
+
 
 
   @override

@@ -4,13 +4,14 @@ import '../../data/models/user_model.dart';
 import '../../provider/profile_provider.dart';
 
 class EditProfileSection extends StatefulWidget {
-  final UserModel user;
+  final UserModel? user; // ✅ اختياري
 
-  const EditProfileSection({Key? key, required this.user}) : super(key: key);
+  const EditProfileSection({Key? key, this.user}) : super(key: key);
 
   @override
   State<EditProfileSection> createState() => _EditProfileSectionState();
 }
+
 
 class _EditProfileSectionState extends State<EditProfileSection> {
   late TextEditingController usernameC;
@@ -20,16 +21,37 @@ class _EditProfileSectionState extends State<EditProfileSection> {
 
   int? gender;
   bool showPasswordSection = false;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    usernameC = TextEditingController(text: widget.user.username);
-    ageC = TextEditingController(text: widget.user.age?.toString() ?? '');
+    usernameC = TextEditingController();
+    ageC = TextEditingController();
     oldPassC = TextEditingController();
     newPassC = TextEditingController();
-    gender = widget.user.gender;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadUserData());
   }
+
+  Future<void> _loadUserData() async {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    UserModel? user = widget.user ?? provider.user;
+
+    // إذا لم يكن موجود، قم بتحميله
+    if (user == null) {
+      await provider.loadUser();
+      user = provider.user;
+    }
+
+    if (user != null) {
+      usernameC.text = user.username;
+      ageC.text = user.age?.toString() ?? '';
+      gender = user.gender;
+    }
+
+    if (mounted) setState(() => isLoading = false);
+  }
+
 
   @override
   void dispose() {
@@ -49,6 +71,12 @@ class _EditProfileSectionState extends State<EditProfileSection> {
       maxChildSize: 0.9,
       minChildSize: 0.4,
       builder: (context, scrollController) {
+        if (isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        }
+
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -88,27 +116,19 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // اسم المستخدم
                   _inputField(
                     controller: usernameC,
                     label: 'اسم المستخدم',
                     icon: Icons.person_outline,
                   ),
-
                   const SizedBox(height: 12),
-
-                  // العمر
                   _inputField(
                     controller: ageC,
                     label: 'العمر',
                     icon: Icons.cake_outlined,
                     keyboardType: TextInputType.number,
                   ),
-
                   const SizedBox(height: 12),
-
-                  // الجنس
                   DropdownButtonFormField<int>(
                     value: gender,
                     decoration: _inputDecoration(
@@ -123,10 +143,7 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                     ],
                     onChanged: (v) => setState(() => gender = v),
                   ),
-
                   const SizedBox(height: 20),
-
-                  // زر تغيير كلمة المرور
                   TextButton.icon(
                     onPressed: () =>
                         setState(() => showPasswordSection = !showPasswordSection),
@@ -138,7 +155,6 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
-
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: showPasswordSection
@@ -158,10 +174,9 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                           icon: Icons.lock_reset_outlined,
                           obscureText: true,
                         ),
-                        const SizedBox(height: 12),
                         _inputField(
                           controller: newPassC,
-                          label: 'تأكيد كلمة المرور الجديدة ',
+                          label: 'تأكيد كلمة المرور الجديدة',
                           icon: Icons.lock_reset_outlined,
                           obscureText: true,
                         ),
@@ -170,10 +185,7 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                     )
                         : const SizedBox.shrink(),
                   ),
-
                   const SizedBox(height: 10),
-
-                  // زر الحفظ
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -190,17 +202,21 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                           'username': usernameC.text,
                           'age': int.tryParse(ageC.text),
                           'gender': gender,
+                          if (showPasswordSection) ...{
+                            'old_password': oldPassC.text,
+                            'new_password': newPassC.text,
+                          },
                         };
 
                         final ok = await provider.updateUser(body);
                         if (ok && mounted) {
-                          Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('تم تحديث الملف بنجاح'),
                               backgroundColor: Colors.green,
                             ),
                           );
+                          Navigator.pop(context);
                         }
                       },
                       child: const Text('حفظ التعديلات'),
@@ -216,7 +232,6 @@ class _EditProfileSectionState extends State<EditProfileSection> {
     );
   }
 
-  /// عنصر إدخال موحّد التصميم
   Widget _inputField({
     required TextEditingController controller,
     required String label,
@@ -233,7 +248,6 @@ class _EditProfileSectionState extends State<EditProfileSection> {
     );
   }
 
-  /// تنسيق الحقول بنفس طابع التسجيل
   InputDecoration _inputDecoration({required String label, required IconData icon}) {
     return InputDecoration(
       labelText: label,

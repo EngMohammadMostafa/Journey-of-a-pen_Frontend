@@ -44,8 +44,7 @@ class BooksService {
     required int bookId,
     required String paymentMethod,
   }) async {
-    final response = await _api.post(
-      '/api/purchases',
+    final response = await _api.post('/purchases',
       data: {
         'book_id': bookId,
         'payment_method': paymentMethod,

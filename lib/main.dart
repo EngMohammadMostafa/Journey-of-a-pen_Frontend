@@ -53,8 +53,9 @@ class MyApp extends StatelessWidget {
 
         // Profile Provider
         ChangeNotifierProvider(
-          create: (_) => ProfileProvider(repository: profileRepo, mockMode: true),
+          create: (_) => ProfileProvider(repository: profileRepo),
         ),
+
 
         // Books Repository
         ChangeNotifierProvider<BooksRepository>(

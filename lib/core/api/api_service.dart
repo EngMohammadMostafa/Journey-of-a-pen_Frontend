@@ -2,12 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:book_worm_haven/core/constants/api_endpoints.dart';
 
 class ApiService {
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+
   late Dio _dio;
   String? _authToken;
 
   final bool isMockMode;
 
-  ApiService({this.isMockMode = false}) {
+  ApiService._internal({this.isMockMode = false}) {
     BaseOptions options = BaseOptions(
       baseUrl: "http://192.168.0.105:8000/api",
       connectTimeout: const Duration(seconds: 15),
@@ -63,7 +66,7 @@ class ApiService {
   // تعيين توكن المصادقة لجميع الطلبات
   void setAuthToken(String token) {
     _authToken = token;
-    _dio.options.headers['Authorization'] = 'Bearer $token';
+    print("🔐 Token set successfully: $token");
   }
 
   // دوال عامة
