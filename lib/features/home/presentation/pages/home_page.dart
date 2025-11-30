@@ -141,10 +141,12 @@ class _HomeContentState extends State<HomeContent> {
   CategoryModel? selectedCategory;
   String _getCategoryImage(String categoryName) {
     switch (categoryName.toLowerCase()) {
-      case 'قسم الاطفال':
+      case 'kids':
         return "assets/images/kids.png";
-      case 'جريمة':
+      case 'crime':
         return "assets/images/crime.png";
+        case 'romance':
+        return "assets/images/romantic.png";
       default:
         return "assets/images/default.png"; // صورة افتراضية لأي قسم آخر
     }

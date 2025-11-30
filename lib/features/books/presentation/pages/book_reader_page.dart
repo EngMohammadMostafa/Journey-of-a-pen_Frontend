@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:advance_pdf_viewer2/advance_pdf_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+
 import '../../data/models/book_model.dart';
 
 class BookReaderPage extends StatefulWidget {
@@ -14,48 +16,53 @@ class BookReaderPage extends StatefulWidget {
 }
 
 class _BookReaderPageState extends State<BookReaderPage> {
-  String? fileContent; // نص الكتاب للعرض
+  String? localPdfPath;
   bool isLoading = true;
   String? errorMessage;
   bool offlineMode = false;
+  PDFDocument? document;
 
   @override
   void initState() {
     super.initState();
-    _loadBook();
+    _loadPdf();
   }
 
-  Future<void> _loadBook() async {
+  Future<void> _loadPdf() async {
     try {
-      // تحقق من أن لدينا رابط تحميل
       if (widget.book.downloadUrl == null) {
         setState(() {
           isLoading = false;
-          errorMessage = "رابط الكتاب غير متاح";
+          errorMessage = "رابط التحميل غير متاح";
         });
         return;
       }
 
-      // تحديد مسار التخزين المحلي
       final dir = await getApplicationDocumentsDirectory();
-      final localFile = File("${dir.path}/${widget.book.id}.txt");
+      final file = File("${dir.path}/${widget.book.id}.pdf");
 
-      // إذا كان الملف موجود مسبقًا → offline
-      if (await localFile.exists()) {
-        fileContent = await localFile.readAsString();
+      if (await file.exists()) {
+        localPdfPath = file.path;
         offlineMode = true;
       } else {
-        // تحميل الكتاب من الانترنت
         final response = await http.get(Uri.parse(widget.book.downloadUrl!));
-        if (response.statusCode == 200) {
-          fileContent = response.body;
 
-          // حفظ نسخة للقراءة بدون انترنت
-          await localFile.writeAsBytes(response.bodyBytes);
+        if (response.statusCode == 200) {
+          await file.writeAsBytes(response.bodyBytes);
+          localPdfPath = file.path;
           offlineMode = false;
         } else {
-          errorMessage = "فشل تحميل الكتاب: ${response.statusCode}";
+          setState(() {
+            errorMessage = "فشل تحميل الكتاب: ${response.statusCode}";
+            isLoading = false;
+          });
+          return;
         }
+      }
+
+      // تحميل المستند باستخدام advance_pdf_viewer2
+      if (localPdfPath != null) {
+        document = await PDFDocument.fromFile(File(localPdfPath!));
       }
     } catch (e) {
       errorMessage = "حدث خطأ أثناء تحميل الكتاب: $e";
@@ -72,12 +79,12 @@ class _BookReaderPageState extends State<BookReaderPage> {
         backgroundColor: const Color(0xFF1C597B),
         title: Text(widget.book.title),
         actions: [
-          if (!isLoading && fileContent != null)
+          if (!isLoading && localPdfPath != null)
             IconButton(
-              icon: Icon(offlineMode ? Icons.cloud_done : Icons.download),
-              tooltip: offlineMode
-                  ? "تقرأ من النسخة المحفوظة"
-                  : "تم تحميل الكتاب للقراءة دون انترنت",
+              icon: Icon(
+                  offlineMode ? Icons.cloud_done : Icons.download_done_outlined),
+              tooltip:
+              offlineMode ? "تقرأ نسخة بدون إنترنت" : "تم حفظ الكتاب محليًا",
               onPressed: () {},
             )
         ],
@@ -91,15 +98,16 @@ class _BookReaderPageState extends State<BookReaderPage> {
           style: const TextStyle(color: Colors.red, fontSize: 16),
         ),
       )
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: SelectableText(
-            fileContent ?? "",
-            style: const TextStyle(fontSize: 18, height: 1.6),
-          ),
-        ),
+          : document == null
+          ? const Center(
+        child: Text("لم يتم العثور على الملف"),
+      )
+          : PDFViewer(
+        document: document!,
+        zoomSteps: 1,
+        scrollDirection: Axis.vertical,
+        lazyLoad: true,
+        showPicker: false,
       ),
     );
   }
