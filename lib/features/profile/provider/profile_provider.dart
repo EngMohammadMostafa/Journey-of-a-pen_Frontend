@@ -17,6 +17,9 @@ class ProfileProvider extends ChangeNotifier {
   bool loading = false;
   String? error;
 
+  /// قائمة الكتب المحملة محليًا
+  List<BookModel> downloadedBooks = [];
+
   ///  تحميل بيانات المستخدم من الباك اند
   Future<void> loadUser() async {
     try {
@@ -39,7 +42,6 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   ///  تحديث بيانات المستخدم عبر الباك اند
   Future<bool> updateUser(Map<String, dynamic> body) async {
@@ -76,14 +78,21 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  List<BookModel> downloadedBooks = [];
-
+  /// 🔹 إضافة كتاب محمّل إلى قائمة downloadedBooks
   void addDownloadedBook(BookModel book) {
     if (!downloadedBooks.any((b) => b.id == book.id)) {
       downloadedBooks.add(book);
       notifyListeners();
     }
   }
+
+  /// 🔹 يمكن لاحقًا إضافة دالة لجلب الكتب المحملة من الباك:
+  // Future<void> loadDownloadedBooks() async {
+  //   if (user == null) return;
+  //   downloadedBooks = await _repository.getDownloadedBooks(user!.id);
+  //   notifyListeners();
+  // }
+
   /// تسجيل الخروج
   Future<void> logout(BuildContext context) async {
     try {
