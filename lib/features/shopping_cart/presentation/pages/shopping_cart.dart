@@ -297,7 +297,7 @@ class ShoppingCartPage extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        "🗓️ $formattedDate",
+                                        " $formattedDate",
                                         style: const TextStyle(
                                           color: Colors.black54,
                                           fontSize: 13,

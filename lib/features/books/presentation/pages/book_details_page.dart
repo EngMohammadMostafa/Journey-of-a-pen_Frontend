@@ -19,11 +19,11 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   void _onBuyPressed() async {
     final booksRepo = context.read<BooksRepository>();
 
-    // جلب رابط التحميل تلقائيًا، BooksRepository تتحقق من التوكن
+    // جلب رابط التحميل من الباك (يتحقق من التوكن وامتلاك الكتاب)
     final downloadUrl = await booksRepo.getDownloadLink(widget.book);
 
     if (downloadUrl != null) {
-      // انتقل لصفحة الدفع
+      // انتقل لصفحة الدفع إذا لم يكن المستخدم قد اشترى الكتاب بعد
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -31,9 +31,8 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         ),
       );
     } else {
-      // في حال فشل الحصول على الرابط أو لم يسجل المستخدم الدخول
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الرجاء تسجيل الدخول أولاً")),
+        const SnackBar(content: Text("الرجاء تسجيل الدخول أولاً أو شراء الكتاب")),
       );
     }
   }
@@ -57,6 +56,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +134,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // 📝 الوصف
+                        //  الوصف
                         Text(
                           book.description ?? "No description available.",
                           textAlign: TextAlign.justify,
@@ -146,17 +146,18 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // 💰 السعر
+                        //  السعر
                         if (book.isPaid)
-                          const Text(
-                            "Price: \$9.99",
-                            style: TextStyle(
+                          Text(
+                            "Price: \$${book.price.toStringAsFixed(2)}",
+                            style: const TextStyle(
                               fontSize: 18,
                               color: Colors.amberAccent,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Papyrus',
                             ),
                           ),
+
                       ],
                     ),
                   ),

@@ -9,11 +9,11 @@ class QuoteRepository {
   final ApiService _apiService = ApiService();
 
   // ==============================
-  // 🔹 جلب جميع الاقتباسات
+  //  جلب جميع الاقتباسات
   // ==============================
   Future<List<Quote>> fetchQuotes() async {
     try {
-      // 🟢 جلب التوكن من SharedPreferences
+      //  جلب التوكن من SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
@@ -21,7 +21,7 @@ class QuoteRepository {
         throw Exception('لم يتم العثور على التوكن. يُرجى تسجيل الدخول مجددًا.');
       }
 
-      // 🟢 تعيين التوكن في ApiService
+      //  تعيين التوكن في ApiService
       _apiService.setAuthToken(token);
 
       final response = await _apiService.get(ApiEndpoints.quotes);
@@ -38,11 +38,11 @@ class QuoteRepository {
   }
 
   // ==============================
-  // 🔹 إضافة اقتباس جديد
+  //  إضافة اقتباس جديد
   // ==============================
   Future<Quote> addQuote(String text, String bookName, int userId) async {
     try {
-      // 🟢 جلب التوكن من SharedPreferences
+      //  جلب التوكن من SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
@@ -50,10 +50,10 @@ class QuoteRepository {
         throw Exception('لم يتم العثور على التوكن. يُرجى تسجيل الدخول مجددًا.');
       }
 
-      // 🟢 إعداد التوكن في ApiService
+      //  إعداد التوكن في ApiService
       _apiService.setAuthToken(token);
 
-      // 📡 إرسال البيانات
+      //  إرسال البيانات
       final response = await _apiService.post(
         ApiEndpoints.quotes,
         data: {

@@ -139,6 +139,17 @@ class _HomeContentState extends State<HomeContent> {
   bool _isLoading = true;
   bool _isLoadingCategories = true;
   CategoryModel? selectedCategory;
+  String _getCategoryImage(String categoryName) {
+    switch (categoryName.toLowerCase()) {
+      case 'قسم الاطفال':
+        return "assets/images/kids.png";
+      case 'جريمة':
+        return "assets/images/crime.png";
+      default:
+        return "assets/images/default.png"; // صورة افتراضية لأي قسم آخر
+    }
+  }
+
 
   // ============================
   // الخدمات
@@ -165,6 +176,10 @@ class _HomeContentState extends State<HomeContent> {
     setState(() => _isLoading = true);
     try {
       final booksFromApi = await booksService.fetchBooks();
+
+      // ✅ Debug print للتأكد من البيانات
+      print("Books fetched: ${booksFromApi.map((b) => b.title).toList()}");
+
       setState(() => _books = booksFromApi);
     } catch (e) {
       print("Error loading books: $e");
@@ -197,10 +212,14 @@ class _HomeContentState extends State<HomeContent> {
   List<BookModel> getFilteredBooks() {
     List<BookModel> list = _books;
 
+    // فلترة حسب التصنيف (نستخدم الاسم لتوافق JSON الحالي)
     if (selectedCategory != null) {
-      list = list.where((book) => book.categoryId == selectedCategory!.id).toList();
+      list = list
+          .where((book) => book.categoryName == selectedCategory!.name)
+          .toList();
     }
 
+    // فلترة حسب البحث
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
       list = list.where((book) {
@@ -212,8 +231,6 @@ class _HomeContentState extends State<HomeContent> {
 
     return list;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -263,14 +280,14 @@ class _HomeContentState extends State<HomeContent> {
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   final category = _categories[index];
-                  final isSelected = category.id == selectedCategory?.id;
+                  final isSelected =
+                      category.id == selectedCategory?.id;
 
                   return GestureDetector(
                     onTap: () =>
                         setState(() => selectedCategory = category),
                     child: AnimatedContainer(
-                      duration:
-                      const Duration(milliseconds: 300),
+                      duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 18, vertical: 10),
@@ -323,16 +340,13 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                   child: Container(
-                    margin:
-                    const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black
-                              .withOpacity(0.1),
+                          color: Colors.black.withOpacity(0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -341,13 +355,12 @@ class _HomeContentState extends State<HomeContent> {
                     child: Row(
                       children: [
                         ClipRRect(
-                          borderRadius:
-                          const BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(20),
                             bottomLeft: Radius.circular(20),
                           ),
                           child: Image.asset(
-                            "assets/images/kids.png",
+                            _getCategoryImage(book.categoryName),
                             width: 100,
                             height: 140,
                             fit: BoxFit.cover,
@@ -356,10 +369,8 @@ class _HomeContentState extends State<HomeContent> {
 
                         Expanded(
                           child: Padding(
-                            padding:
-                            const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                             child: Column(
                               crossAxisAlignment:
                               CrossAxisAlignment.start,
@@ -368,10 +379,8 @@ class _HomeContentState extends State<HomeContent> {
                                   book.title,
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    fontWeight:
-                                    FontWeight.bold,
-                                    color:
-                                    Color(0xFF1C597B),
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1C597B),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -386,55 +395,37 @@ class _HomeContentState extends State<HomeContent> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-
                                 // حالة الكتاب (مجاني / مدفوع)
                                 Container(
-                                  padding:
-                                  const EdgeInsets
-                                      .symmetric(
-                                      horizontal: 10,
-                                      vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: book.isPaid
-                                        ? Colors.red
-                                        .withOpacity(
-                                        0.1)
-                                        : Colors.green
-                                        .withOpacity(
-                                        0.1),
+                                        ? Colors.red.withOpacity(0.1)
+                                        : Colors.green.withOpacity(0.1),
                                     borderRadius:
-                                    BorderRadius
-                                        .circular(12),
+                                    BorderRadius.circular(12),
                                   ),
                                   child: Row(
-                                    mainAxisSize:
-                                    MainAxisSize.min,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
                                         book.isPaid
                                             ? Icons.lock
-                                            : Icons
-                                            .check_circle,
+                                            : Icons.check_circle,
                                         color: book.isPaid
                                             ? Colors.red
                                             : Colors.green,
                                         size: 18,
                                       ),
-                                      const SizedBox(
-                                          width: 6),
+                                      const SizedBox(width: 6),
                                       Text(
-                                        book.isPaid
-                                            ? "مدفوع"
-                                            : "مجاني",
+                                        book.isPaid ? "مدفوع" : "مجاني",
                                         style: TextStyle(
-                                          color: book
-                                              .isPaid
+                                          color: book.isPaid
                                               ? Colors.red
-                                              : Colors
-                                              .green,
-                                          fontWeight:
-                                          FontWeight
-                                              .bold,
+                                              : Colors.green,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ],

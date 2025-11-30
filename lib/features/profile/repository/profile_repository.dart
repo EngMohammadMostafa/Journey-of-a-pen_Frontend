@@ -5,10 +5,10 @@ import '../data/models/user_model.dart';
 import '../../../core/constants/api_endpoints.dart';
 
 class ProfileRepository {
-  // ✅ استخدام Singleton ApiService
+  //  استخدام Singleton ApiService
   final ApiService _api = ApiService();
 
-  /// 🟩 جلب بيانات المستخدم الحالي
+  ///  جلب بيانات المستخدم الحالي
   Future<UserModel> getCurrentUser() async {
     try {
       final response = await _api.get(ApiEndpoints.currentUser);
@@ -21,7 +21,7 @@ class ProfileRepository {
     }
   }
 
-  /// ✏️ تحديث بيانات المستخدم الحالي
+  ///  تحديث بيانات المستخدم الحالي
   Future<UserModel> updateProfile(UserModel user) async {
     try {
       final response = await _api.put(
@@ -37,7 +37,7 @@ class ProfileRepository {
     }
   }
 
-  /// 🚪 تسجيل الخروج
+  ///  تسجيل الخروج
   Future<void> logout() async {
     try {
       final response = await _api.post(ApiEndpoints.logout);
@@ -49,7 +49,7 @@ class ProfileRepository {
     }
   }
 
-  /// 🔒 إعداد التوكن
+  ///  إعداد التوكن
   void setAuthToken(String token) {
     _api.setAuthToken(token); // الآن كل الطلبات بعد تسجيل الدخول ستحتوي التوكن تلقائيًا
   }

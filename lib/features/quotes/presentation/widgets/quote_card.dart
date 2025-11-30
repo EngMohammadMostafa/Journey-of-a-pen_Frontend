@@ -22,7 +22,7 @@ class QuoteCard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          '📖 $bookName',
+          ' $bookName',
           style: const TextStyle(color: Color(0xFF1C597B)),
         ),
       ),

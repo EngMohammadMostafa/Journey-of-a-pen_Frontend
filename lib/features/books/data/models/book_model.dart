@@ -4,8 +4,7 @@ class BookModel {
   final String author;
   final String? imageUrl;
   final bool isPaid;
-  final int categoryId;
-  final String categoryName;
+  final String categoryName; // فقط اسم القسم كما يعيده الباك الآن
   final String? description;
 
   // الحقول الجديدة
@@ -23,7 +22,6 @@ class BookModel {
     required this.author,
     this.imageUrl,
     required this.isPaid,
-    required this.categoryId,
     required this.categoryName,
     this.description,
     this.price = 0,
@@ -36,26 +34,23 @@ class BookModel {
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
-    final category = json['category'];
     return BookModel(
       id: json['id'],
       title: json['title'],
       author: json['author'],
-      imageUrl: json['image_url'], // إذا موجود
+      imageUrl: json['image_url'],
       isPaid: (json['book_type'] ?? 'free') == 'paid',
-      categoryId: category != null ? category['id'] : 0,
-      categoryName: category != null ? category['name'] : "غير محدد",
+      categoryName: json['category'] ?? "غير محدد", // الآن category هو String
       description: json['description'] ?? 'لا يوجد وصف متاح.',
       price: (json['price'] ?? 0).toDouble(),
       discountRate: (json['discount_rate'] ?? 0).toDouble(),
-      numberOfLikes: json['number_of_likes'] ?? 0,
+      numberOfLikes: json['likes_count'] ?? 0, // الباك يعيد likes_count
       filePath: json['file_path'],
       fileType: json['file_type'],
       fileSize: json['file_size'],
       downloadUrl: json['download_url'],
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -64,10 +59,7 @@ class BookModel {
       'author': author,
       'image_url': imageUrl,
       'book_type': isPaid ? 'paid' : 'free',
-      'category': {
-        'id': categoryId,
-        'name': categoryName,
-      },
+      'category': categoryName, // نرسل الاسم فقط
       'description': description,
       'price': price,
       'discount_rate': discountRate,

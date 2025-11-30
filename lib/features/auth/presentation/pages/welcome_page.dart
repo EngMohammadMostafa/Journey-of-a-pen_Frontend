@@ -32,7 +32,7 @@ class WelcomePage extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // 🌿 الورقة مع التدرج الشفاف من الأعلى
+                //  الورقة مع التدرج الشفاف من الأعلى
                 Positioned(
                   top: 40,
                   right: 5,
@@ -61,7 +61,7 @@ class WelcomePage extends StatelessWidget {
                   top: 120,
                   left: 40,
                   child: Text(
-                    "WELCOME\nBACK",
+                    "JOURNEY \nOF\n A PEN",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       color: Colors.white,
@@ -74,7 +74,7 @@ class WelcomePage extends StatelessWidget {
                   ),
                 ),
 
-                // 👧 صورة الفتاة كما كانت بالحجم الأصلي لكن بدائرة أكثر نعومة
+                //  صورة الفتاة كما كانت بالحجم الأصلي لكن بدائرة أكثر نعومة
                 Positioned(
                   bottom: 30,
                   left: 40,

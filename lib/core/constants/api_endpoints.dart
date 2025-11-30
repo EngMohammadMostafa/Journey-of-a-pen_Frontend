@@ -1,23 +1,23 @@
 class ApiEndpoints {
   static const String baseUrl = "http://192.168.0.105:8000/api";
 
-  // 🔐 Auth
+  //  Auth
   static const String register = "/auth/register";
   static const String login = "/auth/login";
   static const String logout = "/auth/logout";
 
-  // 👤 User
+  //  User
   static const String currentUser = "/users/me";
   static const String updateCurrentUser = "/users/me";
 
-  // ⭐ Points
+  //  Points
   static const String userPoints = "/users/points";
 
-  // 📚 Quotes
+  //  Quotes
   static const String quotes = "/quotes"; // GET → جميع الاقتباسات | POST → نشر اقتباس جديد
   static const String saveQuote = "/quotes/save"; // POST → حفظ اقتباس للمستخدم
 
-  // 📖 Books & Categories
+  //  Books & Categories
   static const String categories = "/categories"; // GET → جميع الأقسام
   static String booksByCategory(int categoryId) => "/categories/$categoryId/books"; // GET → الكتب حسب القسم
   static const String allBooks = "/books"; // GET → جميع الكتب

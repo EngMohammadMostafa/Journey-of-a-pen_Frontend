@@ -9,7 +9,7 @@ class HomeProvider extends ChangeNotifier {
 
   List<BookModel> _books = [];
   String _searchQuery = '';
-  int? _selectedCategoryId;
+  String? _selectedCategoryName; // بدل _selectedCategoryId
 
   List<BookModel> get books => _books;
   String get searchQuery => _searchQuery;
@@ -33,9 +33,9 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // اختيار التصنيف
-  void selectCategory(int? id) {
-    _selectedCategoryId = id;
+  // اختيار التصنيف (استبدل القديم)
+  void selectCategory(String? name) {
+    _selectedCategoryName = name;
     notifyListeners();
   }
 
@@ -43,8 +43,8 @@ class HomeProvider extends ChangeNotifier {
   List<BookModel> get filteredBooks {
     List<BookModel> result = _books;
 
-    if (_selectedCategoryId != null) {
-      result = result.where((b) => b.categoryId == _selectedCategoryId).toList();
+    if (_selectedCategoryName != null) {
+      result = result.where((b) => b.categoryName == _selectedCategoryName).toList();
     }
 
     if (_searchQuery.isNotEmpty) {

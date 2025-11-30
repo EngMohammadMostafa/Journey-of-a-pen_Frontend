@@ -7,7 +7,7 @@ import 'models/purchase_model.dart';
 class BooksService {
   final ApiService _api;
 
-  BooksService(this._api); // تمرير ApiService من الخارج
+  BooksService(this._api);
 
   // ==========================
   // جلب كل الكتب
@@ -29,7 +29,7 @@ class BooksService {
   }
 
   // ==========================
-  // شراء كتاب واحد
+  // شراء كتاب
   // ==========================
   Future<PurchaseModel> purchaseBook(int id) async {
     final response = await _api.post('/books/$id/purchase');
@@ -44,7 +44,8 @@ class BooksService {
     required int bookId,
     required String paymentMethod,
   }) async {
-    final response = await _api.post('/purchases',
+    final response = await _api.post(
+      '/purchases',
       data: {
         'book_id': bookId,
         'payment_method': paymentMethod,
@@ -65,31 +66,34 @@ class BooksService {
   }
 
   // ==========================
-  // دالة للحصول على رابط التحميل لكل كتاب
+  // الحصول على رابط التحميل لكل كتاب
   // ==========================
   Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
     try {
-      // استخدام التوكن الممرر أو جلبه من SharedPreferences
       String? token = userToken;
+
+      // جلب التوكن من SharedPreferences إذا لم يمرر من الخارج
       if (token == null) {
         final prefs = await SharedPreferences.getInstance();
         token = prefs.getString('token');
       }
 
-      if (token == null) {
-        print("❌ لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
+      if (token == null || token.isEmpty) {
+        print("لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
         return null;
       }
 
-      // إضافة التوكن للـ ApiService مؤقتًا
+      // ضبط التوكن في ApiService قبل الطلب
       _api.setAuthToken(token);
 
-      // استدعاء endpoint التحميل مباشرة باستخدام ApiService
+      // إرسال طلب POST بدون تمرير options
       final res = await _api.post('/books/${book.id}/download');
 
       if (res.statusCode == 200 && res.data['success'] == true) {
         book.downloadUrl = res.data['download_url'];
         return book.downloadUrl;
+      } else {
+        print("فشل الحصول على رابط التحميل: ${res.data['message'] ?? 'خطأ غير معروف'}");
       }
 
       return null;
@@ -98,5 +102,6 @@ class BooksService {
       return null;
     }
   }
+
 
 }

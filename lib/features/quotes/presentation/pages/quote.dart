@@ -28,7 +28,7 @@ class _QuotesPageState extends State<QuotesPage> {
     final token = await PrefsHelper.getToken();
     if (token != null) {
       ApiService().setAuthToken(token);
-      print('🔹 Token restored from storage: $token');
+      print(' Token restored from storage: $token');
     }
   }
 

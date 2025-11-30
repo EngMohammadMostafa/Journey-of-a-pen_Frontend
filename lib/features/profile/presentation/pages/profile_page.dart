@@ -4,7 +4,7 @@ import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
 import '../widgets/edit_profile_section.dart';
-import '../widgets/purchased_books_section.dart'; // ✅ استدعاء الودجت الجديد
+import '../widgets/purchased_books_section.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -21,6 +21,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     provider = Provider.of<ProfileProvider>(context, listen: false);
     provider.loadUser(); // جلب بيانات المستخدم من الباك اند
+
   }
 
   @override
@@ -54,7 +55,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     _openEditProfileSheet(context);
                   },
                   actions: [
-                    {'icon': 'assets/icons/star_filled.png', 'onTap': () {}},
+                    {'icon': 'assets/icons/star_filled.png', 'onTap': () {
+                      showPointsPopup(context, user.points);
+                    }},
+
                     {'icon': 'assets/icons/edit.png', 'onTap': () {
                       _openEditProfileSheet(context);
                     }},
@@ -62,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     {'icon': 'assets/icons/book.png', 'onTap': () {
                       _showPurchasedBooks(context);
                     }},
-                    {'icon': 'assets/icons/gift.png', 'onTap': () {}},
+
                     {
                       'icon': 'assets/icons/logout.png',
                       'onTap': () {
@@ -79,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: 'عدد النقاط',
                   subtitle: '${user.points}',
                   iconAsset: 'assets/icons/star_filled.png',
-                  onTap: () {},
+                  onTap: () { showPointsPopup(context, user.points);},
                 ),
 
                 const SizedBox(height: 16),
@@ -87,7 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 // الأقسام الأخرى
                 _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {}),
                 _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () {}),
-                _buildSectionTile('المكافآت', 'تفاصيل المكافآت والاستبدال', () {}),
 
                 const SizedBox(height: 30),
               ],
@@ -112,7 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// 🔹 فتح واجهة التعديل (نصف شاشة من الأسفل)
+  ///  فتح واجهة التعديل (نصف شاشة من الأسفل)
   _openEditProfileSheet(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
     if (provider.user == null) return;
@@ -122,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => EditProfileSection(
-        user: provider.user, // ✅ تمرير بيانات المستخدم إذا موجودة
+        user: provider.user, //  تمرير بيانات المستخدم إذا موجودة
       ),
     );
   }
@@ -158,4 +161,73 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => PurchasedBooksSection(books: purchasedBooks),
     );
   }
+  void showPointsPopup(BuildContext context, int points) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.star, size: 60, color: Colors.yellow),
+                const SizedBox(height: 15),
+
+                Text(
+                  'نقاطك الحالية',
+                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 20),
+                ),
+                const SizedBox(height: 10),
+
+                Text(
+                  '$points ⭐',
+                  style: const TextStyle(color: Colors.yellow, fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 20),
+
+                // رسالة عند الوصول لعدد معين
+                Text(
+                  points >= 50
+                      ? '🎉 لقد وصلت للحد المطلوب! سيتم التواصل معك من قبل المسؤول للحصول على مكافأة.'
+                      : 'عند وصولك إلى 50 نقطة سيتم التواصل معك للحصول على مكافأة 🎁',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16),
+                ),
+
+                const SizedBox(height: 25),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Text('حسناً'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+// Usage inside ProfileHeader actions:
+// {'icon': 'assets/icons/star_filled.png', 'onTap': () => showPointsPopup(context, user.points)},
+
 }

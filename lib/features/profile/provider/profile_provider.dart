@@ -16,7 +16,7 @@ class ProfileProvider extends ChangeNotifier {
   bool loading = false;
   String? error;
 
-  /// 🔹 تحميل بيانات المستخدم من الباك اند
+  ///  تحميل بيانات المستخدم من الباك اند
   Future<void> loadUser() async {
     try {
       loading = true;
@@ -40,7 +40,7 @@ class ProfileProvider extends ChangeNotifier {
   }
 
 
-  /// ✏️ تحديث بيانات المستخدم عبر الباك اند
+  ///  تحديث بيانات المستخدم عبر الباك اند
   Future<bool> updateUser(Map<String, dynamic> body) async {
     if (user == null) return false;
 
@@ -75,7 +75,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// 🚪 تسجيل الخروج
+  /// تسجيل الخروج
   Future<void> logout(BuildContext context) async {
     try {
       loading = true;
@@ -90,7 +90,7 @@ class ProfileProvider extends ChangeNotifier {
       loading = false;
       notifyListeners();
 
-      // ✅ عرض رسالة نجاح
+      //  عرض رسالة نجاح
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم تسجيل الخروج بنجاح'),
@@ -100,7 +100,7 @@ class ProfileProvider extends ChangeNotifier {
         ),
       );
 
-      // 🔁 الانتقال إلى صفحة اختيار الحساب
+      // الانتقال إلى صفحة اختيار الحساب
       await Future.delayed(const Duration(milliseconds: 400));
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/auth_choice',
