@@ -32,15 +32,16 @@ dependencies:
     sdk: flutter
 
   http: 0.13.6
-
   dio: ^5.3.3
-
   shared_preferences: ^2.1.0
   cached_network_image: ^3.2.3
   flutter_svg: ^2.0.0
   provider: ^6.0.0
-
   intl: ^0.18.1
+
+  # المكتبات الجديدة المطلوبة للتحميل وفتح الملفات
+  path_provider: ^2.0.15       # للوصول إلى مجلدات التطبيق للتخزين المحلي
+  open_file: ^3.2.1            # لفتح ملفات PDF أو الكتب بعد التحميل
 
 
 

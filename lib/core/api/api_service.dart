@@ -147,4 +147,8 @@ class ApiService {
       return 'Connection error: ${e.message}';
     }
   }
+
+  Future<Response> download(String endpoint, {Options? options}) async {
+    return await _dio.post(endpoint, options: options);
+  }
 }

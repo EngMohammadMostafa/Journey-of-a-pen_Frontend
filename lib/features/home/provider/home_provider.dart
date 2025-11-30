@@ -66,11 +66,20 @@ class HomeProvider extends ChangeNotifier {
   // ==============================
   Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
     try {
-      final link = await _booksService.getDownloadLink(book, userToken: userToken);
-      return link;
+      // تحميل الكتاب وتسجيله وإرجاع الملف
+      final file = await _booksService.downloadAndRegisterBook(
+        book,
+        userToken: userToken,
+      );
+
+      if (file == null) return null;
+
+      // نرجع مسار الملف بدل رابط التحميل
+      return file.path;
     } catch (e) {
       print("Error getting download link for book ${book.id}: $e");
       return null;
     }
   }
+
 }

@@ -13,27 +13,27 @@ class BooksRepository extends ChangeNotifier {
       : _service = BooksService(api),
         _api = api;
 
-  // 🔹 جلب كل الكتب
+  // جلب كل الكتب
   Future<List<BookModel>> getAllBooks() => _service.fetchBooks();
 
-  // 🔹 جلب كتاب محدد
+  // جلب كتاب محدد
   Future<BookModel> getBookById(int id) => _service.fetchBookById(id);
 
-  // 🔹 شراء كتاب
+  // شراء كتاب
   Future<PurchaseModel> purchaseBook(int id) => _service.purchaseBook(id);
 
-  // 🔹 إنشاء عملية شراء
+  // إنشاء عملية شراء
   Future<PurchaseModel> createPurchase(int bookId, String method) =>
       _service.createPurchase(bookId: bookId, paymentMethod: method);
 
-  // 🔹 جلب كتب حسب القسم
+  // جلب الكتب حسب القسم
   Future<List<BookModel>> getBooksByCategory(int categoryId) =>
       _service.fetchBooksByCategory(categoryId);
 
-  // 🔹 دالة للحصول على رابط التحميل لكل كتاب مع التحقق من تسجيل الدخول
+  // 🔹 إرجاع رابط التحميل
   Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
     try {
-      // إذا لم يتم تمرير التوكن، نحاول جلبه من SharedPreferences
+      // محاولة الحصول على التوكن إن لم يُمرر
       String? token = userToken;
       if (token == null) {
         final prefs = await SharedPreferences.getInstance();
@@ -45,21 +45,39 @@ class BooksRepository extends ChangeNotifier {
         return null;
       }
 
-      // إضافة التوكن للـ ApiService قبل الطلب
+      // وضع التوكن في الـ ApiService
       _api.setAuthToken(token);
 
-      // استدعاء الـ endpoint باستخدام ApiService مباشرة
       final res = await _api.post('/books/${book.id}/download');
 
       if (res.statusCode == 200 && res.data['success'] == true) {
-        book.downloadUrl = res.data['download_url'];
+        final url = res.data['download_url'];
+        book.downloadUrl = url;
         notifyListeners();
-        return book.downloadUrl;
+        return url;
       }
 
       return null;
     } catch (e) {
       print("Error generating download link: $e");
+      return null;
+    }
+  }
+
+  // 🔹 الدالة الناقصة التي سببت الخطأ: تحميل الكتاب + تسجيل العملية داخلياً
+  Future<String?> downloadAndRegisterBook(BookModel book) async {
+    try {
+      final link = await getDownloadLink(book);
+
+      if (link != null) {
+        print("📘 تم الحصول على رابط التحميل: $link");
+        return link;
+      } else {
+        print("❌ فشل في إنشاء رابط التحميل");
+        return null;
+      }
+    } catch (e) {
+      print("Error in downloadAndRegisterBook: $e");
       return null;
     }
   }

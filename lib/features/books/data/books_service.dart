@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../core/api/api_service.dart';
 import 'models/book_model.dart';
@@ -66,42 +69,70 @@ class BooksService {
   }
 
   // ==========================
-  // الحصول على رابط التحميل لكل كتاب
+  // تحميل الكتاب وتسجيله على السيرفر (للكتاب المجاني أو المدفوع بعد الشراء)
   // ==========================
-  Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
+  Future<File?> downloadAndRegisterBook(BookModel book, {String? userToken}) async {
     try {
       String? token = userToken;
-
-      // جلب التوكن من SharedPreferences إذا لم يمرر من الخارج
       if (token == null) {
         final prefs = await SharedPreferences.getInstance();
         token = prefs.getString('token');
       }
 
       if (token == null || token.isEmpty) {
-        print("لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
+        print("المستخدم غير مسجل الدخول");
         return null;
       }
 
-      // ضبط التوكن في ApiService قبل الطلب
       _api.setAuthToken(token);
 
-      // إرسال طلب POST بدون تمرير options
-      final res = await _api.post('/books/${book.id}/download');
+      // طلب التحميل من السيرفر (يتحقق من الملكية على السيرفر)
+      final response = await _api.post('/books/${book.id}/download');
 
-      if (res.statusCode == 200 && res.data['success'] == true) {
-        book.downloadUrl = res.data['download_url'];
-        return book.downloadUrl;
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        book.downloadUrl = response.data['download_url'];
+
+        // مجلد التطبيق لحفظ الملف محليًا
+        final dir = await getApplicationDocumentsDirectory();
+        final filePath = '${dir.path}/${book.title.replaceAll(" ", "_")}.${book.fileType ?? "pdf"}';
+        final file = File(filePath);
+
+        // إذا الملف موجود مسبقًا
+        if (await file.exists()) {
+          book.filePath = file.path;
+          return file;
+        }
+
+        // تنزيل الكتاب من رابط التحميل
+        final downloadResponse = await Dio().get<List<int>>(
+          book.downloadUrl!,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        await file.writeAsBytes(downloadResponse.data!);
+        book.filePath = file.path;
+
+        return file;
       } else {
-        print("فشل الحصول على رابط التحميل: ${res.data['message'] ?? 'خطأ غير معروف'}");
+        print("لا يمكن تحميل الكتاب: ${response.data['message'] ?? 'غير مسموح'}");
+        return null;
       }
-
-      return null;
     } catch (e) {
-      print("Error generating download link: $e");
+      print("Error downloading/registering book: $e");
       return null;
     }
   }
 
-
+  // ==========================
+  // فتح الكتاب (تحميله إذا لم يكن موجودًا محليًا)
+  // ==========================
+  Future<void> openBook(BookModel book) async {
+    if (book.filePath == null) {
+      final file = await downloadAndRegisterBook(book);
+      if (file == null) return;
+    }
+    if (book.filePath != null) {
+      await OpenFile.open(book.filePath);
+    }
+  }
 }

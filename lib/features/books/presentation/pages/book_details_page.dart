@@ -19,11 +19,10 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   void _onBuyPressed() async {
     final booksRepo = context.read<BooksRepository>();
 
-    // جلب رابط التحميل من الباك (يتحقق من التوكن وامتلاك الكتاب)
-    final downloadUrl = await booksRepo.getDownloadLink(widget.book);
+    final file = await booksRepo.downloadAndRegisterBook(widget.book);
 
-    if (downloadUrl != null) {
-      // انتقل لصفحة الدفع إذا لم يكن المستخدم قد اشترى الكتاب بعد
+    if (file == null) {
+      // المستخدم غير مسجل أو لم يشتر الكتاب
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -31,19 +30,24 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الرجاء تسجيل الدخول أولاً أو شراء الكتاب")),
+      // تم تحميله أو يمتلكه مسبقاً → افتح مباشرة
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BookReaderPage(book: widget.book),
+        ),
       );
     }
   }
 
+
   void _onReadPressed() async {
     final booksRepo = context.read<BooksRepository>();
 
-    // جلب رابط التحميل إذا لم يكن موجود
-    final downloadUrl = await booksRepo.getDownloadLink(widget.book);
+    // تحميل أو فتح الكتاب
+    final file = await booksRepo.downloadAndRegisterBook(widget.book);
 
-    if (downloadUrl != null) {
+    if (file != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -52,10 +56,11 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الرجاء تسجيل الدخول أولاً")),
+        const SnackBar(content: Text("الرجاء تسجيل الدخول أو شراء الكتاب أولاً")),
       );
     }
   }
+
 
 
   @override

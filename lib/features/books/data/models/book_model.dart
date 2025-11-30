@@ -11,7 +11,7 @@ class BookModel {
   final double price;
   final double discountRate;
   final int numberOfLikes;
-  final String? filePath;
+   String? filePath;
   final String? fileType;
   final int? fileSize;
   String? downloadUrl; // يمكن تحديثه لاحقًا عند طلب رابط التحميل
