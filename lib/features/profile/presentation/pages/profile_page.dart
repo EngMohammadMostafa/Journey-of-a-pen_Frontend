@@ -50,26 +50,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 ProfileHeader(
                   username: user.username,
                   points: user.points,
-                  onEditProfile: () {
-                    _openEditProfileSheet(context);
-                  },
+                  onEditProfile: () => _openEditProfileSheet(context),
                   actions: [
-                    {'icon': 'assets/icons/star_filled.png', 'onTap': () {
-                      showPointsPopup(context, user.points);
-                    }},
-                    {'icon': 'assets/icons/edit.png', 'onTap': () {
-                      _openEditProfileSheet(context);
-                    }},
-                    {'icon': 'assets/icons/book_open.png', 'onTap': () {}},
-                    {'icon': 'assets/icons/book.png', 'onTap': () {
-                      _showPurchasedBooks(context);
-                    }},
-                    {
-                      'icon': 'assets/icons/logout.png',
-                      'onTap': () {
-                        provider.logout(context);
-                      }
-                    },
+                    {'icon': 'assets/icons/star_filled.png', 'onTap': () => showPointsPopup(context, user.points)},
+                    {'icon': 'assets/icons/edit.png', 'onTap': () => _openEditProfileSheet(context)},
+                    {'icon': 'assets/icons/book_open.png', 'onTap': () => _showDownloadedBooks(context)},
+                    {'icon': 'assets/icons/book.png', 'onTap': () => _showPurchasedBooks(context)},
+                    {'icon': 'assets/icons/logout.png', 'onTap': () => provider.logout(context)},
                   ],
                 ),
 
@@ -80,16 +67,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: 'عدد النقاط',
                   subtitle: '${user.points}',
                   iconAsset: 'assets/icons/star_filled.png',
-                  onTap: () { showPointsPopup(context, user.points);},
+                  onTap: () => showPointsPopup(context, user.points),
                 ),
 
                 const SizedBox(height: 16),
 
                 // الأقسام الأخرى
-                _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {
-                  _showDownloadedBooks(context);
-                }),
-                _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () {}),
+                _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () => _showDownloadedBooks(context)),
+                _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () => _showPurchasedBooks(context)),
 
                 const SizedBox(height: 30),
               ],
@@ -115,7 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   ///  فتح واجهة التعديل
-  _openEditProfileSheet(BuildContext context) {
+  void _openEditProfileSheet(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
     if (provider.user == null) return;
 
@@ -123,47 +108,13 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => EditProfileSection(
-        user: provider.user,
-      ),
+      builder: (_) => EditProfileSection(user: provider.user),
     );
   }
 
-  /// 🔹 الكتب المدفوعة (موجود سابقًا)
-  void _showPurchasedBooks(BuildContext context) {
-    final purchasedBooks = [
-      {
-        'title': 'مدخل إلى البرمجة بلغة Dart',
-        'author': 'أحمد علي',
-        'cover': 'assets/images/book1.jpg',
-        'downloaded': true,
-      },
-      {
-        'title': 'أساسيات Flutter الحديثة',
-        'author': 'سارة محمد',
-        'cover': 'assets/images/book2.jpg',
-        'downloaded': true,
-      },
-      {
-        'title': 'هندسة البرمجيات الشاملة',
-        'author': 'خالد إبراهيم',
-        'cover': 'assets/images/book3.jpg',
-        'downloaded': false,
-      },
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => PurchasedBooksSection(books: purchasedBooks),
-    );
-  }
-
-  /// 🔥 **الكتب المحملة (حقيقية)**
   void _showDownloadedBooks(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
-    final downloaded = provider.downloadedBooks; // يفترض أنها List<BookModel>
+    final downloaded = provider.downloadedBooks;
 
     if (downloaded.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,8 +130,35 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => PurchasedBooksSection(
         books: downloaded.map((book) => {
           'title': book.title,
-          'author': book.author, // BookModel.author موجود دائماً
-          'cover': book.imageUrl ?? 'assets/images/default.png', // <-- استخدم imageUrl بدل coverUrl
+          'author': book.author,
+          'cover': book.imageUrl ?? 'assets/images/default.png',
+          'downloaded': true,
+          'book': book, // تمرير الكائن الكامل إذا تريد استخدامه لاحقًا
+        }).toList(),
+      ),
+    );
+  }
+
+  void _showPurchasedBooks(BuildContext context) {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    final purchasedBooks = provider.downloadedBooks;
+
+    if (purchasedBooks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("لا توجد كتب مدفوعة")),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => PurchasedBooksSection(
+        books: purchasedBooks.map((book) => {
+          'title': book.title,
+          'author': book.author,
+          'cover': book.imageUrl ?? 'assets/images/default.png',
           'downloaded': true,
           'book': book,
         }).toList(),
@@ -188,68 +166,55 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// 🔹 نافذة عرض النقاط
   void showPointsPopup(BuildContext context, int points) {
     showDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star, size: 60, color: Colors.yellow),
-                const SizedBox(height: 15),
-
-                Text(
-                  'نقاطك الحالية',
-                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 20),
-                ),
-                const SizedBox(height: 10),
-
-                Text(
-                  '$points ⭐',
-                  style: const TextStyle(color: Colors.yellow, fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 20),
-
-                Text(
-                  points >= 50
-                      ? '🎉 لقد وصلت للحد المطلوب! سيتم التواصل معك من قبل المسؤول للحصول على مكافأة.'
-                      : 'عند وصولك إلى 50 نقطة سيتم التواصل معك للحصول على مكافأة 🎁',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16),
-                ),
-
-                const SizedBox(height: 25),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Text('حسناً'),
-                  ),
-                ),
-              ],
-            ),
+            borderRadius: BorderRadius.circular(20),
           ),
-        );
-      },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.star, size: 60, color: Colors.yellow),
+              const SizedBox(height: 15),
+              Text('نقاطك الحالية', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 20)),
+              const SizedBox(height: 10),
+              Text('$points ⭐', style: const TextStyle(color: Colors.yellow, fontSize: 30, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              Text(
+                points >= 50
+                    ? '🎉 لقد وصلت للحد المطلوب! سيتم التواصل معك من قبل المسؤول للحصول على مكافأة.'
+                    : 'عند وصولك إلى 50 نقطة سيتم التواصل معك للحصول على مكافأة 🎁',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16),
+              ),
+              const SizedBox(height: 25),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text('حسناً'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
