@@ -21,7 +21,6 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     provider = Provider.of<ProfileProvider>(context, listen: false);
     provider.loadUser(); // جلب بيانات المستخدم من الباك اند
-
   }
 
   @override
@@ -58,7 +57,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     {'icon': 'assets/icons/star_filled.png', 'onTap': () {
                       showPointsPopup(context, user.points);
                     }},
-
                     {'icon': 'assets/icons/edit.png', 'onTap': () {
                       _openEditProfileSheet(context);
                     }},
@@ -66,7 +64,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     {'icon': 'assets/icons/book.png', 'onTap': () {
                       _showPurchasedBooks(context);
                     }},
-
                     {
                       'icon': 'assets/icons/logout.png',
                       'onTap': () {
@@ -89,7 +86,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 16),
 
                 // الأقسام الأخرى
-                _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {}),
+                _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () {
+                  _showDownloadedBooks(context);
+                }),
                 _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () {}),
 
                 const SizedBox(height: 30),
@@ -115,7 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  ///  فتح واجهة التعديل (نصف شاشة من الأسفل)
+  ///  فتح واجهة التعديل
   _openEditProfileSheet(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
     if (provider.user == null) return;
@@ -125,13 +124,12 @@ class _ProfilePageState extends State<ProfilePage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => EditProfileSection(
-        user: provider.user, //  تمرير بيانات المستخدم إذا موجودة
+        user: provider.user,
       ),
     );
   }
 
-
-
+  /// 🔹 الكتب المدفوعة (موجود سابقًا)
   void _showPurchasedBooks(BuildContext context) {
     final purchasedBooks = [
       {
@@ -161,6 +159,35 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => PurchasedBooksSection(books: purchasedBooks),
     );
   }
+
+  /// 🔥 **الكتب المحملة (حقيقية)**
+  void _showDownloadedBooks(BuildContext context) {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    final downloaded = provider.downloadedBooks; // يفترض أنها List<BookModel>
+
+    if (downloaded.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("لا توجد كتب محملة")),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => PurchasedBooksSection(
+        books: downloaded.map((book) => {
+          'title': book.title,
+          'author': book.author, // BookModel.author موجود دائماً
+          'cover': book.imageUrl ?? 'assets/images/default.png', // <-- استخدم imageUrl بدل coverUrl
+          'downloaded': true,
+          'book': book,
+        }).toList(),
+      ),
+    );
+  }
+
   void showPointsPopup(BuildContext context, int points) {
     showDialog(
       context: context,
@@ -196,7 +223,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 20),
 
-                // رسالة عند الوصول لعدد معين
                 Text(
                   points >= 50
                       ? '🎉 لقد وصلت للحد المطلوب! سيتم التواصل معك من قبل المسؤول للحصول على مكافأة.'
@@ -226,8 +252,4 @@ class _ProfilePageState extends State<ProfilePage> {
       },
     );
   }
-
-// Usage inside ProfileHeader actions:
-// {'icon': 'assets/icons/star_filled.png', 'onTap': () => showPointsPopup(context, user.points)},
-
 }

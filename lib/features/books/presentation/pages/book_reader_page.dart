@@ -3,7 +3,9 @@ import 'package:advance_pdf_viewer2/advance_pdf_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
+import '../../../profile/provider/profile_provider.dart';
 import '../../data/models/book_model.dart';
 
 class BookReaderPage extends StatefulWidget {
@@ -39,30 +41,34 @@ class _BookReaderPageState extends State<BookReaderPage> {
       }
 
       final dir = await getApplicationDocumentsDirectory();
-      final file = File("${dir.path}/${widget.book.id}.pdf");
+      final filePath = "${dir.path}/${widget.book.id}.pdf";
+      final file = File(filePath);
 
+      // 🔥 1) لو الملف موجود → افتحه بدون إنترنت
       if (await file.exists()) {
-        localPdfPath = file.path;
-        offlineMode = true;
-      } else {
-        final response = await http.get(Uri.parse(widget.book.downloadUrl!));
+        document = await PDFDocument.fromFile(file);
+        Provider.of<ProfileProvider>(context, listen: false)
+            .addDownloadedBook(widget.book);
 
-        if (response.statusCode == 200) {
-          await file.writeAsBytes(response.bodyBytes);
-          localPdfPath = file.path;
-          offlineMode = false;
-        } else {
-          setState(() {
-            errorMessage = "فشل تحميل الكتاب: ${response.statusCode}";
-            isLoading = false;
-          });
-          return;
-        }
+        localPdfPath = filePath;
+        offlineMode = true;
+
+        setState(() => isLoading = false);
+        return;
       }
 
-      // تحميل المستند باستخدام advance_pdf_viewer2
-      if (localPdfPath != null) {
-        document = await PDFDocument.fromFile(File(localPdfPath!));
+      // 🔥 2) لو ما كان موجود → تحميل مرة واحدة فقط
+      final response = await http.get(Uri.parse(widget.book.downloadUrl!));
+
+      if (response.statusCode == 200) {
+        await file.writeAsBytes(response.bodyBytes);
+
+        localPdfPath = filePath;
+        offlineMode = false;
+
+        document = await PDFDocument.fromFile(file);
+      } else {
+        errorMessage = "فشل تحميل الكتاب: ${response.statusCode}";
       }
     } catch (e) {
       errorMessage = "حدث خطأ أثناء تحميل الكتاب: $e";
@@ -79,12 +85,14 @@ class _BookReaderPageState extends State<BookReaderPage> {
         backgroundColor: const Color(0xFF1C597B),
         title: Text(widget.book.title),
         actions: [
-          if (!isLoading && localPdfPath != null)
+          if (!isLoading && document != null)
             IconButton(
               icon: Icon(
-                  offlineMode ? Icons.cloud_done : Icons.download_done_outlined),
-              tooltip:
-              offlineMode ? "تقرأ نسخة بدون إنترنت" : "تم حفظ الكتاب محليًا",
+                offlineMode ? Icons.cloud_done : Icons.download_done_outlined,
+              ),
+              tooltip: offlineMode
+                  ? "تقرأ نسخة بدون إنترنت"
+                  : "تم تحميل الكتاب وتخزينه محليًا",
               onPressed: () {},
             )
         ],
@@ -99,14 +107,12 @@ class _BookReaderPageState extends State<BookReaderPage> {
         ),
       )
           : document == null
-          ? const Center(
-        child: Text("لم يتم العثور على الملف"),
-      )
+          ? const Center(child: Text("لم يتم العثور على الملف"))
           : PDFViewer(
         document: document!,
         zoomSteps: 1,
         scrollDirection: Axis.vertical,
-        lazyLoad: true,
+        lazyLoad: false, // يمنع تحميل الصفحات اللاحق
         showPicker: false,
       ),
     );

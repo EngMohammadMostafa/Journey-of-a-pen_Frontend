@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/utils/prefs_helper.dart';
+import '../../books/data/models/book_model.dart';
 import '../data/models/user_model.dart';
 import '../repository/profile_repository.dart';
 
@@ -75,6 +76,14 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
+  List<BookModel> downloadedBooks = [];
+
+  void addDownloadedBook(BookModel book) {
+    if (!downloadedBooks.any((b) => b.id == book.id)) {
+      downloadedBooks.add(book);
+      notifyListeners();
+    }
+  }
   /// تسجيل الخروج
   Future<void> logout(BuildContext context) async {
     try {
