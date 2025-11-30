@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
 
-    // ▶️ تحميل الكتب من HomeProvider عند فتح الصفحة (موجود ضمن نطاق _HomePageState)
+    //  تحميل الكتب من HomeProvider عند فتح الصفحة (موجود ضمن نطاق _HomePageState)
     Future.microtask(() {
       try {
         Provider.of<HomeProvider>(context, listen: false).fetchAllBooks();
@@ -408,26 +408,77 @@ class _HomeContentState extends State<HomeContent> {
                                     borderRadius:
                                     BorderRadius.circular(12),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                  child:// حالة الكتاب (مجاني / مدفوع) + الإعجاب
+                                  // حالة الكتاب (مجاني / مدفوع) + الإعجاب
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Icon(
-                                        book.isPaid
-                                            ? Icons.lock
-                                            : Icons.check_circle,
-                                        color: book.isPaid
-                                            ? Colors.red
-                                            : Colors.green,
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        book.isPaid ? "مدفوع" : "مجاني",
-                                        style: TextStyle(
+                                      // حالة الكتاب
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
                                           color: book.isPaid
-                                              ? Colors.red
-                                              : Colors.green,
-                                          fontWeight: FontWeight.bold,
+                                              ? Colors.red.withOpacity(0.1)
+                                              : Colors.green.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              book.isPaid ? Icons.lock : Icons.check_circle,
+                                              color: book.isPaid ? Colors.red : Colors.green,
+                                              size: 18,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              book.isPaid ? "مدفوع" : "مجاني",
+                                              style: TextStyle(
+                                                color: book.isPaid ? Colors.red : Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // أيقونة الإعجاب التفاعلية
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            book.toggleLike(); // استخدم دالة toggleLike من BookModel
+                                          });
+
+                                          // 🔹 هنا يمكن استدعاء API لتحديث الإعجاب في الباك
+                                          // مثال:
+                                          // booksService.toggleLike(book.id, book.isLikedByUser);
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: book.isLikedByUser
+                                                ? Colors.orange.withOpacity(0.2)
+                                                : Colors.orange.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.thumb_up,
+                                                color: book.isLikedByUser ? Color(0xFF1C597B) : Colors.blueGrey,
+                                                size: 18,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "${book.numberOfLikes}",
+                                                style: TextStyle(
+                                                  color: book.isLikedByUser ? Color(0xFF1C597B) : Colors.blueGrey,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ],

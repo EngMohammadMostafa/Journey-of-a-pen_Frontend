@@ -197,36 +197,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                   ),
 
                   const SizedBox(height: 35),
-
-                  // ⭐ التقييم
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Rate this book:",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: 'Papyrus',
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(5, (index) {
-                          return IconButton(
-                            onPressed: () => setState(() => _rating = index + 1.0),
-                            icon: Icon(
-                              index < _rating ? Icons.star : Icons.star_border,
-                              color: Colors.amber,
-                              size: 32,
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
