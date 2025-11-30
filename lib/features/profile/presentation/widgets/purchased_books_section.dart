@@ -1,14 +1,15 @@
-// Flutter code with quiz button for each book
-// This is a full example integrating: quiz button, answering flow, locking button after completion
-// You can merge it into your project
-
 import 'package:flutter/material.dart';
+import '../../../books/data/models/book_model.dart';
 
 class PurchasedBooksSection extends StatefulWidget {
-  final List<Map<String, dynamic>> books;
+  final List<BookModel> books;
+  final void Function(BookModel)? onBookTap;
 
-  const PurchasedBooksSection({super.key, required this.books});
-
+  const PurchasedBooksSection({
+    super.key,
+    required this.books,
+    this.onBookTap,
+  });
   @override
   State<PurchasedBooksSection> createState() => _PurchasedBooksSectionState();
 }
@@ -56,37 +57,49 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: widget.books.length,
-                    itemBuilder: (context, index) {
-                      final book = widget.books[index];
-                      return Card(
-                        color: Colors.white.withOpacity(0.15),
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
-                        child: ListTile(
-                          title: Text(
-                            book['title'],
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(book['author'], style: const TextStyle(color: Colors.white70)),
-                          trailing: quizCompleted[index] == true
-                              ? const Icon(Icons.check_circle, color: Colors.greenAccent)
-                              : ElevatedButton(
-                            onPressed: () {
-                              if (quizCompleted[index] == true) return;
-                              _openQuiz(context, index);
-                            },
-                            child: const Text('Quiz'),
-                          ),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: widget.books.length,
+                itemBuilder: (context, index) {
+                  final book = widget.books[index]; // تعريف book هنا داخل itemBuilder
+
+                  return Card(
+                    color: Colors.white.withOpacity(0.15),
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    child: ListTile(
+                      title: Text(
+                        book.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                      subtitle: Text(
+                        book.author,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      onTap: () {
+                        if (widget.onBookTap != null) {
+                          widget.onBookTap!(book); // عند النقر على الكتاب
+                        }
+                      },
+                      trailing: quizCompleted[index] == true
+                          ? const Icon(Icons.check_circle, color: Colors.greenAccent)
+                          : ElevatedButton(
+                        onPressed: () {
+                          if (quizCompleted[index] == true) return;
+                          _openQuiz(context, index); // index موجود داخل itemBuilder
+                        },
+                        child: const Text('Quiz'),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+                
               ],
             ),
           ),
@@ -155,7 +168,6 @@ class _QuizScreenState extends State<QuizScreen> {
         title: const Text('Quiz'),
         automaticallyImplyLeading: false,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -166,7 +178,6 @@ class _QuizScreenState extends State<QuizScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-
             ...List.generate(q['options'].length, (i) {
               return RadioListTile<int>(
                 value: i,
@@ -177,23 +188,18 @@ class _QuizScreenState extends State<QuizScreen> {
                 title: Text(q['options'][i], style: const TextStyle(color: Colors.white)),
               );
             }),
-
             const SizedBox(height: 20),
-
             if (!answered)
               ElevatedButton(
                 onPressed: selectedOption == null ? null : _checkAnswer,
                 child: const Text('تحقق'),
               ),
-
             if (answered)
               Text(
                 selectedOption == q['correct'] ? '✔ إجابة صحيحة' : '✘ إجابة خاطئة',
                 style: const TextStyle(fontSize: 20, color: Colors.yellow),
               ),
-
             const Spacer(),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -201,7 +207,6 @@ class _QuizScreenState extends State<QuizScreen> {
                   onPressed: answered ? null : () => Navigator.pop(context),
                   child: const Text('Exit'),
                 ),
-
                 ElevatedButton(
                   onPressed: answered ? _next : null,
                   child: const Text('التالي'),

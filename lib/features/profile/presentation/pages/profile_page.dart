@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../books/presentation/pages/book_reader_page.dart';
 import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
@@ -20,7 +21,8 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     provider = Provider.of<ProfileProvider>(context, listen: false);
-    provider.loadUser(); // جلب بيانات المستخدم من الباك اند
+    provider.loadUser();// جلب بيانات المستخدم من الباك اند
+    provider.loadDownloadedBooks();
   }
 
   @override
@@ -128,20 +130,24 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => PurchasedBooksSection(
-        books: downloaded.map((book) => {
-          'title': book.title,
-          'author': book.author,
-          'cover': book.imageUrl ?? 'assets/images/default.png',
-          'downloaded': true,
-          'book': book, // تمرير الكائن الكامل إذا تريد استخدامه لاحقًا
-        }).toList(),
+        books: downloaded,
+        onBookTap: (book) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BookReaderPage(book: book),
+            ),
+          );
+        },
       ),
     );
   }
 
+
+
   void _showPurchasedBooks(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
-    final purchasedBooks = provider.downloadedBooks;
+    final purchasedBooks = provider.downloadedBooks; // أو أي قائمة كتب مدفوعة عندك
 
     if (purchasedBooks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -155,16 +161,11 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => PurchasedBooksSection(
-        books: purchasedBooks.map((book) => {
-          'title': book.title,
-          'author': book.author,
-          'cover': book.imageUrl ?? 'assets/images/default.png',
-          'downloaded': true,
-          'book': book,
-        }).toList(),
+        books: purchasedBooks, // ✅ تمرير List<BookModel مباشرة
       ),
     );
   }
+
 
   /// 🔹 نافذة عرض النقاط
   void showPointsPopup(BuildContext context, int points) {

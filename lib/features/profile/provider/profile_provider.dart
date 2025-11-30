@@ -17,10 +17,10 @@ class ProfileProvider extends ChangeNotifier {
   bool loading = false;
   String? error;
 
-  /// قائمة الكتب المحملة محليًا
+  /// قائمة الكتب المحملة محليًا أو من الباك
   List<BookModel> downloadedBooks = [];
 
-  ///  تحميل بيانات المستخدم من الباك اند
+  /// تحميل بيانات المستخدم من الباك اند
   Future<void> loadUser() async {
     try {
       loading = true;
@@ -43,7 +43,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  ///  تحديث بيانات المستخدم عبر الباك اند
+  /// تحديث بيانات المستخدم عبر الباك اند
   Future<bool> updateUser(Map<String, dynamic> body) async {
     if (user == null) return false;
 
@@ -52,7 +52,6 @@ class ProfileProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      // إنشاء نسخة من المستخدم مع التعديلات
       final updatedUser = UserModel(
         id: user!.id,
         username: body['username'] ?? user!.username,
@@ -64,7 +63,6 @@ class ProfileProvider extends ChangeNotifier {
         gender: body['gender'] ?? user!.gender,
       );
 
-      // إرسال التحديث إلى الباك اند
       user = await _repository.updateProfile(updatedUser);
 
       loading = false;
@@ -78,7 +76,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// 🔹 إضافة كتاب محمّل إلى قائمة downloadedBooks
+  /// إضافة كتاب محمّل إلى قائمة downloadedBooks
   void addDownloadedBook(BookModel book) {
     if (!downloadedBooks.any((b) => b.id == book.id)) {
       downloadedBooks.add(book);
@@ -86,12 +84,25 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// 🔹 يمكن لاحقًا إضافة دالة لجلب الكتب المحملة من الباك:
-  // Future<void> loadDownloadedBooks() async {
-  //   if (user == null) return;
-  //   downloadedBooks = await _repository.getDownloadedBooks(user!.id);
-  //   notifyListeners();
-  // }
+  /// 🔹 جلب الكتب المحمّلة للمستخدم من الباك
+  Future<void> loadDownloadedBooks() async {
+    if (user == null) return;
+
+    try {
+      loading = true;
+      error = null;
+      notifyListeners();
+
+      downloadedBooks = await _repository.getUserBooks(); // يجب أن تعيد List<BookModel>
+
+      loading = false;
+      notifyListeners();
+    } catch (e) {
+      loading = false;
+      error = e.toString();
+      notifyListeners();
+    }
+  }
 
   /// تسجيل الخروج
   Future<void> logout(BuildContext context) async {
@@ -99,16 +110,12 @@ class ProfileProvider extends ChangeNotifier {
       loading = true;
       notifyListeners();
 
-      // تسجيل الخروج من الباك اند
       await _repository.logout();
-
-      // حذف التوكن من التخزين
       await PrefsHelper.clearToken();
 
       loading = false;
       notifyListeners();
 
-      //  عرض رسالة نجاح
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم تسجيل الخروج بنجاح'),
@@ -117,7 +124,6 @@ class ProfileProvider extends ChangeNotifier {
           duration: Duration(seconds: 2),
         ),
       );
-
       // الانتقال إلى صفحة اختيار الحساب
       await Future.delayed(const Duration(milliseconds: 400));
       Navigator.of(context).pushNamedAndRemoveUntil(
