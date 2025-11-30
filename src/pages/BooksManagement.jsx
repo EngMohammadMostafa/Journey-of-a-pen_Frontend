@@ -280,19 +280,39 @@ if (selectedFile) {
   };
 
   // --- دوال إدارة الأسئلة ---
-  const handleAddQuestion = () => {
+  const handleAddQuestion = async () => {
     if (!newQuestionText || !selectedBookId) {
       alert('يرجى كتابة السؤال واختيار الكتاب');
       return;
     }
-    const book = books.find(b => b.id === parseInt(selectedBookId));
-    const newQuestion = { id: Date.now(), text: newQuestionText, book_title: book?.title || 'غير محدد', book_id: parseInt(selectedBookId) };
-    setQuestions([...questions, newQuestion]);
-    alert('تم إضافة السؤال (محاكاة)');
-    setNewQuestionText('');
-    setSelectedBookId('');
-    setIsQuestionModalOpen(false);
+  
+    try {
+      // استدعاء الـ API الفعلية
+      const response = await booksService.addQuestion(selectedBookId, newQuestionText);
+  
+      // تحديث قائمة الأسئلة بعد الإضافة
+      const book = books.find(b => b.id === parseInt(selectedBookId));
+      const addedQuestion = response.question || {
+        id: Date.now(),
+        text: newQuestionText,
+        book_title: book?.title || 'غير محدد',
+        book_id: parseInt(selectedBookId)
+      };
+  
+      setQuestions([...questions, addedQuestion]);
+      alert('تم إضافة السؤال بنجاح');
+  
+      // إعادة تهيئة الحقول وإغلاق المودال
+      setNewQuestionText('');
+      setSelectedBookId('');
+      setIsQuestionModalOpen(false);
+  
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ أثناء إضافة السؤال');
+    }
   };
+  
 
   const openEditQuestionModal = (question) => {
     setEditingQuestion(question);
@@ -300,25 +320,50 @@ if (selectedFile) {
     setIsEditQuestionModalOpen(true);
   };
 
-  const handleSaveEditQuestion = () => {
+  const handleSaveEditQuestion = async () => {
     if (!editingQuestionText) {
       alert('يرجى كتابة السؤال');
       return;
     }
-    setQuestions(questions.map(q => q.id === editingQuestion.id ? { ...q, text: editingQuestionText } : q));
-    alert('تم تعديل السؤال (محاكاة)');
-    setIsEditQuestionModalOpen(false);
-    setEditingQuestion(null);
-    setEditingQuestionText('');
-  };
-
-  const handleDeleteQuestion = (question) => {
-    if (window.confirm(`هل أنت متأكد من حذف السؤال "${question.text}"؟`)) {
-      setQuestions(questions.filter(q => q.id !== question.id));
-      alert('تم حذف السؤال (محاكاة)');
+  
+    try {
+      // استدعاء الـ API لتعديل السؤال
+      await booksService.updateQuestion(editingQuestion.id, editingQuestionText);
+  
+      // تحديث القائمة بعد التعديل
+      setQuestions(questions.map(q => q.id === editingQuestion.id ? { ...q, text: editingQuestionText } : q));
+  
+      alert('تم تعديل السؤال بنجاح');
+  
+      // إعادة تهيئة الحقول وإغلاق المودال
+      setIsEditQuestionModalOpen(false);
+      setEditingQuestion(null);
+      setEditingQuestionText('');
+  
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ أثناء تعديل السؤال');
     }
   };
-
+  
+  const handleDeleteQuestion = async (question) => {
+    if (!window.confirm(`هل أنت متأكد من حذف السؤال "${question.text}"؟`)) return;
+  
+    try {
+      // استدعاء الـ API لحذف السؤال
+      await booksService.deleteQuestion(question.id);
+  
+      // تحديث قائمة الأسئلة بعد الحذف
+      setQuestions(questions.filter(q => q.id !== question.id));
+  
+      alert('تم حذف السؤال بنجاح');
+  
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ أثناء حذف السؤال');
+    }
+  };
+  
   // --- useEffect ---
   useEffect(() => {
     const fetchCategories = async () => {
@@ -368,7 +413,25 @@ useEffect(() => {
     setFilteredQuestions(filtered);
   }, [questions, searchTypeQuestion, searchQuestionTerm, searchBookId]);
 
-
+  
+  useEffect(() => {
+    if (activeSection === 'questions') {
+      const fetchQuestions = async () => {
+        try {
+          setLoading(true);
+          const questionsData = await booksService.getAllQuestions();
+          setQuestions(questionsData || []);
+        } catch (error) {
+          console.error("Error fetching questions:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchQuestions();
+    }
+  }, [activeSection]);
+  
   return (
     <div className="books-management">
     <div className="page-header">

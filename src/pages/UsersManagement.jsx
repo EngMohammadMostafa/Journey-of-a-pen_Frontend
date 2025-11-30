@@ -6,8 +6,10 @@ import { useAuth } from '../context/AuthContext'
 import '../styles/UsersManagement.css'
 import '../styles/global.css'
 
-
 const UsersManagement = () => {
+  const { token } = useAuth();
+
+  // --- حالات المستخدمين ---
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,18 +17,19 @@ const UsersManagement = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [userTypeFilter, setUserTypeFilter] = useState('all');
-  const [errorMessage, setErrorMessage] = useState(''); // ✅ إضافة حالة للخطأ
-  const { token } = useAuth();
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    password_confirmation: '',
     age: '',
     gender: 'male'
   });
 
-  const columns = [
+  // --- أعمدة جدول المستخدمين ---
+  const userColumns = [
     { key: 'id', title: 'ID' },
     { key: 'username', title: 'اسم المستخدم' },
     { key: 'email', title: 'البريد الإلكتروني' },
@@ -38,10 +41,7 @@ const UsersManagement = () => {
     { 
       key: 'gender', 
       title: 'الجنس',
-      render: (value) => {
-        const genders = { male: 'ذكر', female: 'أنثى' };
-        return genders[value] || value;
-      }
+      render: (value) => ({ male: 'ذكر', female: 'أنثى' }[value] || value)
     },
     { 
       key: 'user_type', 
@@ -49,10 +49,20 @@ const UsersManagement = () => {
       render: (value) => value === 1 ? 'عادي' : 'مدير'
     },
     { key: 'points', title: 'النقاط' },
-    { key: 'purchases_count', title: 'عدد المشتريات' }
+    { key: 'purchases_count', title: 'عدد المشتريات' },
+    {
+      key: 'actions',
+      title: 'الإجراءات',
+      render: (_, user) => (
+        <div>
+          <button className="btn-primary" onClick={() => handleEdit(user)}>تعديل</button>
+          <button className="btn-danger" onClick={() => handleDelete(user)}>حذف</button>
+        </div>
+      )
+    }
   ];
 
-  // ✅ تعديل دالة جلب المستخدمين
+  // --- دوال إدارة المستخدمين ---
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -61,36 +71,17 @@ const UsersManagement = () => {
       setFilteredUsers(response.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setErrorMessage('حدث خطأ في جلب بيانات المستخدمين'); // ✅ تعيين الرسالة
-      setTimeout(() => setErrorMessage(''), 3000); // ✅ إخفاؤها بعد 3 ثوانٍ
+      setErrorMessage('حدث خطأ في جلب بيانات المستخدمين');
+      setTimeout(() => setErrorMessage(''), 3000);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    let filtered = users;
-    if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.username?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    if (userTypeFilter !== 'all') {
-      filtered = filtered.filter(user => user.user_type === parseInt(userTypeFilter));
-    }
-    setFilteredUsers(filtered);
-  }, [users, searchTerm, userTypeFilter]);
-
-  const userStats = {
-    total: users.length,
-    regular: users.filter(u => u.user_type === 1).length,
-    admin: users.filter(u => u.user_type === 2).length,
-    withPurchases: users.filter(u => u.purchases_count > 0).length
+  const handleAddUser = () => {
+    setEditingUser(null);
+    setFormData({ username: '', email: '', password: '',password_confirmation: '',age: '', gender: 'male' });
+    setIsModalOpen(true);
   };
 
   const handleEdit = (user) => {
@@ -99,11 +90,120 @@ const UsersManagement = () => {
       username: user.username || '',
       email: user.email || '',
       password: '',
+      password_confirmation: '',
       age: user.age || '',
       gender: user.gender || 'male'
     });
     setIsModalOpen(true);
   };
+  const handleSaveNewUser = async () => {
+    // تحقق واجهة بسيطة قبل الإرسال
+    if (!formData.username || !formData.email || !formData.password || !formData.password_confirmation || !formData.age || !formData.gender) {
+      alert('الرجاء ملء جميع الحقول المطلوبة (بما في ذلك تأكيد كلمة المرور والعمر).');
+      return;
+    }
+  
+    // تحقق من تساوي الباسوورد
+    if (formData.password !== formData.password_confirmation) {
+      alert('كلمة المرور وتأكيدها غير متطابقين.');
+      return;
+    }
+  
+    // تحقق مبدئي لشرط الباكند: طول وكلفة الباسور (تقديري)
+    if (formData.password.length < 8) {
+      alert('كلمة المرور يجب أن تكون على الأقل 8 أحرف.');
+      return;
+    }
+    // (اختياري) تحقق وجود حرف كبير، حرف صغير، رقم، ورمز
+    const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+    if (!pwdRegex.test(formData.password)) {
+      alert('كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص.');
+      return;
+    }
+  
+    // تأكد من العمر integer و >=10
+    const ageInt = parseInt(formData.age, 10);
+    if (isNaN(ageInt) || ageInt < 10) {
+      alert('الرجاء إدخال عمر صالح (عدد صحيح >= 10).');
+      return;
+    }
+  
+    const newUser = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      password_confirmation: formData.password_confirmation,
+      age: ageInt,
+      gender: formData.gender
+    };
+  
+    try {
+      // **هنا نرسل التوكن أيضاً** (token موجود من useAuth)
+      await usersService.addUser(newUser, token);
+      alert('تم إضافة المستخدم بنجاح');
+      fetchUsers();
+      setIsModalOpen(false);
+      setFormData({ username: '', email: '', password: '', password_confirmation: '', age: '', gender: 'male' });
+    } catch (error) {
+      console.error('Error adding user:', error);
+      // أفضل استخراج رسالة خطأ من الباك (422 validation)
+      const msg = error?.response?.data?.errors ? JSON.stringify(error.response.data.errors) : 'حدث خطأ في إضافة المستخدم';
+      setErrorMessage(msg);
+      setTimeout(() => setErrorMessage(''), 5000);
+    }
+  };
+  
+  const handleSaveUser = async () => {
+    try {
+      const userData = { ...formData };
+  
+      // التحقق من كلمة المرور
+      if (userData.password) {
+        if (!userData.password_confirmation) {
+          alert('الرجاء إدخال تأكيد كلمة المرور');
+          return;
+        }
+        if (userData.password !== userData.password_confirmation) {
+          alert('كلمة المرور وتأكيدها غير متطابقين.');
+          return;
+        }
+        const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+        if (!pwdRegex.test(userData.password)) {
+          alert('كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص.');
+          return;
+        }
+      } else {
+        delete userData.password;
+        delete userData.password_confirmation;
+      }
+  
+      // التحقق من العمر
+      if (userData.age !== '') {
+        const ageInt = parseInt(userData.age, 10);
+        if (isNaN(ageInt) || ageInt < 10) {
+          alert('الرجاء إدخال عمر صالح (عدد صحيح >= 10).');
+          return;
+        }
+        userData.age = ageInt;
+      } else {
+        alert('العمر حقل مطلوب.');
+        return;
+      }
+  
+      // إرسال البيانات للباكند مع التوكن
+      await usersService.updateUser(editingUser.id, userData, token);
+  
+      alert('تم تحديث بيانات المستخدم بنجاح');
+      setIsModalOpen(false);
+      setEditingUser(null);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error updating user:', error);
+      setErrorMessage('حدث خطأ في تحديث بيانات المستخدم');
+      setTimeout(() => setErrorMessage(''), 3000);
+    }
+  };
+  
 
   const handleDelete = async (user) => {
     if (window.confirm(`هل أنت متأكد من حذف المستخدم "${user.username}"؟`)) {
@@ -119,213 +219,127 @@ const UsersManagement = () => {
     }
   };
 
-  const handleSave = async () => {
-    try {
-      const userData = { ...formData };
-      if (!userData.password) delete userData.password;
+  const handleFormSubmit = editingUser ? handleSaveUser : handleSaveNewUser;
 
-      await usersService.updateUser(editingUser.id, userData, token);
-      alert('تم تحديث بيانات المستخدم بنجاح');
-      setIsModalOpen(false);
-      setEditingUser(null);
-      fetchUsers();
-    } catch (error) {
-      console.error('Error updating user:', error);
-      setErrorMessage('حدث خطأ في تحديث بيانات المستخدم');
-      setTimeout(() => setErrorMessage(''), 3000);
+  // --- useEffect ---
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    let filtered = users;
+    if (searchTerm) {
+      filtered = filtered.filter(u => u.username?.toLowerCase().includes(searchTerm.toLowerCase()));
     }
-  };
-
-  const handleAddUser = () => {
-    setEditingUser(null);
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      age: '',
-      gender: 'male'
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSaveNewUser = async () => {
-    try {
-      if (!formData.username || !formData.email || !formData.password) {
-        alert('الرجاء ملء جميع الحقول المطلوبة');
-        return;
-      }
-      alert('سيتم تفعيل إضافة المستخدم بعد اكتمال API');
-      setIsModalOpen(false);
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        age: '',
-        gender: 'male'
-      });
-    } catch (error) {
-      console.error('Error adding user:', error);
-      setErrorMessage('حدث خطأ في إضافة المستخدم');
-      setTimeout(() => setErrorMessage(''), 3000);
+    if (userTypeFilter !== 'all') {
+      filtered = filtered.filter(u => u.user_type === parseInt(userTypeFilter));
     }
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, userTypeFilter]);
+
+  const userStats = {
+    total: users.length,
+    regular: users.filter(u => u.user_type === 1).length,
+    admin: users.filter(u => u.user_type === 2).length,
+    withPurchases: users.filter(u => u.purchases_count > 0).length
   };
 
-  const handleFormSubmit = editingUser ? handleSave : handleSaveNewUser;
-  const modalTitle = editingUser ? 'تعديل بيانات المستخدم' : 'إضافة مستخدم جديد';
-
+  
+  // --- JSX ---
   return (
     <div className="users-management">
       <div className="page-header">
-        <h1>User management</h1>
-        <button className="btn-primary" onClick={handleAddUser}>
-            Add new user + 
-        </button>
+        <h1>إدارة المستخدمين</h1>
+        <button className="btn-primary" onClick={handleAddUser}>إضافة مستخدم جديد +</button>
       </div>
 
-      {/* ✅ عرض رسالة الخطأ المؤقتة */}
-      {errorMessage && (
-        <div className="error-banner">
-          {errorMessage}
-        </div>
-      )}
+      {errorMessage && <div className="error-banner">{errorMessage}</div>}
 
       <div className="user-stats">
-        <div className="stat-card">
-          <h3>Total number of users</h3>
-          <span className="stat-number">{userStats.total}</span>
-        </div>
-        <div className="stat-card">
-          <h3>Numper of managers </h3>
-          <span className="stat-number">{userStats.admin}</span>
-        </div>
-        <div className="stat-card">
-          <h3>عدد المستخدمين اللذين لديهم مشتريات</h3>
-          <span className="stat-number">{userStats.withPurchases}</span>
-        </div>
+        <div className="stat-card"><h3>إجمالي المستخدمين</h3><span>{userStats.total}</span></div>
+        <div className="stat-card"><h3>عدد المديرين</h3><span>{userStats.admin}</span></div>
+        <div className="stat-card"><h3>المستخدمين الذين لديهم مشتريات</h3><span>{userStats.withPurchases}</span></div>
       </div>
 
       <div className="users-filters">
-        <div className="search-section">
-          <input
-            type="text"
-            placeholder="Search by name "
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-        
-        <div className="filter-section">
-          <select 
-            value={userTypeFilter} 
-            onChange={(e) => setUserTypeFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All users</option>
-            <option value="1">Normal users</option>
-            <option value="2">Managers</option>
-          </select>
-        </div>
-
-        <div className="results-count">
-          <span>Show {filteredUsers.length} Out of {users.length} Users</span>
-        </div>
+        <input
+          type="text"
+          placeholder="بحث بالاسم"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+        <select value={userTypeFilter} onChange={(e) => setUserTypeFilter(e.target.value)} className="filter-select">
+          <option value="all">جميع المستخدمين</option>
+          <option value="1">مستخدم عادي</option>
+          <option value="2">مدير</option>
+        </select>
+        <div>عرض {filteredUsers.length} من {users.length} مستخدم</div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredUsers}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        actions={['edit', 'delete']}
-      />
+      <DataTable columns={userColumns} data={filteredUsers} loading={loading} />
 
       {/* مودال إضافة/تعديل مستخدم */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingUser(null);
-        }}
-        title={modalTitle}
+        onClose={() => { setIsModalOpen(false); setEditingUser(null); }}
+        title={editingUser ? 'تعديل بيانات المستخدم' : 'إضافة مستخدم جديد'}
       >
         <div className="user-form">
           <div className="form-group">
-            <label>اسم المستخدم: *</label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              required
-            />
+            <label>اسم المستخدم *</label>
+            <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
           </div>
-          
           <div className="form-group">
-            <label>البريد الإلكتروني: *</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
+            <label>البريد الإلكتروني *</label>
+            <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
           </div>
-          
           <div className="form-group">
-            <label>
-              {editingUser ? 'كلمة المرور (اتركها فارغة إذا لم ترد التغيير):' : 'كلمة المرور: *'}
-            </label>
+            <label>{editingUser ? 'كلمة المرور (اتركها فارغة إذا لم تغيرها):' : 'كلمة المرور *'}</label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder={editingUser ? "اتركها فارغة للحفاظ على كلمة المرور الحالية" : "أدخل كلمة المرور"}
+              placeholder={editingUser ? "اتركها فارغة للحفاظ على الحالية" : "أدخل كلمة المرور"}
               required={!editingUser}
             />
           </div>
-          
           <div className="form-group">
-            <label>العمر:</label>
+  <label>
+    {editingUser ? 'تأكيد كلمة المرور (اختياري إذا لم تغير كلمة المرور):' : 'تأكيد كلمة المرور *'}
+  </label>
+  <input
+    type="password"
+    value={formData.password_confirmation || ''}
+    onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+    placeholder={editingUser ? "اتركها فارغة للحفاظ على كلمة المرور الحالية" : "أدخل تأكيد كلمة المرور"}
+    required={!editingUser} // عند إضافة مستخدم جديد مطلوب
+  />
+</div>
+
+          <div className="form-group">
+            <label>العمر</label>
             <input
-              type="number"
-              value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-              min="1"
-              max="120"
-            />
+  type="number"
+  name="age"
+  value={formData.age}
+  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+  min="10"
+  max="120"
+  required
+/>
+
           </div>
-          
           <div className="form-group">
-            <label>الجنس:</label>
-            <select
-              value={formData.gender}
-              onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-            >
+            <label>الجنس</label>
+            <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
               <option value="male">ذكر</option>
               <option value="female">أنثى</option>
             </select>
           </div>
-
-          {!editingUser && (
-            <div className="form-group">
-              <label>نوع المستخدم:</label>
-              <select
-                value={formData.user_type || '1'}
-                onChange={(e) => setFormData({ ...formData, user_type: parseInt(e.target.value) })}
-              >
-                <option value="1">مستخدم عادي</option>
-                <option value="2">مدير</option>
-              </select>
-            </div>
-          )}
-          
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
-              إلغاء
-            </button>
-            <button className="btn-primary" onClick={handleFormSubmit}>
-              {editingUser ? 'حفظ التغييرات' : 'إضافة مستخدم'}
-            </button>
+            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
+            <button className="btn-primary" onClick={handleFormSubmit}>{editingUser ? 'حفظ التغييرات' : 'إضافة مستخدم'}</button>
           </div>
         </div>
       </Modal>
