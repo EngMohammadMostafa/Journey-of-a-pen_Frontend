@@ -54,35 +54,17 @@ const BooksManagement = () => {
   const [isEditQuestionModalOpen, setIsEditQuestionModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [editingQuestionText, setEditingQuestionText] = useState('');
+// --- حالات Pagination للأسئلة ---
+const [currentPage, setCurrentPage] = useState(1);
+const [perPage, setPerPage] = useState(10);
+const [lastPage, setLastPage] = useState(1);
 
   const questionStats = {
     totalQuestions: questions.length,
     correctAnswers: questions.filter(q => q.is_correct === 1).length,
     totalPoints: questions.reduce((sum, q) => sum + (q.points || 0), 0)
   };
-/* // --- أعمدة الجداول ---
-  const bookColumns = [
-    { key: 'id', title: 'ID' },
-    { key: 'author', title: 'المؤلف' },
-    { key: 'title', title: 'عنوان الكتاب' },
-    { key: 'description', title: 'الوصف' },
-    { key: 'price', title: 'السعر' },
-    { key: 'is_free', title: 'مجاني؟', render: (value) => (value === 1 ? 'نعم' : 'لا') },
-    { key: 'book_type', title: 'نوع الكتاب' },
-    { key: 'discount_rate', title: 'نسبة الخصم' },
-    { key: 'number_of_likes', title: 'عدد الإعجابات' },
-    { key: 'sectionid', title: 'القسم' },
-    {
-      key: 'actions',
-      title: 'الإجراءات',
-      render: (_, book) => (
-        <div>
-          <button className="btn-secondary" onClick={() => handleEditBook(book)}>تعديل</button>
-          <button className="btn-danger" onClick={() => handleDeleteBook(book)}>حذف</button>
-        </div>
-      )
-    }
-  ];*/
+
   const bookColumns = [
     { key: 'id', title: 'ID' },
     { key: 'author', title: 'المؤلف' },
@@ -287,22 +269,25 @@ if (selectedFile) {
     }
   
     try {
-      // استدعاء الـ API الفعلية
-      const response = await booksService.addQuestion(selectedBookId, newQuestionText);
+      await booksService.addQuestion(selectedBookId, newQuestionText);
   
-      // تحديث قائمة الأسئلة بعد الإضافة
-      const book = books.find(b => b.id === parseInt(selectedBookId));
-      const addedQuestion = response.question || {
-        id: Date.now(),
-        text: newQuestionText,
-        book_title: book?.title || 'غير محدد',
-        book_id: parseInt(selectedBookId)
-      };
+      // إعادة جلب الصفحة الحالية بعد الإضافة
+      const res = await booksService.getPaginatedQuestions(currentPage, perPage);
   
-      setQuestions([...questions, addedQuestion]);
+      // التعديل هنا
+      const list = res.list;        // ← التغيير هنا
+      setLastPage(res.last_page);   // ← التغيير هنا
+  
+      const formatted = list.map(q => ({
+        id: q.id,
+        text: q.question_text,
+        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_id: q.book_id,
+      }));
+  
+      setQuestions(formatted);
+  
       alert('تم إضافة السؤال بنجاح');
-  
-      // إعادة تهيئة الحقول وإغلاق المودال
       setNewQuestionText('');
       setSelectedBookId('');
       setIsQuestionModalOpen(false);
@@ -319,7 +304,6 @@ if (selectedFile) {
     setEditingQuestionText(question.text);
     setIsEditQuestionModalOpen(true);
   };
-
   const handleSaveEditQuestion = async () => {
     if (!editingQuestionText) {
       alert('يرجى كتابة السؤال');
@@ -327,15 +311,23 @@ if (selectedFile) {
     }
   
     try {
-      // استدعاء الـ API لتعديل السؤال
       await booksService.updateQuestion(editingQuestion.id, editingQuestionText);
   
-      // تحديث القائمة بعد التعديل
-      setQuestions(questions.map(q => q.id === editingQuestion.id ? { ...q, text: editingQuestionText } : q));
+      const res = await booksService.getPaginatedQuestions(currentPage, perPage);
+  
+      const list = res.list;        // ← التغيير هنا
+      setLastPage(res.last_page);   // ← التغيير هنا
+  
+      const formatted = list.map(q => ({
+        id: q.id,
+        text: q.question_text,
+        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_id: q.book_id,
+      }));
+  
+      setQuestions(formatted);
   
       alert('تم تعديل السؤال بنجاح');
-  
-      // إعادة تهيئة الحقول وإغلاق المودال
       setIsEditQuestionModalOpen(false);
       setEditingQuestion(null);
       setEditingQuestionText('');
@@ -345,16 +337,25 @@ if (selectedFile) {
       alert('حدث خطأ أثناء تعديل السؤال');
     }
   };
-  
   const handleDeleteQuestion = async (question) => {
     if (!window.confirm(`هل أنت متأكد من حذف السؤال "${question.text}"؟`)) return;
   
     try {
-      // استدعاء الـ API لحذف السؤال
       await booksService.deleteQuestion(question.id);
   
-      // تحديث قائمة الأسئلة بعد الحذف
-      setQuestions(questions.filter(q => q.id !== question.id));
+      const res = await booksService.getPaginatedQuestions(currentPage, perPage);
+  
+      const list = res.list;        // ← التغيير هنا
+     setLastPage(res.last_page);   // ← التغيير هنا
+  
+      const formatted = list.map(q => ({
+        id: q.id,
+        text: q.question_text,
+        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_id: q.book_id,
+      }));
+  
+      setQuestions(formatted);
   
       alert('تم حذف السؤال بنجاح');
   
@@ -363,6 +364,14 @@ if (selectedFile) {
       alert('حدث خطأ أثناء حذف السؤال');
     }
   };
+  
+  
+  const goToPage = (page) => {
+    if (page >= 1 && page <= lastPage) {
+      setCurrentPage(page);
+    }
+  };
+  
   
   // --- useEffect ---
   useEffect(() => {
@@ -379,8 +388,7 @@ if (selectedFile) {
   }, []);
   
   // --- جلب الكتب عند فتح قسم Book Management ---
-useEffect(() => {
-  if (activeSection === 'books') {
+  useEffect(() => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
@@ -392,10 +400,12 @@ useEffect(() => {
         setLoading(false);
       }
     };
-
-    fetchBooks();
-  }
-}, [activeSection]);
+  
+    if (activeSection === "books" || activeSection === "questions") {
+      fetchBooks();
+    }
+  }, [activeSection]);
+  
 
   useEffect(() => {
     let filtered = books;
@@ -412,15 +422,29 @@ useEffect(() => {
     else if (searchTypeQuestion === 'book' && searchBookId) filtered = questions.filter(q => q.book_id === parseInt(searchBookId));
     setFilteredQuestions(filtered);
   }, [questions, searchTypeQuestion, searchQuestionTerm, searchBookId]);
-
-  
   useEffect(() => {
     if (activeSection === 'questions') {
       const fetchQuestions = async () => {
         try {
           setLoading(true);
-          const questionsData = await booksService.getAllQuestions();
-          setQuestions(questionsData || []);
+  
+          const response = await booksService.getPaginatedQuestions(currentPage, perPage);
+
+// ← تحديث رقم آخر صفحة
+setLastPage(response.last_page);
+
+// ← تجهيز البيانات
+const formatted = response.list.map(q => ({
+  id: q.id,
+  text: q.question_text,
+  book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+  book_id: q.book_id,
+}));
+
+// ← حفظها في state
+setQuestions(formatted);
+
+  
         } catch (error) {
           console.error("Error fetching questions:", error);
         } finally {
@@ -430,7 +454,7 @@ useEffect(() => {
   
       fetchQuestions();
     }
-  }, [activeSection]);
+  }, [activeSection, currentPage, perPage, books]);
   
   return (
     <div className="books-management">
@@ -529,15 +553,15 @@ useEffect(() => {
 
 
           {/* جدول الأقسام */}
-<div className="section-header" style={{ marginTop: '40px' }}>
-  <h3>الأقسام المتوفرة</h3>
-</div>
+            <div className="section-header" style={{ marginTop: '40px' }}>
+              <h3>الأقسام المتوفرة</h3>
+         </div>
 
-<DataTable
-  columns={categoryColumns}
-  data={categories}
-  loading={false}
-/>
+          <DataTable
+            columns={categoryColumns}
+            data={categories}
+            loading={false}
+          />
 
         </div>
       )}
@@ -601,6 +625,27 @@ useEffect(() => {
           </div>
   
           <DataTable columns={questionColumns} data={filteredQuestions} loading={loading} />
+          <div className="pagination">
+  <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+    &laquo; Prev
+  </button>
+
+  {Array.from({ length: lastPage }, (_, i) => (
+    <button
+      key={i + 1}
+      onClick={() => goToPage(i + 1)}
+      className={currentPage === i + 1 ? 'active' : ''}
+    >
+      {i + 1}
+    </button>
+  ))}
+
+  <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage}>
+    Next &raquo;
+  </button>
+</div>
+
+        
         </div>
       )}
   

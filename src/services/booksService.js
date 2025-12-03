@@ -156,6 +156,7 @@ getAllCategories: async () => {
   // 🟦 الأسئلة (Questions)
   // ============================================================
 
+  
   // إضافة سؤال لكتاب (Admin)
   addQuestion: async (bookId, questionText) => {
     try {
@@ -189,7 +190,22 @@ getAllCategories: async () => {
       throw error;
     }
   },
-
+  getPaginatedQuestions: async (page = 1, perPage = 10) => {
+    try {
+      const response = await api.get(`/admin/questions?page=${page}&per_page=${perPage}`);
+      
+      return {
+        list: response.data.data.data,      // ← قائمة الأسئلة
+        current_page: response.data.data.current_page,
+        last_page: response.data.data.last_page,
+        total: response.data.data.total
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  
   // ============================================================
   // 🟦 الإجابات (Answers)
   // ============================================================
