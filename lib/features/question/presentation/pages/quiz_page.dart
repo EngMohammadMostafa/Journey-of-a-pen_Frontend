@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../provider/quiz_provider.dart';
 
 class QuizPage extends StatefulWidget {
-  final int bookId; // ID الكتاب
+  final int bookId;
   final VoidCallback onCompleted;
 
   const QuizPage({
@@ -22,31 +22,65 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void initState() {
     super.initState();
-    // تحميل الأسئلة من السيرفر مباشرة عند فتح الصفحة
     Future.microtask(() {
+      // تحميل الأسئلة وبدء الجلسة تلقائياً
       context.read<QuizProvider>().loadQuestions(widget.bookId);
     });
+  }
+
+  @override
+  void dispose() {
+    // عند الخروج قبل إنهاء الجلسة، نغلق الجلسة
+    context.read<QuizProvider>().exitSession(widget.bookId);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<QuizProvider>();
 
-    // حالة التحميل
     if (provider.isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF1C597B),
+        body: Center(child: CircularProgressIndicator(color: Colors.yellow)),
+      );
+    }
+
+    if (provider.errorMessage != null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF1C597B),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: const Text('Quiz', style: TextStyle(color: Colors.white)),
+        ),
         body: Center(
-          child: CircularProgressIndicator(color: Colors.yellow),
+          child: Text(
+            provider.errorMessage!,
+            style: const TextStyle(color: Colors.white, fontSize: 20),
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }
 
-    // إذا لم توجد أسئلة
     if (provider.questions.isEmpty) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF1C597B),
-        body: Center(
+      return Scaffold(
+        backgroundColor: const Color(0xFF1C597B),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: const Text('Quiz', style: TextStyle(color: Colors.white)),
+        ),
+        body: const Center(
           child: Text(
             "لا توجد أسئلة لهذا الكتاب",
             style: TextStyle(color: Colors.white, fontSize: 20),
@@ -56,8 +90,7 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     final currentQuestion = provider.currentQuestion!;
-    final progress =
-        (provider.currentIndex + 1) / provider.questions.length;
+    final progress = (provider.currentIndex + 1) / provider.questions.length;
 
     return Scaffold(
       backgroundColor: const Color(0xFF1C597B),
@@ -73,20 +106,21 @@ class _QuizPageState extends State<QuizPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () async {
+                      await provider.exitSession(widget.bookId);
+                      Navigator.pop(context);
+                    },
                   ),
                   Text(
                     'Quiz ${provider.currentIndex + 1}/${provider.questions.length}',
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 48),
                 ],
               ),
-
               const SizedBox(height: 12),
 
               // Progress Bar
@@ -99,7 +133,6 @@ class _QuizPageState extends State<QuizPage> {
                   backgroundColor: Colors.white30,
                 ),
               ),
-
               const SizedBox(height: 24),
 
               // Question Card
@@ -112,14 +145,12 @@ class _QuizPageState extends State<QuizPage> {
                   child: Text(
                     currentQuestion.question,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
 
               // Options
@@ -139,8 +170,7 @@ class _QuizPageState extends State<QuizPage> {
                         groupValue: selectedOption,
                         onChanged: provider.isSubmitting
                             ? null
-                            : (value) =>
-                            setState(() => selectedOption = value),
+                            : (value) => setState(() => selectedOption = value),
                         title: Text(
                           answer.answer,
                           style: const TextStyle(
@@ -157,7 +187,7 @@ class _QuizPageState extends State<QuizPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Exit Button
+                  // Exit
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white30,
@@ -165,15 +195,16 @@ class _QuizPageState extends State<QuizPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
+                          borderRadius: BorderRadius.circular(14)),
                     ),
-                    onPressed: () => Navigator.pop(context),
-                    child:
-                    const Text('Exit', style: TextStyle(fontSize: 16)),
+                    onPressed: () async {
+                      await provider.exitSession(widget.bookId);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Exit', style: TextStyle(fontSize: 16)),
                   ),
 
-                  // Next / Submit Button
+                  // Next / Finish
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.yellow,
@@ -181,31 +212,52 @@ class _QuizPageState extends State<QuizPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
+                          borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: selectedOption == null
                         ? null
                         : () async {
-                      final selectedAnswerId =
-                          currentQuestion.answers[selectedOption!].id;
+                      final answer =
+                      currentQuestion.answers[selectedOption!];
 
-                      await provider.submitAnswer(
+                      // حفظ الإجابة محلياً وارسالها للباك
+                      await provider.saveAnswer(
                         bookId: widget.bookId,
-                        answerId: selectedAnswerId,
+                        questionId: currentQuestion.id,
+                        answerId: answer.id,
+                        isCorrect: answer.isCorrect,
                       );
 
-                      // إذا انتهت الجلسة
-                      if (provider.isSessionFinished) {
-                        widget.onCompleted();
-                        Navigator.pop(context);
-                      }
+                      // انتقال
+                      if (provider.currentIndex ==
+                          provider.questions.length - 1) {
+                        await provider.finishSession(widget.bookId);
 
-                      setState(() => selectedOption = null);
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("تم إنهاء الاختبار"),
+                            content: Text(
+                                "لقد حصلت على ${provider.totalPoints} نقطة."),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  widget.onCompleted();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("حسناً"),
+                              )
+                            ],
+                          ),
+                        );
+                      } else {
+                        provider.nextQuestion();
+                        setState(() => selectedOption = null);
+                      }
                     },
                     child: Text(
-                      provider.currentIndex ==
-                          provider.questions.length - 1
+                      provider.currentIndex == provider.questions.length - 1
                           ? 'إنهاء'
                           : 'التالي',
                       style: const TextStyle(fontSize: 16),
@@ -213,7 +265,6 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
             ],
           ),

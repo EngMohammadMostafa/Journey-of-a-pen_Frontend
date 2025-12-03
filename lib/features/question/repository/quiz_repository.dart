@@ -23,19 +23,27 @@ class QuizRepository {
   }
 
   // =============================
-  //  إرسال إجابة واحدة
+  //  بدء الجلسة
   // =============================
-  Future<Map<String, dynamic>> submitAnswer({
+  Future<Map<String, dynamic>> startSession(int bookId) async {
+    final response = await _api.post('/books/$bookId/session/start');
+    final raw = response.data;
+    return raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
+  }
+
+  // =============================
+  //  تسجيل إجابة واحدة
+  // =============================
+  Future<Map<String, dynamic>> recordAnswer({
     required int bookId,
     required int questionId,
     required int answerId,
   }) async {
     final response = await _api.post(
-      '/books/$bookId/session/submit',
+      '/books/$bookId/session/answer',
       data: {
-        'answers': [
-          {'question_id': questionId, 'answer_id': answerId}
-        ]
+        'question_id': questionId,
+        'answer_id': answerId,
       },
     );
 
@@ -46,12 +54,20 @@ class QuizRepository {
   // =============================
   //  إنهاء الجلسة
   // =============================
-  Future<Map<String, dynamic>> finishSession(int bookId) async {
+  Future<Map<String, dynamic>> finishSession(int bookId, {List<Map<String, dynamic>>? answers}) async {
     final response = await _api.post(
       '/books/$bookId/session/submit',
+      data: answers != null ? {'answers': answers} : null,
     );
 
     final raw = response.data;
     return raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
+  }
+
+  // =============================
+  //  إنهاء الجلسة عند الخروج
+  // =============================
+  Future<void> exitSession(int bookId) async {
+    await _api.post('/books/$bookId/session/exit');
   }
 }
