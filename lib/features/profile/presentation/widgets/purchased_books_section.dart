@@ -114,6 +114,7 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
       context,
       MaterialPageRoute(
         builder: (_) => QuizPage(
+          bookId: widget.books[bookIndex].id, // ← نمرّر معرف الكتاب هنا
           onCompleted: () {
             setState(() => quizCompleted[bookIndex] = true);
           },

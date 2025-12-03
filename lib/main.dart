@@ -14,6 +14,8 @@ import 'features/auth/presentation/pages/welcome_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/auth/presentation/pages/choose_interests_page.dart';
 import 'features/auth/presentation/pages/success_page.dart';
+import 'features/question/provider/quiz_provider.dart';
+import 'features/question/repository/quiz_repository.dart';
 import 'features/quotes/presentation/pages/quote.dart';
 
 // Provider و Repository
@@ -56,7 +58,6 @@ class MyApp extends StatelessWidget {
           create: (_) => ProfileProvider(repository: profileRepo),
         ),
 
-
         // Books Repository
         ChangeNotifierProvider<BooksRepository>(
           create: (_) => BooksRepository(apiService),
@@ -70,6 +71,10 @@ class MyApp extends StatelessWidget {
         // Home Provider
         ChangeNotifierProvider<HomeProvider>(
           create: (_) => HomeProvider(BooksService(apiService)),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => QuizProvider(QuizRepository(apiService)),
         ),
       ],
       child: MaterialApp(
