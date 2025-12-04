@@ -349,3 +349,75 @@
       font-size: 1.5rem;
     }
   }
+
+
+
+  /* answer modal (form adding /updating)*/
+
+.answer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.answer-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.answer-form label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.answer-form input[type="text"],
+.answer-form select {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.answer-form input[type="text"]:focus,
+.answer-form select:focus {
+  border-color: #4C869F;
+  box-shadow: 0 0 0 2px rgba(76, 134, 159, 0.1);
+}
+
+.answer-form input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.answer-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.answer-form .form-actions .btn-secondary {
+  background: #aaa;
+  color: #fff;
+}
+
+.answer-form .form-actions .btn-primary {
+  background: #4C869F;
+  color: white;
+}
+
+.answer-form .answer-form-row {
+  display: flex;
+  justify-content: space-between; /* Checkbox على اليسار والأزرار على اليمين */
+  align-items: center;
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.answer-form .checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+

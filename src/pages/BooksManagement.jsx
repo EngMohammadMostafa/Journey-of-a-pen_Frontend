@@ -59,11 +59,29 @@ const [currentPage, setCurrentPage] = useState(1);
 const [perPage, setPerPage] = useState(10);
 const [lastPage, setLastPage] = useState(1);
 
+// --- حالات الاجوبة ---
+const [answers, setAnswers] = useState([]);
+const [filteredAnswers, setFilteredAnswers] = useState([]);
+const [answersPage, setAnswersPage] = useState(1);
+const [answersLastPage, setAnswersLastPage] = useState(1);
+const [loadingAnswers, setLoadingAnswers] = useState(false);
+const [isAnswersModalOpen, setIsAnswersModalOpen] = useState(false);
+
+
+// --- حالات مودالات الإجابات ---
+const [showAddAnswerModal, setShowAddAnswerModal] = useState(false);
+const [showEditAnswerModal, setShowEditAnswerModal] = useState(false);
+const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+const [selectedAnswer, setSelectedAnswer] = useState(null);
+const [answerText, setAnswerText] = useState("");
+const [isCorrect, setIsCorrect] = useState(false);
+
   const questionStats = {
     totalQuestions: questions.length,
     correctAnswers: questions.filter(q => q.is_correct === 1).length,
     totalPoints: questions.reduce((sum, q) => sum + (q.points || 0), 0)
   };
+
 
   const bookColumns = [
     { key: 'id', title: 'ID' },
@@ -123,10 +141,37 @@ const [lastPage, setLastPage] = useState(1);
         <div>
           <button className="btn-secondary" onClick={() => openEditQuestionModal(question)}>تعديل</button>
           <button className="btn-danger" onClick={() => handleDeleteQuestion(question)}>حذف</button>
+          <button className="btn btn-primary" onClick={() => openAddAnswer(question.id)}>إضافة جواب</button>
         </div>
       )
     }
   ];
+
+  // ↘ هنا بعد questionColumns تضيف:
+  const answerColumns = [
+    { key: 'id', title: 'ID' },
+    { key: 'answer_text', title: 'النص' },
+    { key: 'question_id', title: 'ID السؤال' },
+    { 
+      key: 'is_correct', 
+      title: 'صحيح أم خطأ',
+      render: (value) => value ? " صحيحة" : " خاطئة"
+    },
+    {
+      key: 'actions',
+      title: 'الإجراءات',
+      render: (_, answer) => (
+        <div>
+          <button onClick={() => openEditAnswer(answer)} className="btn btn-warning">تعديل</button>
+          <button onClick={() => handleDeleteAnswer(answer.id)} className="btn btn-danger">حذف</button>
+        </div>
+      )
+    }
+  ];
+  
+
+
+
 
   // --- التبديل بين الأقسام ---
   const handleRequests = () => setActiveSection('requests');
@@ -297,6 +342,8 @@ if (selectedFile) {
       alert('حدث خطأ أثناء إضافة السؤال');
     }
   };
+
+
   
 
   const openEditQuestionModal = (question) => {
@@ -365,13 +412,112 @@ if (selectedFile) {
     }
   };
   
+  //دوال ادارة الاجوبة 
+
+  const openAddAnswer = (questionId = null) => {
+    setSelectedQuestionId(questionId);
+    setAnswerText("");
+    setIsCorrect(false);
+    setShowAddAnswerModal(true);
+  };
+  
+  
+  const handleAddAnswer = async () => {
+
+     // تحقق من اختيار السؤال
+  if (!selectedQuestionId) {
+    alert("يرجى اختيار السؤال أولاً");
+    return;
+  }
+
+    try {
+      const payload = {
+        answer_text: answerText,
+        is_correct: isCorrect,
+      };
+
+  // إرسال السؤال المختار مع الجواب
+      await booksService.addAnswer(selectedQuestionId, payload);
+  
+      setShowAddAnswerModal(false);
+
+      fetchAnswers(); // إعادة تحميل الإجابات
+    } catch (error) {
+      console.error("Error adding answer:", error);
+    }
+  };
+  
+  
+
+
+  const openEditAnswer = (answer) => {
+    setSelectedAnswer(answer);
+    setAnswerText(answer.answer_text);
+    setIsCorrect(answer.is_correct);
+    setShowEditAnswerModal(true);
+  };
+  
+  const handleEditAnswer = async () => {
+    try {
+      const payload = {
+        answer_text: answerText,
+        is_correct: isCorrect,
+      };
+  
+      await booksService.updateAnswer(selectedAnswer.id, payload);
+  
+      setShowEditAnswerModal(false);
+      fetchAnswers(); // إعادة تحميل الإجابات
+    } catch (error) {
+      console.error("Error updating answer:", error);
+    }
+  };
+  
+
+
+  const handleDeleteAnswer = async (answerId) => {
+    if (!window.confirm("هل أنت متأكد من حذف الإجابة؟")) return;
+  
+    try {
+      await booksService.deleteAnswer(answerId);
+      fetchAnswers();
+    } catch (error) {
+      console.error("Error deleting answer:", error);
+    }
+  };
+  const fetchAnswers = async () => {
+    try {
+      setLoadingAnswers(true);
+  
+      const res = await booksService.getPaginatedAnswers(answersPage, 10);
+  
+      setAnswers(res.data);
+      setFilteredAnswers(res.data);
+      setAnswersLastPage(res.meta.last_page);
+  
+    } catch (error) {
+      console.error("Error fetching answers:", error);
+    } finally {
+      setLoadingAnswers(false);
+    }
+  };
+  
   
   const goToPage = (page) => {
     if (page >= 1 && page <= lastPage) {
       setCurrentPage(page);
     }
   };
+
+
+  // ====== دالة تغيير صفحة الإجابات ======
+  const goToAnswersPage = (page) => {
+    if (page >= 1 && page <= answersLastPage) {
+      setAnswersPage(page); // ← هذا سيستدعي fetchAnswers تلقائيًا بسبب useEffect
+    }
+  };
   
+
   
   // --- useEffect ---
   useEffect(() => {
@@ -422,6 +568,7 @@ if (selectedFile) {
     else if (searchTypeQuestion === 'book' && searchBookId) filtered = questions.filter(q => q.book_id === parseInt(searchBookId));
     setFilteredQuestions(filtered);
   }, [questions, searchTypeQuestion, searchQuestionTerm, searchBookId]);
+  
   useEffect(() => {
     if (activeSection === 'questions') {
       const fetchQuestions = async () => {
@@ -456,6 +603,43 @@ setQuestions(formatted);
     }
   }, [activeSection, currentPage, perPage, books]);
   
+
+
+useEffect(() => {
+  if (activeSection === 'questions') {
+   
+   
+    const fetchAnswers = async () => {
+      try {
+        setLoadingAnswers(true);
+    
+        // استدعاء الـ API
+        const res = await booksService.getPaginatedAnswers(answersPage, 10);
+    
+        // تحديث الـ state
+        setAnswers(res.data);
+        setFilteredAnswers(res.data);
+        setAnswersLastPage(res.meta.last_page);
+    
+      } catch (error) {
+        console.error("Error fetching answers:", error);
+      } finally {
+        setLoadingAnswers(false);
+      }
+    };
+    
+
+    fetchAnswers();
+  }
+}, [activeSection, answersPage]);
+
+
+
+  // ====== جلب الإجابات مع Pagination ======
+
+
+
+  
   return (
     <div className="books-management">
     <div className="page-header">
@@ -474,9 +658,16 @@ setQuestions(formatted);
       )}
 
       {activeSection === 'questions' && (
+        <div style={{ display: 'flex', gap: '10px' }}>
         <button className="btn-primary add-book-btn" onClick={() => setIsQuestionModalOpen(true)}>
           + Add New Question
         </button>
+    
+        <button className="btn-primary add-book-btn" onClick={() => openAddAnswer(null)}>
+  + Add New Answer
+</button>
+
+      </div>
       )}
 
     </div>
@@ -568,86 +759,123 @@ setQuestions(formatted);
   
      
   
-      {/* قسم إدارة الأسئلة */}
-      {activeSection === 'questions' && (
-        <div className="questions-section">
-          <div className="section-header">
-            <h2>Questions and Answers Section</h2>
-          </div>
-  
-          <div className="question-stats">
-            <div className="stat-card">
-              <h3>Total Number Of Questions</h3>
-              <span className="stat-number">{questionStats.totalQuestions}</span>
-            </div>
-            <div className="stat-card">
-              <h3>Number Of Correct Answers</h3>
-              <span className="stat-number">{questionStats.correctAnswers}</span>
-            </div>
-            <div className="stat-card">
-              <h3>Total Number Of Points Earned</h3>
-              <span className="stat-number">{questionStats.totalPoints}</span>
-            </div>
-          </div>
-  
-          <div className="questions-filters">
-            <div className="filter-section">
-              <select value={searchTypeQuestion} onChange={(e) => setSearchTypeQuestion(e.target.value)} className="filter-select">
-                <option value="text">Search For A Question</option>
-                <option value="book">Search By Book</option>
-              </select>
-            </div>
-  
-            {searchTypeQuestion === 'text' && (
-              <div className="filter-section">
-                <input
-                  type="text"
-                  placeholder="Search For A Question"
-                  value={searchQuestionTerm}
-                  onChange={(e) => setSearchQuestionTerm(e.target.value)}
-                  className="search-input"
-                />
-                <button className="btn-secondary" onClick={() => setSearchQuestionTerm('')}>View All Questions</button>
-              </div>
-            )}
-  
-            {searchTypeQuestion === 'book' && (
-              <div className="filter-section">
-                <select value={searchBookId} onChange={(e) => setSearchBookId(e.target.value)} className="filter-select">
-                  <option value="">-- كل الكتب --</option>
-                  {books.map(book => (
-                    <option key={book.id} value={book.id}>{book.title}</option>
-                  ))}
-                </select>
-                <button className="btn-secondary" onClick={() => setSearchBookId('')}>عرض كل الأسئلة</button>
-              </div>
-            )}
-          </div>
-  
-          <DataTable columns={questionColumns} data={filteredQuestions} loading={loading} />
-          <div className="pagination">
-  <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-    &laquo; Prev
-  </button>
+    {/* قسم إدارة الأسئلة */}
+{activeSection === 'questions' && (
+  <div className="questions-section">
+    <div className="section-header">
+      <h2>Questions and Answers Section</h2>
+    </div>
 
-  {Array.from({ length: lastPage }, (_, i) => (
-    <button
-      key={i + 1}
-      onClick={() => goToPage(i + 1)}
-      className={currentPage === i + 1 ? 'active' : ''}
-    >
-      {i + 1}
-    </button>
-  ))}
+    <div className="question-stats">
+      <div className="stat-card">
+        <h3>Total Number Of Questions</h3>
+        <span className="stat-number">{questionStats.totalQuestions}</span>
+      </div>
+      <div className="stat-card">
+        <h3>Number Of Correct Answers</h3>
+        <span className="stat-number">{questionStats.correctAnswers}</span>
+      </div>
+      <div className="stat-card">
+        <h3>Total Number Of Points Earned</h3>
+        <span className="stat-number">{questionStats.totalPoints}</span>
+      </div>
+    </div>
 
-  <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage}>
-    Next &raquo;
-  </button>
-</div>
+    <div className="questions-filters">
+      <div className="filter-section">
+        <select value={searchTypeQuestion} onChange={(e) => setSearchTypeQuestion(e.target.value)} className="filter-select">
+          <option value="text">Search For A Question</option>
+          <option value="book">Search By Book</option>
+        </select>
+      </div>
 
-        
+      {searchTypeQuestion === 'text' && (
+        <div className="filter-section">
+          <input
+            type="text"
+            placeholder="Search For A Question"
+            value={searchQuestionTerm}
+            onChange={(e) => setSearchQuestionTerm(e.target.value)}
+            className="search-input"
+          />
+          <button className="btn-secondary" onClick={() => setSearchQuestionTerm('')}>View All Questions</button>
         </div>
       )}
+
+      {searchTypeQuestion === 'book' && (
+        <div className="filter-section">
+          <select value={searchBookId} onChange={(e) => setSearchBookId(e.target.value)} className="filter-select">
+            <option value="">-- كل الكتب --</option>
+            {books.map(book => (
+              <option key={book.id} value={book.id}>{book.title}</option>
+            ))}
+          </select>
+          <button className="btn-secondary" onClick={() => setSearchBookId('')}>عرض كل الأسئلة</button>
+        </div>
+      )}
+    </div>
+
+    <DataTable columns={questionColumns} data={filteredQuestions} loading={loading} />
+    
+    <div className="pagination">
+      <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+        « Prev
+      </button>
+
+      {Array.from({ length: lastPage }, (_, i) => (
+        <button
+          key={i + 1}
+          onClick={() => goToPage(i + 1)}
+          className={currentPage === i + 1 ? 'active' : ''}
+        >
+          {i + 1}
+        </button>
+      ))}
+
+      <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage}>
+        Next »
+      </button>
+    </div>
+
+    {/* ====== جدول الإجابات أسفل الأسئلة ====== */}
+
+
+    <div className="answers-section" style={{ marginTop: '40px' }}>
+      <h3>Answers List</h3>
+
+      <DataTable 
+        columns={answerColumns}
+        data={filteredAnswers}
+        loading={loadingAnswers}
+      />
+
+      <div className="pagination">
+        <button onClick={() => goToAnswersPage(answersPage - 1)} disabled={answersPage === 1}>
+          « Prev
+        </button>
+
+        {Array.from({ length: answersLastPage }, (_, i) => (
+          <button
+            key={i + 1}
+            onClick={() => goToAnswersPage(i + 1)}
+            className={answersPage === i + 1 ? 'active' : ''}
+          >
+            {i + 1}
+          </button>
+        ))}
+
+        <button onClick={() => goToAnswersPage(answersPage + 1)} disabled={answersPage === answersLastPage}>
+              Next »
+        </button>
+      </div>
+    </div>
+
+  </div>
+)}
+
+
+      
+      
   
       {/* مودال إضافة / تعديل كتاب */}
       <Modal
@@ -783,6 +1011,80 @@ setQuestions(formatted);
           </div>
         </div>
       </Modal>
+
+
+      {/* مودال إضافة / تعديل جواب */}
+<Modal
+  isOpen={showAddAnswerModal || showEditAnswerModal}
+  onClose={() => {
+    setShowAddAnswerModal(false);
+    setShowEditAnswerModal(false);
+    setSelectedAnswer(null);
+    setAnswerText("");
+    setIsCorrect(false);
+  }}
+  title={selectedAnswer ? "تعديل جواب" : "إضافة جواب"}
+><div className="answer-form">
+  {/* اختيار السؤال أولاً */}
+  <div className="form-group">
+    <label>اختر السؤال *</label>
+    <select 
+      value={selectedQuestionId || ""} 
+      onChange={(e) => setSelectedQuestionId(e.target.value)} 
+      required
+    >
+      <option value="">-- اختر السؤال --</option>
+      {questions.map(q => (
+        <option key={q.id} value={q.id}>
+          {q.id} - {q.text.slice(0, 50)}...
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* حقل نص الجواب */}
+  <div className="form-group">
+    <label>نص الجواب *</label>
+    <input
+      type="text"
+      value={answerText}
+      onChange={(e) => setAnswerText(e.target.value)}
+      required
+    />
+  </div>
+
+{/* checkbox صحيح */}
+<div className="checkbox-inline">
+  <input
+    type="checkbox"
+    checked={isCorrect}
+    onChange={(e) => setIsCorrect(e.target.checked)}
+    id="isCorrect"
+  />
+  <label htmlFor="isCorrect">صحيح</label>
+</div>
+
+
+
+
+  {/* أزرار حفظ / إلغاء */}
+  <div className="form-actions">
+    <button className="btn-secondary" onClick={() => {
+      setShowAddAnswerModal(false);
+      setShowEditAnswerModal(false);
+      setSelectedAnswer(null);
+      setAnswerText("");
+      setIsCorrect(false);
+    }}>إلغاء</button>
+
+    <button className="btn-primary" onClick={selectedAnswer ? handleEditAnswer : handleAddAnswer}>
+      {selectedAnswer ? "تعديل" : "إضافة"}
+    </button>
+  </div>
+</div>
+
+</Modal>
+
     </div>
   );
   

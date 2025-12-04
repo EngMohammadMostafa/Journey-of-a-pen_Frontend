@@ -238,7 +238,21 @@ getAllCategories: async () => {
     } catch (error) {
       throw error;
     }
+  },
+
+ // داخل booksService
+    getPaginatedAnswers: async (page = 1, perPage = 10) => {
+  try {
+    const response = await api.get('/admin/answers', {
+      params: { page, per_page: perPage }  // ← مهم: params هنا
+    });
+    return response.data; // ← هذا يعيد data و meta من الباكند
+  } catch (error) {
+    throw error;
   }
+},
+
 
 };
+
 
