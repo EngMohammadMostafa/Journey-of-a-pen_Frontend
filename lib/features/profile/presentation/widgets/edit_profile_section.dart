@@ -37,7 +37,6 @@ class _EditProfileSectionState extends State<EditProfileSection> {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
     UserModel? user = widget.user ?? provider.user;
 
-    // إذا لم يكن موجود، قم بتحميله
     if (user == null) {
       await provider.loadUser();
       user = provider.user;
@@ -51,6 +50,7 @@ class _EditProfileSectionState extends State<EditProfileSection> {
 
     if (mounted) setState(() => isLoading = false);
   }
+
 
 
   @override
@@ -231,7 +231,6 @@ class _EditProfileSectionState extends State<EditProfileSection> {
       },
     );
   }
-
   Widget _inputField({
     required TextEditingController controller,
     required String label,
@@ -247,6 +246,7 @@ class _EditProfileSectionState extends State<EditProfileSection> {
       decoration: _inputDecoration(label: label, icon: icon),
     );
   }
+
 
   InputDecoration _inputDecoration({required String label, required IconData icon}) {
     return InputDecoration(

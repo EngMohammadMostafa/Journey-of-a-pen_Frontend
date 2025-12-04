@@ -152,7 +152,6 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-
   // ============================
   // الخدمات
   // ============================
@@ -449,7 +448,7 @@ class _HomeContentState extends State<HomeContent> {
                                             book.toggleLike(); // استخدم دالة toggleLike من BookModel
                                           });
 
-                                          // 🔹 هنا يمكن استدعاء API لتحديث الإعجاب في الباك
+                                          //  هنا يمكن استدعاء API لتحديث الإعجاب في الباك
                                           // مثال:
                                           // booksService.toggleLike(book.id, book.isLikedByUser);
                                         },

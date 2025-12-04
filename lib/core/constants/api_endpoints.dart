@@ -20,6 +20,8 @@ class ApiEndpoints {
 
   //  Books & Categories
   static const String categories = "/categories"; // GET جميع الأقسام
+  static String categoryDetails(int categoryId) => "/categories/$categoryId"; // GET تفاصيل قسم
+
   static String booksByCategory(int categoryId) => "/categories/$categoryId/books"; // GET الكتب حسب القسم
   static const String allBooks = "/books"; // GET جميع الكتب
   static String bookDetails(int bookId) => "/books/$bookId"; // GET تفاصيل كتاب
@@ -34,6 +36,4 @@ class ApiEndpoints {
   static String recordAnswer(int bookId) => "/books/$bookId/session/answer"; // POST تسجيل إجابة
   static String submitAnswers(int bookId) => "/books/$bookId/session/submit"; // POST إنهاء الجلسة
   static String exitSession(int bookId) => "/books/$bookId/session/exit"; // POST الخروج من الجلسة
-
-
 }

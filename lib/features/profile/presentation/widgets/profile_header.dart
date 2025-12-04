@@ -58,13 +58,13 @@ class ProfileHeader extends StatelessWidget {
               SizedBox(height: 10),
               Text(
                 username,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+
               SizedBox(height: 15),
 
               // صف الأيقونات

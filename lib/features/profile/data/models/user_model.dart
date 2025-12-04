@@ -3,7 +3,7 @@ class UserModel {
   final String username;
   final String email;
   final int? age;
-  final int? gender;
+  final int? gender; // 1 male, 2 female
   final int userType;
   final int points;
   final int purchasesCount;
@@ -29,21 +29,25 @@ class UserModel {
       points: json['points'] ?? 0,
       purchasesCount: json['purchases_count'] ?? 0,
       age: json['age'],
-      gender: json['gender'],
+      gender: _parseGender(json['gender']),
     );
   }
 
-  /// 🔄 تحويل الكائن إلى JSON لتحديث المستخدم
+  /// 🔄 تحويل الكائن إلى JSON
   Map<String, dynamic> toJson() {
-    return {
+    final data = {
       "username": username,
       "age": age,
       "gender": gender,
-      // ملاحظات: لا نرسل points أو purchasesCount لأنها محسوبة في الباك
     };
+
+    // إزالة المفاتيح ذات القيمة null (مفضل في PATCH)
+    data.removeWhere((key, value) => value == null);
+
+    return data;
   }
 
-  /// ✏️ دالة copyWith لتحديث القيم بسهولة
+  /// ✏️ دالة تحديث copyWith
   UserModel copyWith({
     String? username,
     String? email,
@@ -65,9 +69,25 @@ class UserModel {
     );
   }
 
-  /// 🧩 لتحسين عرض البيانات (debug)
+  ///  لعرض البيانات
   @override
   String toString() {
     return 'UserModel(id: $id, username: $username, email: $email, points: $points, purchases: $purchasesCount)';
+  }
+
+  ///  أداة لتحويل الجنس من JSON
+  static int? _parseGender(dynamic value) {
+    if (value == null) return null;
+
+    if (value is int) {
+      return (value == 1 || value == 2) ? value : null;
+    }
+
+    if (value is String) {
+      if (value.toLowerCase() == "male") return 1;
+      if (value.toLowerCase() == "female") return 2;
+    }
+
+    return null;
   }
 }

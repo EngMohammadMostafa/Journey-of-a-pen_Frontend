@@ -61,8 +61,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final book = widget.book;
