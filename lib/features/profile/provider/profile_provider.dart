@@ -17,44 +17,41 @@ class ProfileProvider extends ChangeNotifier {
   bool loading = false;
   String? error;
 
-  /// قائمة الكتب المحملة محليًا أو من الباك
   List<BookModel> downloadedBooks = [];
 
   /// تحميل بيانات المستخدم من الباك اند
   Future<void> loadUser() async {
-    loading = true;
-    error = null;
-    notifyListeners();
-
     try {
+      loading = true;
+      error = null;
+      notifyListeners();
+
       final token = await PrefsHelper.getToken();
       if (token != null && token.isNotEmpty) {
         _repository.setAuthToken(token.trim());
       }
 
-      // جلب بيانات المستخدم
       user = await _repository.getCurrentUser();
 
-      // جلب النقاط الكلية للمستخدم من الباك
-      try {
-        final totalPoints = await _repository.getUserTotalPoints(); // يجب أن يُرجع int
-        user = user!.copyWith(points: totalPoints);
-      } catch (e) {
-        print("Error fetching total points: $e");
-      }
-
-    } catch (e) {
-      error = e.toString();
-    } finally {
       loading = false;
+      notifyListeners();
+    } catch (e) {
+      loading = false;
+      error = e.toString();
       notifyListeners();
     }
   }
 
+  /// تحديث بيانات المستخدم عبر الباك اند مع رسائل خطأ واضحة
+  Future<String?> updateUser(Map<String, dynamic> body) async {
+    if (user == null) return "المستخدم غير موجود";
 
-  /// تحديث بيانات المستخدم عبر الباك اند
-  Future<bool> updateUser(Map<String, dynamic> body) async {
-    if (user == null) return false;
+    // التحقق من الحقول المطلوبة قبل الإرسال
+    if ((body['username'] as String?)?.trim().isEmpty ?? true ||
+        (body['age'] == null) ||
+        (body['gender'] == null)) {
+      return "يرجى ملء جميع الحقول المطلوبة";
+    }
 
     try {
       loading = true;
@@ -76,16 +73,34 @@ class ProfileProvider extends ChangeNotifier {
 
       loading = false;
       notifyListeners();
-      return true;
+      return null; // null يعني نجاح العملية
     } catch (e) {
       loading = false;
       error = e.toString();
       notifyListeners();
-      return false;
+      // تحويل أي exception إلى رسالة مفهومة
+      if (kDebugMode) print("Error updating user: $e");
+      return "فشل تحديث البيانات، حاول مرة أخرى";
+    }
+  }
+  int userPoints = 0;
+
+  Future<void> loadUserPoints() async {
+    try {
+      loading = true;
+      notifyListeners();
+
+      userPoints = await _repository.getUserTotalPoints(); // استدعاء API
+      loading = false;
+      notifyListeners();
+    } catch (e) {
+      loading = false;
+      error = e.toString();
+      notifyListeners();
     }
   }
 
-  /// إضافة كتاب محمّل إلى قائمة downloadedBooks
+
   void addDownloadedBook(BookModel book) {
     if (!downloadedBooks.any((b) => b.id == book.id)) {
       downloadedBooks.add(book);
@@ -93,7 +108,6 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// 🔹 جلب الكتب المحمّلة للمستخدم من الباك
   Future<void> loadDownloadedBooks() async {
     if (user == null) return;
 
@@ -102,7 +116,7 @@ class ProfileProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      downloadedBooks = await _repository.getUserBooks(); // يجب أن تعيد List<BookModel>
+      downloadedBooks = await _repository.getUserBooks();
 
       loading = false;
       notifyListeners();
@@ -113,7 +127,6 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// تسجيل الخروج
   Future<void> logout(BuildContext context) async {
     try {
       loading = true;
@@ -133,13 +146,8 @@ class ProfileProvider extends ChangeNotifier {
           duration: Duration(seconds: 2),
         ),
       );
-
-      // الانتقال إلى صفحة اختيار الحساب
       await Future.delayed(const Duration(milliseconds: 400));
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/auth_choice',
-            (route) => false,
-      );
+      Navigator.of(context).pushNamedAndRemoveUntil('/auth_choice', (route) => false);
     } catch (e) {
       loading = false;
       error = e.toString();
@@ -147,4 +155,3 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 }
-

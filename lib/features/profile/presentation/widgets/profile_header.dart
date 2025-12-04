@@ -39,12 +39,13 @@ class ProfileHeader extends StatelessWidget {
           ),
         ),
 
-        // محتوى الرأس
+// محتوى الرأس
         Positioned(
           top: 40,
           left: 0,
           right: 0,
           child: Column(
+            mainAxisSize: MainAxisSize.min, // لتجنب المساحة الفارغة
             children: [
               // الصورة الشخصية
               CircleAvatar(
@@ -55,9 +56,11 @@ class ProfileHeader extends StatelessWidget {
                   backgroundImage: AssetImage('assets/icons/profile.png'),
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 8),
+
               Text(
                 username,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -65,8 +68,8 @@ class ProfileHeader extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 15),
-
+              const SizedBox(height: 15),
+              
               // صف الأيقونات
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

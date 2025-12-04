@@ -197,28 +197,37 @@ class _EditProfileSectionState extends State<EditProfileSection> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () async {
-                        final body = {
-                          'username': usernameC.text,
-                          'age': int.tryParse(ageC.text),
-                          'gender': gender,
-                          if (showPasswordSection) ...{
-                            'old_password': oldPassC.text,
-                            'new_password': newPassC.text,
-                          },
-                        };
+                        onPressed: () async {
+                          final body = {
+                            'username': usernameC.text,
+                            'age': int.tryParse(ageC.text),
+                            'gender': gender,
+                            if (showPasswordSection) ...{
+                              'old_password': oldPassC.text,
+                              'new_password': newPassC.text,
+                            },
+                          };
 
-                        final ok = await provider.updateUser(body);
-                        if (ok && mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('تم تحديث الملف بنجاح'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      },
+                          final errorMessage = await provider.updateUser(body);
+
+                          if (errorMessage == null && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('تم تحديث الملف بنجاح'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          } else if (errorMessage != null && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(errorMessage),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+
                       child: const Text('حفظ التعديلات'),
                     ),
                   ),

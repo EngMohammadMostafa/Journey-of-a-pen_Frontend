@@ -21,8 +21,9 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     provider = Provider.of<ProfileProvider>(context, listen: false);
-    provider.loadUser();// جلب بيانات المستخدم من الباك اند
-    provider.loadDownloadedBooks();
+    provider.loadUser();              // جلب بيانات المستخدم
+    provider.loadDownloadedBooks();   // جلب الكتب المحملة
+    provider.loadUserPoints();        // جلب نقاط المستخدم
   }
 
   @override
@@ -43,7 +44,10 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
 
-          final user = p.user!;
+          final user = p.user;
+          if (user == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           return SingleChildScrollView(
             child: Column(
@@ -51,10 +55,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 // رأس الصفحة
                 ProfileHeader(
                   username: user.username,
-                  points: user.points,
+                  points: p.userPoints,
                   onEditProfile: () => _openEditProfileSheet(context),
                   actions: [
-                    {'icon': 'assets/icons/star_filled.png', 'onTap': () => showPointsPopup(context, user.points)},
+                    {'icon': 'assets/icons/star_filled.png', 'onTap': () => showPointsPopup(context, p.userPoints)},
                     {'icon': 'assets/icons/edit.png', 'onTap': () => _openEditProfileSheet(context)},
                     {'icon': 'assets/icons/book_open.png', 'onTap': () => _showDownloadedBooks(context)},
                     {'icon': 'assets/icons/book.png', 'onTap': () => _showPurchasedBooks(context)},
@@ -67,10 +71,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 // عدد النقاط
                 ProfileSection(
                   title: 'عدد النقاط',
-                  subtitle: '${user.points}',
+                  subtitle: '${p.userPoints}',
                   iconAsset: 'assets/icons/star_filled.png',
-                  onTap: () => showPointsPopup(context, user.points),
+                  onTap: () => showPointsPopup(context, p.userPoints),
                 ),
+
 
 
                 const SizedBox(height: 16),
@@ -189,13 +194,13 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               const Icon(Icons.star, size: 60, color: Colors.yellow),
               const SizedBox(height: 15),
-              Text('نقاطك الحالية', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 20)),
+              Text('مجموع النقاط', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 20)),
               const SizedBox(height: 10),
               Text('$points ⭐', style: const TextStyle(color: Colors.yellow, fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Text(
                 points >= 50
-                    ? '🎉 لقد وصلت للحد المطلوب! سيتم التواصل معك من قبل المسؤول للحصول على مكافأة.'
+                    ? '🎉 لقد وصلت للحد المطلوب! سيتم التواصل معك من قبل المسؤول للحصول على مكافأة'
                     : 'عند وصولك إلى 50 نقطة سيتم التواصل معك للحصول على مكافأة 🎁',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16),
