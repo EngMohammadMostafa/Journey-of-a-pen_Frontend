@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../profile/provider/profile_provider.dart';
 import '../../provider/quiz_provider.dart';
 
 class QuizPage extends StatefulWidget {
@@ -138,8 +139,6 @@ class _QuizPageState extends State<QuizPage> {
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Display total points before session
               Text(
                 "نقاطك الكلية: ${provider.totalPoints}",
                 style: const TextStyle(
@@ -148,8 +147,6 @@ class _QuizPageState extends State<QuizPage> {
                     fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-
-              // Progress Bar
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: LinearProgressIndicator(
@@ -160,8 +157,6 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Question Card
               Card(
                 color: Colors.white.withOpacity(0.15),
                 shape: RoundedRectangleBorder(
@@ -178,8 +173,6 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Options
               Expanded(
                 child: ListView.builder(
                   itemCount: currentQuestion.answers.length,
@@ -208,12 +201,9 @@ class _QuizPageState extends State<QuizPage> {
                   },
                 ),
               ),
-
-              // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Exit
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white30,
@@ -246,8 +236,6 @@ class _QuizPageState extends State<QuizPage> {
                     },
                     child: const Text('Exit', style: TextStyle(fontSize: 16)),
                   ),
-
-                  // Next / Finish
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.yellow,
@@ -274,127 +262,111 @@ class _QuizPageState extends State<QuizPage> {
                           provider.questions.length - 1) {
                         await provider.finishSession(widget.bookId);
 
-                        // Show session result dialog
-                        showGeneralDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          barrierColor: Colors.black.withOpacity(0.4),
-                          pageBuilder: (_, __, ___) => const SizedBox.shrink(),
-                          transitionBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            return BackdropFilter(
-                              filter:
-                              ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                              child: ScaleTransition(
-                                scale: CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeOutBack,
-                                ),
-                                child: AlertDialog(
-                                  backgroundColor:
-                                  Colors.white.withOpacity(0.08),
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(25)),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // ✔ أيقونة نهاية
-                                      AnimatedContainer(
-                                        duration: const Duration(
-                                            milliseconds: 600),
-                                        curve: Curves.easeOutBack,
-                                        width: 95,
-                                        height: 95,
-                                        decoration: BoxDecoration(
-                                          color: Colors.greenAccent
-                                              .withOpacity(0.2),
-                                          shape: BoxShape.circle,
+                        // ✅ تحديث النقاط بطريقة آمنة
+                        final profileProvider = Provider.of<ProfileProvider>(
+                            context,
+                            listen: false);
+                        profileProvider.updateUserPoints(provider.totalPoints);
+
+                        if (!mounted) return;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          showGeneralDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            barrierColor: Colors.black.withOpacity(0.4),
+                            pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+                            transitionBuilder: (context, animation, secondaryAnimation, child) {
+                              return BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                                child: ScaleTransition(
+                                  scale: CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOutBack,
+                                  ),
+                                  child: AlertDialog(
+                                    backgroundColor:
+                                    Colors.white.withOpacity(0.08),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(25)),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        AnimatedContainer(
+                                          duration: const Duration(milliseconds: 600),
+                                          curve: Curves.easeOutBack,
+                                          width: 95,
+                                          height: 95,
+                                          decoration: BoxDecoration(
+                                            color: Colors.greenAccent.withOpacity(0.2),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.check_rounded,
+                                              color: Colors.greenAccent, size: 55),
                                         ),
-                                        child: const Icon(
-                                            Icons.check_rounded,
-                                            color: Colors.greenAccent,
-                                            size: 55),
-                                      ),
-                                      const SizedBox(height: 20),
-
-                                      // 🏆 العنوان
-                                      const Text(
-                                        "تم إنهاء الاختبار",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
+                                        const SizedBox(height: 20),
+                                        const Text(
+                                          "تم إنهاء الاختبار",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold),
                                         ),
-                                      ),
-
-                                      const SizedBox(height: 12),
-
-                                      // ⚡ النقاط الكلية بعد الجلسة
-                                      Text(
-                                        "نقاطك الكلية الآن: ${provider.totalPoints}",
-                                        style: const TextStyle(
-                                            color: Colors.yellowAccent,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 20),
-
-                                      // ⭐ تقييم النجوم بناءً على أداء الجلسة
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        children: List.generate(
-                                          3,
-                                              (index) => Icon(
-                                            index <
-                                                ((provider.correctAnswersInSession /
-                                                    provider.questions
-                                                        .length) *
-                                                    3)
-                                                    .round()
-                                                ? Icons.star
-                                                : Icons.star_border,
-                                            color: Colors.yellow,
-                                            size: 30,
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          "نقاطك الكلية الآن: ${provider.totalPoints}",
+                                          style: const TextStyle(
+                                              color: Colors.yellowAccent,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: List.generate(
+                                            3,
+                                                (index) => Icon(
+                                              index <
+                                                  ((provider.correctAnswersInSession /
+                                                      provider.questions.length) *
+                                                      3)
+                                                      .round()
+                                                  ? Icons.star
+                                                  : Icons.star_border,
+                                              color: Colors.yellow,
+                                              size: 30,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 25),
-
-                                      // زر الإنهاء
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.yellow,
-                                          foregroundColor: Colors.black,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                              BorderRadius.circular(
-                                                  18)),
-                                          padding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 35,
-                                              vertical: 12),
+                                        const SizedBox(height: 25),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.yellow,
+                                            foregroundColor: Colors.black,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                BorderRadius.circular(18)),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 35, vertical: 12),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            widget.onCompleted();
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("حسناً",
+                                              style: TextStyle(fontSize: 18)),
                                         ),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                          widget.onCompleted();
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text(
-                                          "حسناً",
-                                          style:
-                                          TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        );
+                              );
+                            },
+                          );
+                        });
                       } else {
                         provider.nextQuestion();
                         setState(() => selectedOption = null);

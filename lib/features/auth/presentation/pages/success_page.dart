@@ -47,7 +47,7 @@ class SuccessPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "Welcome to Book Worm Haven.\nYou're now part of our community!",
+                    "Welcome to JOURNEY OF A PEN.\nYou're now part of our community!",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white70,

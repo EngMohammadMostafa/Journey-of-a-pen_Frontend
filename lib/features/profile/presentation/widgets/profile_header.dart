@@ -69,7 +69,7 @@ class ProfileHeader extends StatelessWidget {
               ),
 
               const SizedBox(height: 15),
-              
+
               // صف الأيقونات
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -59,7 +59,43 @@ class ProfileRepository {
     try {
       final response = await _api.get(ApiEndpoints.userBooks);
 
-      // استخرج قائمة الكتب من المفتاح "books"
+      final Map<String, dynamic> data = response.data is String
+          ? jsonDecode(response.data)
+          : response.data as Map<String, dynamic>;
+
+      final List<dynamic> booksJson = data['books'] ?? [];
+
+      return booksJson
+          .map((json) => BookModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
+
+  /// 🔹 جلب محتوى الكتاب حسب الـ bookId
+  Future<String> getBookContent(int bookId) async {
+    try {
+      final response = await _api.get('${ApiEndpoints.userBooks}/$bookId/content');
+      if (response.data is String) {
+        return response.data as String;
+      } else if (response.data is Map<String, dynamic> && response.data['content'] != null) {
+        return response.data['content'] as String;
+      } else {
+        throw Exception("محتوى الكتاب غير متوفر");
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
+
+  /// 🔹 جلب كتب متعددة حسب قائمة IDs
+  Future<List<BookModel>> getBooksByIds(List<int> ids) async {
+    try {
+      final response = await _api.post('${ApiEndpoints.userBooks}/batch', data: {
+        'ids': ids,
+      });
+
       final Map<String, dynamic> data = response.data is String
           ? jsonDecode(response.data)
           : response.data as Map<String, dynamic>;

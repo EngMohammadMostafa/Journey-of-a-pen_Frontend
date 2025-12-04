@@ -5,7 +5,7 @@ class UserModel {
   final int? age;
   final int? gender; // 1 male, 2 female
   final int userType;
-  final int points;
+  late final int points;
   final int purchasesCount;
 
   UserModel({
@@ -67,6 +67,11 @@ class UserModel {
       age: age ?? this.age,
       gender: gender ?? this.gender,
     );
+  }
+
+  /// 🟢 دالة لتحديث النقاط محليًا بدون التأثير على الباك
+  UserModel updatePoints(int newPoints) {
+    return copyWith(points: newPoints);
   }
 
   ///  لعرض البيانات

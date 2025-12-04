@@ -32,19 +32,11 @@ class _BookReaderPageState extends State<BookReaderPage> {
 
   Future<void> _loadPdf() async {
     try {
-      if (widget.book.downloadUrl == null) {
-        setState(() {
-          isLoading = false;
-          errorMessage = "رابط التحميل غير متاح";
-        });
-        return;
-      }
-
       final dir = await getApplicationDocumentsDirectory();
       final filePath = "${dir.path}/${widget.book.id}.pdf";
       final file = File(filePath);
 
-      // 🔥 1) لو الملف موجود → افتحه بدون إنترنت
+      // 🔹 1) إذا كان الملف موجود مسبقًا → افتحه مباشرة بدون أي تحققات
       if (await file.exists()) {
         document = await PDFDocument.fromFile(file);
         Provider.of<ProfileProvider>(context, listen: false)
@@ -57,7 +49,17 @@ class _BookReaderPageState extends State<BookReaderPage> {
         return;
       }
 
-      // 🔥 2) لو ما كان موجود → تحميل مرة واحدة فقط
+      // 🔹 2) الملف غير موجود → تحقق من وجود رابط التحميل وحمله
+      if (widget.book.downloadUrl == null || widget.book.downloadUrl!.isEmpty) {
+        // إذا كان الكتاب غير موجود محليًا ورابط التحميل غير متاح
+        setState(() {
+          isLoading = false;
+          errorMessage = "لا يمكن فتح الكتاب لأنه غير محمّل مسبقًا";
+        });
+        return;
+      }
+
+      // 🔹 3) تحميل الكتاب من الإنترنت
       final response = await http.get(Uri.parse(widget.book.downloadUrl!));
 
       if (response.statusCode == 200) {
@@ -67,6 +69,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
         offlineMode = false;
 
         document = await PDFDocument.fromFile(file);
+        Provider.of<ProfileProvider>(context, listen: false)
+            .addDownloadedBook(widget.book);
       } else {
         errorMessage = "فشل تحميل الكتاب: ${response.statusCode}";
       }
@@ -112,7 +116,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
         document: document!,
         zoomSteps: 1,
         scrollDirection: Axis.vertical,
-        lazyLoad: false, // يمنع تحميل الصفحات اللاحق
+        lazyLoad: false,
         showPicker: false,
       ),
     );
