@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/quiz_provider.dart';
@@ -23,14 +24,12 @@ class _QuizPageState extends State<QuizPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      // تحميل الأسئلة وبدء الجلسة تلقائياً
       context.read<QuizProvider>().loadQuestions(widget.bookId);
     });
   }
 
   @override
   void dispose() {
-    // عند الخروج قبل إنهاء الجلسة، نغلق الجلسة
     context.read<QuizProvider>().exitSession(widget.bookId);
     super.dispose();
   }
@@ -107,6 +106,23 @@ class _QuizPageState extends State<QuizPage> {
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white),
                     onPressed: () async {
+                      if (provider.answeredCount > 0) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("تنبيه"),
+                            content: const Text(
+                                "لا يمكنك الخروج الآن.\nيجب إكمال باقي الأسئلة قبل المغادرة!"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("حسناً"),
+                              )
+                            ],
+                          ),
+                        );
+                        return;
+                      }
                       await provider.exitSession(widget.bookId);
                       Navigator.pop(context);
                     },
@@ -120,6 +136,16 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                   const SizedBox(width: 48),
                 ],
+              ),
+              const SizedBox(height: 12),
+
+              // Display total points before session
+              Text(
+                "نقاطك الكلية: ${provider.totalPoints}",
+                style: const TextStyle(
+                    color: Colors.yellowAccent,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
 
@@ -160,8 +186,8 @@ class _QuizPageState extends State<QuizPage> {
                   itemBuilder: (context, index) {
                     final answer = currentQuestion.answers[index];
                     return Card(
-                      color: Colors.white.withOpacity(
-                          selectedOption == index ? 0.3 : 0.15),
+                      color: Colors.white
+                          .withOpacity(selectedOption == index ? 0.3 : 0.15),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -198,6 +224,23 @@ class _QuizPageState extends State<QuizPage> {
                           borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: () async {
+                      if (provider.answeredCount > 0) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("تنبيه"),
+                            content: const Text(
+                                "لا يمكنك الخروج الآن.\nيجب إكمال باقي الأسئلة قبل المغادرة!"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("حسناً"),
+                              )
+                            ],
+                          ),
+                        );
+                        return;
+                      }
                       await provider.exitSession(widget.bookId);
                       Navigator.pop(context);
                     },
@@ -220,7 +263,6 @@ class _QuizPageState extends State<QuizPage> {
                       final answer =
                       currentQuestion.answers[selectedOption!];
 
-                      // حفظ الإجابة محلياً وارسالها للباك
                       await provider.saveAnswer(
                         bookId: widget.bookId,
                         questionId: currentQuestion.id,
@@ -228,28 +270,130 @@ class _QuizPageState extends State<QuizPage> {
                         isCorrect: answer.isCorrect,
                       );
 
-                      // انتقال
                       if (provider.currentIndex ==
                           provider.questions.length - 1) {
                         await provider.finishSession(widget.bookId);
 
-                        showDialog(
+                        // Show session result dialog
+                        showGeneralDialog(
                           context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text("تم إنهاء الاختبار"),
-                            content: Text(
-                                "لقد حصلت على ${provider.totalPoints} نقطة."),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  widget.onCompleted();
-                                  Navigator.pop(context);
-                                },
-                                child: const Text("حسناً"),
-                              )
-                            ],
-                          ),
+                          barrierDismissible: false,
+                          barrierColor: Colors.black.withOpacity(0.4),
+                          pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+                          transitionBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return BackdropFilter(
+                              filter:
+                              ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                              child: ScaleTransition(
+                                scale: CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutBack,
+                                ),
+                                child: AlertDialog(
+                                  backgroundColor:
+                                  Colors.white.withOpacity(0.08),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(25)),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // ✔ أيقونة نهاية
+                                      AnimatedContainer(
+                                        duration: const Duration(
+                                            milliseconds: 600),
+                                        curve: Curves.easeOutBack,
+                                        width: 95,
+                                        height: 95,
+                                        decoration: BoxDecoration(
+                                          color: Colors.greenAccent
+                                              .withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                            Icons.check_rounded,
+                                            color: Colors.greenAccent,
+                                            size: 55),
+                                      ),
+                                      const SizedBox(height: 20),
+
+                                      // 🏆 العنوان
+                                      const Text(
+                                        "تم إنهاء الاختبار",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // ⚡ النقاط الكلية بعد الجلسة
+                                      Text(
+                                        "نقاطك الكلية الآن: ${provider.totalPoints}",
+                                        style: const TextStyle(
+                                            color: Colors.yellowAccent,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 20),
+
+                                      // ⭐ تقييم النجوم بناءً على أداء الجلسة
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: List.generate(
+                                          3,
+                                              (index) => Icon(
+                                            index <
+                                                ((provider.correctAnswersInSession /
+                                                    provider.questions
+                                                        .length) *
+                                                    3)
+                                                    .round()
+                                                ? Icons.star
+                                                : Icons.star_border,
+                                            color: Colors.yellow,
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 25),
+
+                                      // زر الإنهاء
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.yellow,
+                                          foregroundColor: Colors.black,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                  18)),
+                                          padding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 35,
+                                              vertical: 12),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          widget.onCompleted();
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text(
+                                          "حسناً",
+                                          style:
+                                          TextStyle(fontSize: 18),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         );
                       } else {
                         provider.nextQuestion();

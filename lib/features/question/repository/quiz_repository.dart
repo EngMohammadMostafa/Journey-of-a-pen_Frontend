@@ -22,6 +22,18 @@ class QuizRepository {
     return questions.map((q) => QuestionModel.fromJson(q)).toList();
   }
 
+
+  // =============================
+// جلب النقاط الكلية الحالية للمستخدم
+// =============================
+  Future<int> fetchUserTotalPoints() async {
+    final response = await _api.get('/users/points');
+    final raw = response.data;
+    final data = raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
+    return data['total_points'] ?? 0;
+  }
+
+
   // =============================
   //  بدء الجلسة
   // =============================

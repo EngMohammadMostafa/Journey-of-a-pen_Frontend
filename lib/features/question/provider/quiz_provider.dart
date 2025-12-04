@@ -5,7 +5,10 @@ import '../repository/quiz_repository.dart';
 class QuizProvider extends ChangeNotifier {
   final QuizRepository _quizRepo;
 
-  QuizProvider(this._quizRepo);
+  QuizProvider(this._quizRepo) {
+    // جلب النقاط الكلية عند إنشاء المزود
+    fetchTotalPoints();
+  }
 
   List<QuestionModel> _questions = [];
   int _currentIndex = 0;
@@ -19,6 +22,12 @@ class QuizProvider extends ChangeNotifier {
 
   final Map<int, int> _answers = {}; // questionId -> answerId
   bool _sessionStarted = false;
+
+  ///عدد الأسئلة التي تمت الإجابة عليها (محلي فقط – لا علاقة له بالباك)
+  int answeredCount = 0;
+
+  /// حفظ حالة الإجابة (صحيحة/خاطئة) لكل سؤال
+  final Map<int, bool> answerCorrectness = {};
 
   List<QuestionModel> get questions => _questions;
   int get currentIndex => _currentIndex;
@@ -36,11 +45,26 @@ class QuizProvider extends ChangeNotifier {
 
   void addPoint() {
     score += 1;
-    _totalPoints = score;
     notifyListeners();
   }
 
-  /// تحميل الأسئلة وبدء الجلسة تلقائياً
+  /// عدد الإجابات الصحيحة في الجلسة الحالية فقط
+  int get correctAnswersInSession =>
+      answerCorrectness.values.where((isCorrect) => isCorrect).length;
+
+  /// جلب النقاط الكلية الحالية من الباك
+  Future<void> fetchTotalPoints() async {
+    try {
+      final points = await _quizRepo.fetchUserTotalPoints();
+      _totalPoints = points;
+      notifyListeners();
+    } catch (e) {
+      print("Error fetching total points: $e");
+      _totalPoints = 0; // إذا فشل الطلب، نترك صفر
+    }
+  }
+
+  /// تحميل الأسئلة وبدء الجلسة
   Future<void> loadQuestions(int bookId) async {
     _isLoading = true;
     _isSessionFinished = false;
@@ -56,8 +80,13 @@ class QuizProvider extends ChangeNotifier {
       final list = await _quizRepo.fetchQuestions(bookId);
       _questions = list;
       _currentIndex = 0;
+
       _answers.clear();
+      answerCorrectness.clear();
+
       score = 0;
+      answeredCount = 0;
+
     } catch (e) {
       _questions = [];
       _errorMessage = e.toString().contains('403')
@@ -70,7 +99,7 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  /// حفظ الإجابة محلياً وارسالها للباك
+  /// حفظ الإجابة محلياً + إرسالها للباك
   Future<void> saveAnswer({
     required int bookId,
     required int questionId,
@@ -78,7 +107,15 @@ class QuizProvider extends ChangeNotifier {
     required bool isCorrect,
   }) async {
     _answers[questionId] = answerId;
+
+    /// تسجيل هل الإجابة صحيحة أم خاطئة لهذا السؤال
+    answerCorrectness[questionId] = isCorrect;
+
+    /// زيادة عدد الإجابات الصحيحة للجلسة
     if (isCorrect) addPoint();
+
+    /// زيادة عدد الأسئلة المجابة (لا علاقة له بالباك)
+    answeredCount++;
 
     if (_sessionStarted) {
       try {
@@ -102,7 +139,7 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  /// إنهاء الجلسة وإرسال النتائج للباك
+  /// إنهاء الجلسة وإرسال الإجابات للباك
   Future<void> finishSession(int bookId) async {
     if (_answers.isEmpty) return;
 
@@ -118,6 +155,7 @@ class QuizProvider extends ChangeNotifier {
 
       _totalPoints = result["total_points"] ?? _totalPoints;
       _isSessionFinished = true;
+
     } catch (e) {
       print("Error finishing quiz session: $e");
     } finally {
@@ -126,7 +164,7 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  /// إنهاء الجلسة عند الخروج بدون حفظ النتائج
+  /// الخروج من الجلسة دون إرسال النتائج
   Future<void> exitSession(int bookId) async {
     if (_sessionStarted) {
       try {
@@ -144,11 +182,16 @@ class QuizProvider extends ChangeNotifier {
     _isSubmitting = false;
     _isLoading = false;
     _isSessionFinished = false;
-    _totalPoints = 0;
+
     _answers.clear();
+    answerCorrectness.clear();
+
+    answeredCount = 0;
     score = 0;
+
     _errorMessage = null;
     _sessionStarted = false;
+
     notifyListeners();
   }
 }

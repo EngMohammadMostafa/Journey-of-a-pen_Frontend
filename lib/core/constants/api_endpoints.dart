@@ -35,6 +35,5 @@ class ApiEndpoints {
   static String submitAnswers(int bookId) => "/books/$bookId/session/submit"; // POST إنهاء الجلسة
   static String exitSession(int bookId) => "/books/$bookId/session/exit"; // POST الخروج من الجلسة
 
-  //  Rewards
-  static const String rewards = "/rewards"; // GET كل المكافآت | POST استبدال مكافأة
+
 }
