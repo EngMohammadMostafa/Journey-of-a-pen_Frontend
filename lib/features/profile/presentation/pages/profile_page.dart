@@ -72,6 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () => showPointsPopup(context, user.points),
                 ),
 
+
                 const SizedBox(height: 16),
 
                 // الأقسام الأخرى

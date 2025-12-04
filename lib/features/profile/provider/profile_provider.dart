@@ -22,26 +22,35 @@ class ProfileProvider extends ChangeNotifier {
 
   /// تحميل بيانات المستخدم من الباك اند
   Future<void> loadUser() async {
-    try {
-      loading = true;
-      error = null;
-      notifyListeners();
+    loading = true;
+    error = null;
+    notifyListeners();
 
+    try {
       final token = await PrefsHelper.getToken();
       if (token != null && token.isNotEmpty) {
         _repository.setAuthToken(token.trim());
       }
 
+      // جلب بيانات المستخدم
       user = await _repository.getCurrentUser();
 
-      loading = false;
-      notifyListeners();
+      // جلب النقاط الكلية للمستخدم من الباك
+      try {
+        final totalPoints = await _repository.getUserTotalPoints(); // يجب أن يُرجع int
+        user = user!.copyWith(points: totalPoints);
+      } catch (e) {
+        print("Error fetching total points: $e");
+      }
+
     } catch (e) {
-      loading = false;
       error = e.toString();
+    } finally {
+      loading = false;
       notifyListeners();
     }
   }
+
 
   /// تحديث بيانات المستخدم عبر الباك اند
   Future<bool> updateUser(Map<String, dynamic> body) async {
@@ -124,6 +133,7 @@ class ProfileProvider extends ChangeNotifier {
           duration: Duration(seconds: 2),
         ),
       );
+
       // الانتقال إلى صفحة اختيار الحساب
       await Future.delayed(const Duration(milliseconds: 400));
       Navigator.of(context).pushNamedAndRemoveUntil(
@@ -137,3 +147,4 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 }
+

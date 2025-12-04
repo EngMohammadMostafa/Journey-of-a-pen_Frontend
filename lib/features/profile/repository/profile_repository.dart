@@ -74,6 +74,18 @@ class ProfileRepository {
     }
   }
 
+  /// 🔹 جلب النقاط الكلية للمستخدم
+  Future<int> getUserTotalPoints() async {
+    try {
+      final response = await _api.get(ApiEndpoints.userPoints);
+      final Map<String, dynamic> data = response.data is String
+          ? jsonDecode(response.data)
+          : response.data as Map<String, dynamic>;
+      return data['total_points'] ?? 0;
+    } on DioException catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
 
   String _handleError(DioException e) {
     if (e.response != null) {

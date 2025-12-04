@@ -39,6 +39,7 @@ class UserModel {
       "username": username,
       "age": age,
       "gender": gender,
+      // ملاحظات: لا نرسل points أو purchasesCount لأنها محسوبة في الباك
     };
   }
 
