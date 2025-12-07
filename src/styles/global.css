@@ -57,9 +57,10 @@ body {
 
 .content-area {
   flex: 1;
-  margin-left: 70%;
+  margin-left: 40%;
+  margin-top: 25%;
   width: calc(94% - 20%);
-  margin-top: -37%;
+  
   
 }
 .main-content {
@@ -129,14 +130,14 @@ flex-grow: 1;
   width: 23%;
   background: linear-gradient(180deg, #000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
   color: white;
-  position: sticky;
-  margin-top:7%;
-  right: 80%;
+  position: fixed;
+  top:14%;
+  left: 0%;
   height: calc(100vh - 7%);
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  z-index: 999;
   border-top-right-radius: 40% 20%;
   overflow-y: auto;
   scrollbar-width: thin;
