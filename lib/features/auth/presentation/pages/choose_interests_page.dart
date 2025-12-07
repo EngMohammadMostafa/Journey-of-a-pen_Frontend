@@ -106,7 +106,7 @@ class _ChooseInterestsPageState extends State<ChooseInterestsPage> {
         ),
         child: Stack(
           children: [
-            // 🔹 الدوائر الزخرفية
+            //  الدوائر الزخرفية
             Positioned(
               right: -20,
               bottom: 20,
@@ -168,7 +168,7 @@ class _ChooseInterestsPageState extends State<ChooseInterestsPage> {
               ),
             ),
 
-            // 🔹 المحتوى الرئيسي
+            //  المحتوى الرئيسي
             SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
@@ -196,7 +196,7 @@ class _ChooseInterestsPageState extends State<ChooseInterestsPage> {
                     ),
                     const SizedBox(height: 40),
 
-                    // ✅ الشبكة مع تعطيل تمريرها الداخلي
+                    //  الشبكة مع تعطيل تمريرها الداخلي
                     GridView.count(
                       crossAxisCount: 3,
                       mainAxisSpacing: 15,
@@ -238,7 +238,7 @@ class _ChooseInterestsPageState extends State<ChooseInterestsPage> {
 
                     const SizedBox(height: 25),
 
-                    // ✅ أزرار "Skip" و "Next"
+                    // أزرار "Skip" و "Next"
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

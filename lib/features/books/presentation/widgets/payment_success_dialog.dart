@@ -6,7 +6,7 @@ class PaymentSuccessDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("✅ تمت العملية بنجاح"),
+      title: const Text(" تمت العملية بنجاح"),
       content: const Text("تم شراء الكتاب وإضافته إلى سلة المشتريات."),
       actions: [
         TextButton(

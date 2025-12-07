@@ -30,7 +30,7 @@ class BooksRepository extends ChangeNotifier {
   Future<List<BookModel>> getBooksByCategory(int categoryId) =>
       _service.fetchBooksByCategory(categoryId);
 
-  // 🔹 إرجاع رابط التحميل
+  //  إرجاع رابط التحميل
   Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
     try {
       // محاولة الحصول على التوكن إن لم يُمرر
@@ -41,7 +41,7 @@ class BooksRepository extends ChangeNotifier {
       }
 
       if (token == null) {
-        print("❌ لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
+        print(" لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
         return null;
       }
 
@@ -64,16 +64,16 @@ class BooksRepository extends ChangeNotifier {
     }
   }
 
-  // 🔹 الدالة الناقصة التي سببت الخطأ: تحميل الكتاب + تسجيل العملية داخلياً
+  //  الدالة الناقصة التي سببت الخطأ: تحميل الكتاب + تسجيل العملية داخلياً
   Future<String?> downloadAndRegisterBook(BookModel book) async {
     try {
       final link = await getDownloadLink(book);
 
       if (link != null) {
-        print("📘 تم الحصول على رابط التحميل: $link");
+        print(" تم الحصول على رابط التحميل: $link");
         return link;
       } else {
-        print("❌ فشل في إنشاء رابط التحميل");
+        print(" فشل في إنشاء رابط التحميل");
         return null;
       }
     } catch (e) {

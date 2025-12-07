@@ -9,11 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthRepository {
   final ApiService _apiService;
 
-  // 🔹 تمرير ApiService من الخارج لضمان مشاركة نفس التوكن
   AuthRepository(this._apiService);
 
   // ==============================
-  // 🔹 تسجيل المستخدم الجديد
+  //  تسجيل المستخدم الجديد
   // ==============================
   Future<String?> register(
       String username,
@@ -47,8 +46,8 @@ class AuthRepository {
 
         try {
           final registerResponse = RegisterResponse.fromJson(data);
-          print('✅ Register Success → Token: ${registerResponse.token}');
-          print('👤 User: ${registerResponse.user.username}');
+          print(' Register Success → Token: ${registerResponse.token}');
+          print(' User: ${registerResponse.user.username}');
 
           if (registerResponse.token != null) {
             // حفظ التوكن وربطه مع ApiService
@@ -59,12 +58,12 @@ class AuthRepository {
           }
 
         } catch (_) {
-          print('✅ Register Success: ${data['message'] ?? 'Registered (no message field)'}');
+          print(' Register Success: ${data['message'] ?? 'Registered (no message field)'}');
         }
 
         return null; // null تعني لا يوجد خطأ → التسجيل ناجح
       } else {
-        print('❌ Register Failed → Status: $status, Body: ${response.data}');
+        print(' Register Failed → Status: $status, Body: ${response.data}');
 
         if (response.data is Map<String, dynamic> && response.data.containsKey('errors')) {
           final errors = response.data['errors'] as Map<String, dynamic>;
@@ -76,13 +75,13 @@ class AuthRepository {
         return 'Registration failed. Please check your input.';
       }
     } catch (e, st) {
-      print('⚠️ Register Exception: $e\n$st');
+      print(' Register Exception: $e\n$st');
       return 'An error occurred. Please try again.';
     }
   }
 
   // ==============================
-  // 🔹 تسجيل الدخول
+  //  تسجيل الدخول
   // ==============================
   Future<bool> login(String email, String password) async {
     try {
@@ -103,14 +102,14 @@ class AuthRepository {
 
         String? token = data['token']?.toString();
 
-        print('✅ Login Success → Token: $token');
+        print(' Login Success → Token: $token');
 
         if (token != null) {
-          // 1️⃣ حفظ التوكن
+          // حفظ التوكن
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
 
-          // 2️⃣ ربط التوكن مع ApiService (مهم جداً)
+          // ربط التوكن مع ApiService (مهم جداً)
           _apiService.setAuthToken(token);
 
           print("🔗 Token added to API headers successfully");
@@ -118,11 +117,11 @@ class AuthRepository {
 
         return true;
       } else {
-        print('❌ Login Failed → Status: $status, Body: ${response.data}');
+        print(' Login Failed → Status: $status, Body: ${response.data}');
         return false;
       }
     } catch (e, st) {
-      print('⚠️ Login Exception: $e\n$st');
+      print(' Login Exception: $e\n$st');
       return false;
     }
   }

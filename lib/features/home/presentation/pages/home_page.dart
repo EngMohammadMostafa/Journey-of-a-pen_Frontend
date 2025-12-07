@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       body: Stack(
         children: [
-          // 🎨 الخلفية المتدرجة
+          //  الخلفية المتدرجة
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -178,7 +178,7 @@ class _HomeContentState extends State<HomeContent> {
     try {
       final booksFromApi = await booksService.fetchBooks();
 
-      // ✅ Debug print للتأكد من البيانات
+      //  Debug print للتأكد من البيانات
       print("Books fetched: ${booksFromApi.map((b) => b.title).toList()}");
 
       setState(() => _books = booksFromApi);
@@ -449,7 +449,6 @@ class _HomeContentState extends State<HomeContent> {
                                           });
 
                                           //  هنا يمكن استدعاء API لتحديث الإعجاب في الباك
-                                          // مثال:
                                           // booksService.toggleLike(book.id, book.isLikedByUser);
                                         },
                                         child: Container(

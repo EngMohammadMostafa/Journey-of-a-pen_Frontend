@@ -55,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => isLoading = true);
 
-    // ✅ جلب AuthRepository من Provider
+    //  جلب AuthRepository من Provider
     final authRepo = Provider.of<AuthRepository>(context, listen: false);
 
     final errorMessage = await authRepo.register(
@@ -287,7 +287,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 }
 
-// رسومات الجبال كما هي
+// رسومات الجبال
 class BottomShapesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

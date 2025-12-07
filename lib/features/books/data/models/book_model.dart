@@ -18,7 +18,7 @@ class BookModel {
   final int? fileSize;
   String? downloadUrl;
 
-  // 🔥 حالة الإعجاب من قبل المستخدم الحالي
+  //  حالة الإعجاب من قبل المستخدم الحالي
   bool isLikedByUser;
 
   BookModel({
@@ -55,7 +55,7 @@ class BookModel {
       fileType: json['file_type'],
       fileSize: json['file_size'],
       downloadUrl: json['download_url'],
-      isLikedByUser: json['is_liked_by_user'] ?? false, // 🔥 جديد
+      isLikedByUser: json['is_liked_by_user'] ?? false,
     );
   }
 
@@ -75,7 +75,7 @@ class BookModel {
       'file_type': fileType,
       'file_size': fileSize,
       'download_url': downloadUrl,
-      'is_liked_by_user': isLikedByUser, // 🔥 جديد
+      'is_liked_by_user': isLikedByUser,
     };
   }
 

@@ -11,7 +11,7 @@ class SuccessPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // ✅ الخلفية المتدرجة مثل باقي الصفحات
+
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -27,7 +27,7 @@ class SuccessPage extends StatelessWidget {
             ),
           ),
 
-          // ✅ المحتوى في المنتصف
+          //  المحتوى في المنتصف
           Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -56,7 +56,7 @@ class SuccessPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  // 🔹 زر الانتقال
+                  //  زر الانتقال
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(

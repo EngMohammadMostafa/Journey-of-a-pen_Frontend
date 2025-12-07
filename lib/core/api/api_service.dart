@@ -12,7 +12,7 @@ class ApiService {
 
   ApiService._internal({this.isMockMode = false}) {
     BaseOptions options = BaseOptions(
-      baseUrl: "http://192.168.0.105:8000/api",
+      baseUrl: "http://192.168.241.251:8000/api",
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       headers: {

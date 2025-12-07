@@ -4,7 +4,7 @@ class AuthButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final Color color; // اللون الأساسي
-  final Color? textColor; // 🔹 جديد: لون النص
+  final Color? textColor; //  لون النص
   final bool isLoading;
   final bool isSecondary;
 
@@ -13,7 +13,7 @@ class AuthButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     required this.color,
-    this.textColor, // يمكن أن يكون null
+    this.textColor,
     this.isLoading = false,
     this.isSecondary = false,
   });

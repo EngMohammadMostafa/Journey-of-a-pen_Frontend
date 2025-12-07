@@ -93,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// 🔹 عنصر واجهة بسيط (القسم)
+  ///  عنصر واجهة بسيط (القسم)
   Widget _buildSectionTile(String title, String subtitle, VoidCallback onTap) {
     return Card(
       color: Colors.white.withOpacity(0.8),
@@ -167,13 +167,13 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => PurchasedBooksSection(
-        books: purchasedBooks, // ✅ تمرير List<BookModel مباشرة
+        books: purchasedBooks, //  تمرير List<BookModel مباشرة
       ),
     );
   }
 
 
-  /// 🔹 نافذة عرض النقاط
+  ///  نافذة عرض النقاط
   void showPointsPopup(BuildContext context, int points) {
     showDialog(
       context: context,

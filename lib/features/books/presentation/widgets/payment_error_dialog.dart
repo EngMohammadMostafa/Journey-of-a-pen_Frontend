@@ -6,7 +6,7 @@ class PaymentErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("❌ خطأ في الدفع"),
+      title: const Text(" خطأ في الدفع"),
       content: const Text("رصيدك غير كافٍ لإتمام عملية الشراء."),
       actions: [
         TextButton(

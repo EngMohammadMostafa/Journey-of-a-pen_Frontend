@@ -95,7 +95,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// 🔹 تحديث النقاط بطريقة آمنة
+  ///  تحديث النقاط بطريقة آمنة
   void updateUserPoints(int newPoints) {
     userPoints = newPoints;
     if (user != null) {

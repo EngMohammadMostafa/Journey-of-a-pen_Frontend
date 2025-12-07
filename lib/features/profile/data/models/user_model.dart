@@ -19,7 +19,7 @@ class UserModel {
     this.gender,
   });
 
-  /// 🟩 إنشاء كائن من JSON
+  ///  إنشاء كائن من JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] ?? 0,
@@ -33,7 +33,7 @@ class UserModel {
     );
   }
 
-  /// 🔄 تحويل الكائن إلى JSON
+  ///  تحويل الكائن إلى JSON
   Map<String, dynamic> toJson() {
     final data = {
       "username": username,
@@ -47,7 +47,7 @@ class UserModel {
     return data;
   }
 
-  /// ✏️ دالة تحديث copyWith
+  /// ️ دالة تحديث copyWith
   UserModel copyWith({
     String? username,
     String? email,
@@ -69,7 +69,7 @@ class UserModel {
     );
   }
 
-  /// 🟢 دالة لتحديث النقاط محليًا بدون التأثير على الباك
+  ///  دالة لتحديث النقاط محليًا بدون التأثير على الباك
   UserModel updatePoints(int newPoints) {
     return copyWith(points: newPoints);
   }

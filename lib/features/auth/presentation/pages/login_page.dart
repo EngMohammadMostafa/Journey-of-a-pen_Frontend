@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     setState(() => isLoading = true);
 
-    // ✅ جلب AuthRepository من Provider
+    //  جلب AuthRepository من Provider
     final authRepo = Provider.of<AuthRepository>(context, listen: false);
 
     final success = await authRepo.login(
@@ -83,7 +83,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // 🟢 المحتوى الكامل
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -105,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 40),
 
-                  // 🟫 Login Card
+                  //  Login Card
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -247,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // ⚪️ الدوائر الزخرفية
+          // ️ الدوائر الزخرفية
           Positioned(
             right: -20,
             bottom: 20,

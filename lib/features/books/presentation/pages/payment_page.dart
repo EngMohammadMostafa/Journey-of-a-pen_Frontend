@@ -135,7 +135,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
           ),
 
-          // 🌐 مؤشر التحميل أثناء تنزيل الكتاب
+          //  مؤشر التحميل أثناء تنزيل الكتاب
           if (isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),

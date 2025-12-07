@@ -262,7 +262,7 @@ class _QuizPageState extends State<QuizPage> {
                           provider.questions.length - 1) {
                         await provider.finishSession(widget.bookId);
 
-                        // ✅ تحديث النقاط بطريقة آمنة
+                        //  تحديث النقاط بطريقة آمنة
                         final profileProvider = Provider.of<ProfileProvider>(
                             context,
                             listen: false);

@@ -98,7 +98,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                 children: [
                   SizedBox(height: kToolbarHeight + 16), // مساحة فارغة أعلى المحتوى
 
-                  // 🧾 البطاقة المعلوماتية
+                  //  البطاقة المعلوماتية
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -116,7 +116,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 🏷️ العنوان
+                        //  العنوان
                         Text(
                           book.title,
                           style: const TextStyle(
@@ -127,7 +127,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        // 👤 المؤلف
+                        //  المؤلف
                         Text(
                           "by ${book.author}",
                           style: const TextStyle(
@@ -167,7 +167,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
 
                   const SizedBox(height: 30),
 
-                  // 🟦 زر الشراء أو القراءة
+                  //  زر الشراء أو القراءة
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor:

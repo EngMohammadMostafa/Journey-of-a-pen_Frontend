@@ -36,7 +36,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
       final filePath = "${dir.path}/${widget.book.id}.pdf";
       final file = File(filePath);
 
-      // 🔹 1) إذا كان الملف موجود مسبقًا → افتحه مباشرة بدون أي تحققات
+      //  إذا كان الملف موجود مسبقًا → افتحه مباشرة بدون أي تحققات
       if (await file.exists()) {
         document = await PDFDocument.fromFile(file);
         Provider.of<ProfileProvider>(context, listen: false)
@@ -49,7 +49,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
         return;
       }
 
-      // 🔹 2) الملف غير موجود → تحقق من وجود رابط التحميل وحمله
+      //  الملف غير موجود → تحقق من وجود رابط التحميل وحمله
       if (widget.book.downloadUrl == null || widget.book.downloadUrl!.isEmpty) {
         // إذا كان الكتاب غير موجود محليًا ورابط التحميل غير متاح
         setState(() {
@@ -59,7 +59,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
         return;
       }
 
-      // 🔹 3) تحميل الكتاب من الإنترنت
+      //  تحميل الكتاب من الإنترنت
       final response = await http.get(Uri.parse(widget.book.downloadUrl!));
 
       if (response.statusCode == 200) {

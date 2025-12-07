@@ -73,7 +73,7 @@ class ProfileRepository {
     }
   }
 
-  /// 🔹 جلب محتوى الكتاب حسب الـ bookId
+  ///  جلب محتوى الكتاب حسب الـ bookId
   Future<String> getBookContent(int bookId) async {
     try {
       final response = await _api.get('${ApiEndpoints.userBooks}/$bookId/content');
@@ -89,7 +89,7 @@ class ProfileRepository {
     }
   }
 
-  /// 🔹 جلب كتب متعددة حسب قائمة IDs
+  ///  جلب كتب متعددة حسب قائمة IDs
   Future<List<BookModel>> getBooksByIds(List<int> ids) async {
     try {
       final response = await _api.post('${ApiEndpoints.userBooks}/batch', data: {
@@ -110,7 +110,7 @@ class ProfileRepository {
     }
   }
 
-  /// 🔹 جلب النقاط الكلية للمستخدم
+  ///  جلب النقاط الكلية للمستخدم
   Future<int> getUserTotalPoints() async {
     try {
       final response = await _api.get(ApiEndpoints.userPoints);

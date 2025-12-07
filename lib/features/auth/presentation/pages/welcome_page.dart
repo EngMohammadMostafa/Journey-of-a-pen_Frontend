@@ -32,7 +32,7 @@ class WelcomePage extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                //  الورقة مع التدرج الشفاف من الأعلى
+                //  الورقة
                 Positioned(
                   top: 40,
                   right: 5,
@@ -74,13 +74,13 @@ class WelcomePage extends StatelessWidget {
                   ),
                 ),
 
-                //  صورة الفتاة كما كانت بالحجم الأصلي لكن بدائرة أكثر نعومة
+                //  صورة الفتاة
                 Positioned(
                   bottom: 30,
                   left: 40,
                   right: 40,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(150), // أكثر تدويرًا
+                    borderRadius: BorderRadius.circular(150), //  تدوير
                     child: Container(
                       color: Colors.white,
                       padding: const EdgeInsets.all(20),

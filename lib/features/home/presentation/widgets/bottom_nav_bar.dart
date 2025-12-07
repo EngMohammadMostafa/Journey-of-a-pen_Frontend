@@ -57,7 +57,7 @@ class BottomNavBar extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // 🔹 حجم الأيقونة ثابت وكبير قليلاً
+                        //  حجم الأيقونة ثابت وكبير قليلاً
                         Image.asset(
                           iconPaths[index],
                           width: 36,
@@ -67,7 +67,7 @@ class BottomNavBar extends StatelessWidget {
 
                         const SizedBox(height: 4),
 
-                        // 🔹 النقطة الصغيرة أسفل الأيقونة عند التحديد
+                        //  النقطة الصغيرة أسفل الأيقونة عند التحديد
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 250),
                           height: 5,
