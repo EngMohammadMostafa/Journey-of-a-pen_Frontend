@@ -126,6 +126,16 @@ flex-grow: 1;
   background: #a8a8a8;
 }
 
+.stat-card {
+  background: linear-gradient(135deg,#000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%)!important;
+  color: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
 .sidebar {
   width: 23%;
   background: linear-gradient(180deg, #000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
