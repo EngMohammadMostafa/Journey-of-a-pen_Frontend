@@ -11,8 +11,6 @@ const Sidebar = () => {
     { path: '/competitions', icon: '', label: 'Competitions Management' },
     { path: '/quotes', icon: '', label: 'Quotes Management' },
     { path: '/notifications', icon: '', label: 'Notifications Management' },
-    { path: '/reports', icon: '', label: 'Performance Reports' },
-    { path: '/author-requests', icon: '', label: 'Author Requests' },
     { path: '/payments', icon: '', label: 'Payments Management' },
     { path: '/points', icon: '', label: 'Points Management' }
   ]

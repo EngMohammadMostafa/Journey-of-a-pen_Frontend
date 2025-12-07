@@ -15,10 +15,8 @@ import QuotesManagement from './pages/QuotesManagement'
 import NotificationsManagement from './pages/NotificationsManagement'
 
 
-import AuthorRequests from './pages/AuthorRequests'
 import PaymentsManagement from './pages/PaymentsManagement'
 import PointsManagement from './pages/PointsManagement'
-import ReportsManagement from './pages/ReportsManagement'
 
 const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { user, isAuthenticated, loading } = useAuth() // ✅ الآن isAuthenticated موجود
@@ -68,8 +66,7 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
             <Route path="/notifications" element={<NotificationsManagement />} />
             
           
-            <Route path="/reports" element={<ReportsManagement />} />
-            <Route path="/author-requests" element={<AuthorRequests />} />
+          
             <Route path="/payments" element={<PaymentsManagement />} />
             <Route path="/points" element={<PointsManagement />} />
             <Route path="/login" element={<Navigate to="/dashboard" />} />
