@@ -738,15 +738,19 @@ useEffect(() => {
             <div className="results-count">
               Show {filteredBooks.length} Out Of {books.length} Books
             </div>
+
           </div>
-  
+
+          <div className="section-header" style={{ marginTop: '40px' }}>
+              <h3>Available Books </h3>
+          </div>
           <DataTable columns={bookColumns} data={searchTerm ? filteredBooks : books} loading={loading} />
 
 
           {/* جدول الأقسام */}
             <div className="section-header" style={{ marginTop: '40px' }}>
-              <h3>الأقسام المتوفرة</h3>
-         </div>
+              <h3>Available Sections </h3>
+          </div>
 
           <DataTable
             columns={categoryColumns}
@@ -881,60 +885,60 @@ useEffect(() => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
-        title={editingBook ? "تعديل كتاب" : "إضافة كتاب جديد"}
+        title={editingBook ? "تعديل كتاب" : "Add New Book"}
       >
         <div className="book-form">
           <div className="form-group">
-            <label>المؤلف *</label>
+            <label>Author *</label>
             <input type="text" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label>عنوان الكتاب *</label>
+            <label> Book Title *</label>
             <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label>الوصف *</label>
+            <label>Description *</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label>السعر *</label>
+            <label>Price *</label>
             <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label>مجاني؟</label>
+            <label>Free.?</label>
             <select value={formData.is_free} onChange={(e) => setFormData({ ...formData, is_free: parseInt(e.target.value) })}>
-              <option value={0}>لا</option>
-              <option value={1}>نعم</option>
+              <option value={0}>No </option>
+              <option value={1}>Yes</option>
             </select>
           </div>
 
           <div className="form-group">
-  <label>نوع الكتاب</label>
+  <label>Book Type</label>
   <select 
     value={formData.book_type} 
     onChange={(e) => setFormData({...formData, book_type: e.target.value})}
     className="form-input"
   >
-    <option value="paid">مدفوع</option>
-    <option value="free">مجاني</option>
+    <option value="paid">For Paid</option>
+    <option value="free">For Free</option>
   </select>
 </div>
 
           <div className="form-group">
-            <label>نسبة الخصم</label>
+            <label>Discount Rate </label>
             <input type="number" value={formData.discount_rate} onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })} />
           </div>
           <div className="form-group">
-            <label>القسم *</label>
+            <label>Section *</label>
             <select value={formData.sectionid} onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })} required>
-              <option value="">-- اختر قسم --</option>
+              <option value="">-- Choose one Section --</option>
               {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
             </select>
           </div>
           
           {/* حقل رفع الملف المضاف */}
           <div className="form-group">
-            <label>رفع ملف الكتاب (PDF) *</label>
+            <label>Upload The Book File  (PDF) *</label>
             <input 
               type="file" 
               accept=".pdf"
@@ -942,11 +946,11 @@ useEffect(() => {
               className="form-input"
               required
             />
-            {selectedFile && <span style={{color: 'green'}}>✓ تم اختيار: {selectedFile.name}</span>}
+            {selectedFile && <span style={{color: 'green'}}>✓ The Choice Is Made : {selectedFile.name}</span>}
           </div>
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
-            <button className="btn-primary" onClick={handleSaveBook}>{editingBook ? "حفظ التعديل" : "إضافة كتاب"}</button>
+            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="btn-primary" onClick={handleSaveBook}>{editingBook ? "حفظ التعديل" : "Add Book"}</button>
           </div>
         </div>
       </Modal>
@@ -955,16 +959,16 @@ useEffect(() => {
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={() => { setIsCategoryModalOpen(false); setFormCategoryData({ name: '' }); }}
-        title="إضافة قسم جديد"
+        title="Add New Section"
       >
         <div className="category-form">
           <div className="form-group">
-            <label>اسم القسم *</label>
+            <label>: Section's Name *</label>
             <input type="text" value={formCategoryData.name} onChange={(e) => setFormCategoryData({ ...formCategoryData, name: e.target.value })} required />
           </div>
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsCategoryModalOpen(false)}>إلغاء</button>
-            <button className="btn-primary" onClick={handleSaveCategory}>إضافة</button>
+            <button className="btn-secondary" onClick={() => setIsCategoryModalOpen(false)}>Cancel</button>
+            <button className="btn-primary" onClick={handleSaveCategory}>Add Section</button>
           </div>
         </div>
       </Modal>
