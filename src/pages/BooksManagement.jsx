@@ -818,7 +818,9 @@ useEffect(() => {
         </div>
       )}
     </div>
-
+    <div className="answers-section" style={{ marginTop: '40px' }}>
+      <h3>Quesions  List</h3>
+</div>
     <DataTable columns={questionColumns} data={filteredQuestions} loading={loading} />
     
     <div className="pagination">
@@ -977,23 +979,23 @@ useEffect(() => {
       <Modal
         isOpen={isQuestionModalOpen}
         onClose={() => setIsQuestionModalOpen(false)}
-        title="إضافة سؤال جديد"
+        title=" Add New Question"
       >
         <div className="question-form">
           <div className="form-group">
-            <label>السؤال *</label>
+            <label>Question Title *</label>
             <textarea value={newQuestionText} onChange={(e) => setNewQuestionText(e.target.value)} required></textarea>
           </div>
           <div className="form-group">
-            <label>اختر الكتاب *</label>
+            <label>Choose The Book *</label>
             <select value={selectedBookId} onChange={(e) => setSelectedBookId(e.target.value)}>
-              <option value="">-- اختر كتاب --</option>
+              <option value="">-- Choose One Book  --</option>
               {books.map(book => (<option key={book.id} value={book.id}>{book.title}</option>))}
             </select>
           </div>
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsQuestionModalOpen(false)}>إلغاء</button>
-            <button className="btn-primary" onClick={handleAddQuestion}>إضافة</button>
+            <button className="btn-secondary" onClick={() => setIsQuestionModalOpen(false)}>Cancel</button>
+            <button className="btn-primary" onClick={handleAddQuestion}>Add Queston</button>
           </div>
         </div>
       </Modal>
@@ -1027,17 +1029,17 @@ useEffect(() => {
     setAnswerText("");
     setIsCorrect(false);
   }}
-  title={selectedAnswer ? "تعديل جواب" : "إضافة جواب"}
+  title={selectedAnswer ? "تعديل جواب" : " Add New Answer "}
 ><div className="answer-form">
   {/* اختيار السؤال أولاً */}
   <div className="form-group">
-    <label>اختر السؤال *</label>
+    <label>Choose The Question  *</label>
     <select 
       value={selectedQuestionId || ""} 
       onChange={(e) => setSelectedQuestionId(e.target.value)} 
       required
     >
-      <option value="">-- اختر السؤال --</option>
+      <option value="">-- Choose One Question  --</option>
       {questions.map(q => (
         <option key={q.id} value={q.id}>
           {q.id} - {q.text.slice(0, 50)}...
@@ -1048,7 +1050,7 @@ useEffect(() => {
 
   {/* حقل نص الجواب */}
   <div className="form-group">
-    <label>نص الجواب *</label>
+    <label>Answer Title  *</label>
     <input
       type="text"
       value={answerText}
@@ -1065,7 +1067,7 @@ useEffect(() => {
     onChange={(e) => setIsCorrect(e.target.checked)}
     id="isCorrect"
   />
-  <label htmlFor="isCorrect">صحيح</label>
+  <label htmlFor="isCorrect">Correct</label>
 </div>
 
 
@@ -1079,10 +1081,10 @@ useEffect(() => {
       setSelectedAnswer(null);
       setAnswerText("");
       setIsCorrect(false);
-    }}>إلغاء</button>
+    }}>Cancel</button>
 
     <button className="btn-primary" onClick={selectedAnswer ? handleEditAnswer : handleAddAnswer}>
-      {selectedAnswer ? "تعديل" : "إضافة"}
+      {selectedAnswer ? "تعديل" : "Add Answer"}
     </button>
   </div>
 </div>
