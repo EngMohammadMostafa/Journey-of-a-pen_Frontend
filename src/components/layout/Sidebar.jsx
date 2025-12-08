@@ -20,8 +20,8 @@ const Sidebar = () => {
      <div className="sidebar-header-horizontal">
     
     <div className="sidebar-info">
-      <h2>email</h2>
-      <p>password</p>
+      <h2>ADMIN</h2>
+      
     </div>
     <img
       src="../src/assets/loginsmall.jpg"

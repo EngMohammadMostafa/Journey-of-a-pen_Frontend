@@ -18,12 +18,12 @@ const Navbar = ({ onToggleSidebar }) => {
       const currentScrollY = window.scrollY
       
       // إذا كان المستخدم يمرر لأسفل → إخفاء النافبار والهيرو
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      if (currentScrollY > lastScrollY && currentScrollY > 45) {
         setHideNavbar(true)
         setIsHeroVisible(false)
       } 
       // إذا كان المستخدم يمرر لأعلى → إظهار النافبار والهيرو
-      else if (currentScrollY < lastScrollY) {
+      else if (currentScrollY === 0) {
         setHideNavbar(false)
         setIsHeroVisible(true)
       }
