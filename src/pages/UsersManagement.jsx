@@ -249,32 +249,32 @@ const UsersManagement = () => {
   return (
     <div className="users-management">
       <div className="page-header">
-        <h1>إدارة المستخدمين</h1>
-        <button className="btn-primary" onClick={handleAddUser}>إضافة مستخدم جديد +</button>
+        <h1>Users Management </h1>
+        <button className="btn-primary" onClick={handleAddUser}> Add New User +</button>
       </div>
 
       {errorMessage && <div className="error-banner">{errorMessage}</div>}
 
       <div className="user-stats">
-        <div className="stat-card"><h3>إجمالي المستخدمين</h3><span>{userStats.total}</span></div>
-        <div className="stat-card"><h3>عدد المديرين</h3><span>{userStats.admin}</span></div>
+        <div className="stat-card"><h3>Total Number Of Users</h3><span>{userStats.total}</span></div>
+        <div className="stat-card"><h3>Number Of Admins </h3><span>{userStats.admin}</span></div>
         <div className="stat-card"><h3>المستخدمين الذين لديهم مشتريات</h3><span>{userStats.withPurchases}</span></div>
       </div>
 
       <div className="users-filters">
         <input
           type="text"
-          placeholder="بحث بالاسم"
+          placeholder=" Search For The Users's Name"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
         <select value={userTypeFilter} onChange={(e) => setUserTypeFilter(e.target.value)} className="filter-select">
-          <option value="all">جميع المستخدمين</option>
-          <option value="1">مستخدم عادي</option>
-          <option value="2">مدير</option>
+          <option value="all">All users </option>
+          <option value="1"> Normal User</option>
+          <option value="2">Admin</option>
         </select>
-        <div>عرض {filteredUsers.length} من {users.length} مستخدم</div>
+        <div>Show {filteredUsers.length} Out Of {users.length} Users</div>
       </div>
 
       <DataTable columns={userColumns} data={filteredUsers} loading={loading} />
@@ -287,15 +287,15 @@ const UsersManagement = () => {
       >
         <div className="user-form">
           <div className="form-group">
-            <label>اسم المستخدم *</label>
+            <label>  UserName   * </label>
             <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label>البريد الإلكتروني *</label>
+            <label>Email  *</label>
             <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label>{editingUser ? 'كلمة المرور (اتركها فارغة إذا لم تغيرها):' : 'كلمة المرور *'}</label>
+            <label>{editingUser ? 'كلمة المرور (اتركها فارغة إذا لم تغيرها):' : 'Password  *'}</label>
             <input
               type="password"
               value={formData.password}
@@ -306,19 +306,19 @@ const UsersManagement = () => {
           </div>
           <div className="form-group">
   <label>
-    {editingUser ? 'تأكيد كلمة المرور (اختياري إذا لم تغير كلمة المرور):' : 'تأكيد كلمة المرور *'}
+    {editingUser ? 'تأكيد كلمة المرور (اختياري إذا لم تغير كلمة المرور):' : 'Confirm Password *'}
   </label>
   <input
     type="password"
     value={formData.password_confirmation || ''}
     onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
-    placeholder={editingUser ? "اتركها فارغة للحفاظ على كلمة المرور الحالية" : "أدخل تأكيد كلمة المرور"}
+    placeholder={editingUser ? "اتركها فارغة للحفاظ على كلمة المرور الحالية" : "Enter Password Confirmation"}
     required={!editingUser} // عند إضافة مستخدم جديد مطلوب
   />
 </div>
 
           <div className="form-group">
-            <label>العمر</label>
+            <label>Age *</label>
             <input
   type="number"
   name="age"
@@ -331,15 +331,15 @@ const UsersManagement = () => {
 
           </div>
           <div className="form-group">
-            <label>الجنس</label>
+            <label>Gender</label>
             <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
-              <option value="male">ذكر</option>
-              <option value="female">أنثى</option>
+              <option value="male">Male</option>
+              <option value="female">Famale</option>
             </select>
           </div>
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>إلغاء</button>
-            <button className="btn-primary" onClick={handleFormSubmit}>{editingUser ? 'حفظ التغييرات' : 'إضافة مستخدم'}</button>
+            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="btn-primary" onClick={handleFormSubmit}>{editingUser ? 'حفظ التغييرات' : 'Add User '}</button>
           </div>
         </div>
       </Modal>
