@@ -114,6 +114,7 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
 
   // تنسيق البيانات للجدول
   const formatTableData = () => {
+
     return filteredQuotes.map(quote => ({
       id: quote.id,
       text: quote.text,
@@ -138,15 +139,15 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
   return (
     <div className="quotes-management">
       <div className="page-header">
-        <h1>إدارة الاقتباسات</h1>
-        <p>إدارة وعرض جميع الاقتباسات في النظام</p>
+        <h1>Quotes Management </h1>
+    
       </div>
 
 
 {/* قسم الإحصائيات مثل صفحة المستخدمين */}
 <div className="quotes-stats">
   <div className="stat-card">
-    <h3>إجمالي عدد الاقتباسات</h3>
+    <h3>Total Number Of Quotes</h3>
     <span className="stat-number">{quotes.length}</span>
   </div>
 
@@ -175,7 +176,7 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
   <div className="search-section">
     <input
       type="text"
-      placeholder="ابحث في الاقتباسات..."
+      placeholder=" Search For A Quote ..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       className="search-input"
@@ -188,14 +189,14 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
       onChange={(e) => setFilterType(e.target.value)}
       className="filter-select"
     >
-      <option value="all">الكل</option>
-      <option value="text">حسب نص الاقتباس</option>
+      <option value="all">All Quotes</option>
+      <option value="text">Search For The Quote Title</option>
       <option value="book">حسب اسم الكتاب</option>
     </select>
   </div>
 
   <div className="results-count">
-    <span>عرض {filteredQuotes.length} من أصل {quotes.length} اقتباسات</span>
+    <span>Show {filteredQuotes.length} Out Of  {quotes.length} Quotes</span>
   </div>
 </div>
 
