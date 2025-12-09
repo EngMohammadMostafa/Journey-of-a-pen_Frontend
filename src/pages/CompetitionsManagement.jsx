@@ -152,7 +152,7 @@ useEffect(() => {
     }
   }
 
-  const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'إضافة مسابقة جديدة'
+  const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'Add New Competation  '
 
   return (
 
@@ -246,7 +246,7 @@ useEffect(() => {
           >
             <div className="competition-form">
               <div className="form-group">
-                <label>اسم المسابقة: *</label>
+                <label> :Competition Name *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -256,7 +256,7 @@ useEffect(() => {
               </div>
 
               <div className="form-group">
-                <label>الحالة:</label>
+                <label>Statu:</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -268,7 +268,7 @@ useEffect(() => {
               </div>
 
               <div className="form-group">
-                <label>تاريخ البداية:</label>
+                <label>Start Date:</label>
                 <input
                   type="date"
                   value={formData.start_date}
@@ -277,7 +277,7 @@ useEffect(() => {
               </div>
 
               <div className="form-group">
-                <label>تاريخ النهاية:</label>
+                <label>End Date :</label>
                 <input
                   type="date"
                   value={formData.end_date}
@@ -286,7 +286,7 @@ useEffect(() => {
               </div>
 
               <div className="form-group">
-                <label>الحد الأقصى للمستخدمين:</label>
+                <label>Maximum Number Of Usres :</label>
                 <input
                   type="number"
                   value={formData.max_users}
@@ -297,10 +297,10 @@ useEffect(() => {
 
               <div className="form-actions">
                 <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
-                  إلغاء
+                  Cancel
                 </button>
                 <button className="btn-primary" onClick={handleSave}>
-                  {editingCompetition ? 'حفظ التغييرات' : 'إضافة مسابقة'}
+                  {editingCompetition ? 'حفظ التغييرات' : 'Add Competation'}
                 </button>
               </div>
             </div>
