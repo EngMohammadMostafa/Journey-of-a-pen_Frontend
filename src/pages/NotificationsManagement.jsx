@@ -102,9 +102,9 @@ const notificationStats = {
   return (
     <div className="notifications-management">
       <div className="page-header">
-        <h1>إدارة الإشعارات</h1>
+        <h1>Notifications Management </h1>
         <button className="btn-primary" onClick={handleAddNotification}>
-          + إضافة إشعار جديد
+          +  Add New Notification
         </button>
       </div>
 
@@ -112,11 +112,11 @@ const notificationStats = {
 {/*  أزرار الإحصائيات */}
 <div className="notification-stats">
   <div className="stat-card">
-    <h3>إجمالي الإشعارات</h3>
+    <h3> Total  Number Of Notification</h3>
     <span className="stat-number">{notificationStats.total}</span>
   </div>
   <div className="stat-card">
-    <h3>الإشعارات المعلقة</h3>
+    <h3>Pending Notification</h3>
     <span className="stat-number">{notificationStats.pending}</span>
   </div>
 </div>
@@ -127,7 +127,7 @@ const notificationStats = {
   <div className="notification-search-section">
     <input
       type="text"
-      placeholder="ابحث عن إشعار..."
+      placeholder="Search For A Notification ..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       className="notification-search-input"
@@ -152,7 +152,7 @@ const notificationStats = {
       >
         <div className="notification-form">
           <div className="form-group">
-            <label>عنوان الإشعار: *</label>
+            <label>Notification Title *</label>
             <input
               type="text"
               value={formData.title}
@@ -162,7 +162,7 @@ const notificationStats = {
           </div>
 
           <div className="form-group">
-            <label>المحتوى: *</label>
+            <label>The Content *</label>
             <textarea
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -171,18 +171,18 @@ const notificationStats = {
           </div>
 
           <div className="form-group">
-            <label>النوع:</label>
+            <label>Notification Type</label>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
             >
-              <option value="competition">مسابقة</option>
-              <option value="general">عام</option>
+              <option value="competition">Competition Notification</option>
+              <option value="general">Global Notification</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>الحالة:</label>
+            <label>Statu:</label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: parseInt(e.target.value) })}
@@ -194,10 +194,10 @@ const notificationStats = {
 
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
-              إلغاء
+              Cancel
             </button>
             <button className="btn-primary" onClick={handleSendNotification}>
-              إرسال
+              Add Notification
             </button>
           </div>
         </div>
