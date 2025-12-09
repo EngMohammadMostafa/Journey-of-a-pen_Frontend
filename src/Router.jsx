@@ -17,6 +17,7 @@ import NotificationsManagement from './pages/NotificationsManagement'
 
 import PaymentsManagement from './pages/PaymentsManagement'
 import PointsManagement from './pages/PointsManagement'
+import DashboardLayout from './components/layout/DashboardLayout';
 
 const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { user, isAuthenticated, loading } = useAuth() // ✅ الآن isAuthenticated موجود
@@ -49,6 +50,7 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
   // إذا كان مسجل دخول، اعرض الهيكل الكامل
   //يوجد سطر حذفته له علاقة بالسايدبار  تم حذفه كان ثاني سطر
   return (
+    <DashboardLayout>
     <div className="app-layout">
       <Sidebar collapsed={sidebarCollapsed} />
 
@@ -76,6 +78,7 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   )
 }
 

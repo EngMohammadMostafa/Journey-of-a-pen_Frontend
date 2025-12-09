@@ -434,6 +434,31 @@ flex-grow: 1;
   color: #7f8c8d;
 }
 
+/*هنا اضفت ستايل الخاص بالداشبورد لايوت  في مجلد اللايوت*/
+
+/* طبقة التدرج بالأعلى */
+.scroll-fade-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px; /* ارتفاع تأثير التدرج */
+  pointer-events: none; /* مهم: حتى لا يمنع الضغط على أي عنصر تحته */
+  background: linear-gradient(
+    rgba(255, 255, 255, 1), 
+    rgba(255, 255, 255, 0.90)
+  );
+  z-index: 8; /* أقل من النافبار وأعلى من المحتوى */
+}
+
+/* محتوى الصفحات بالكامل */
+.dashboard-wrapper {
+  margin-top: 90px; /* يبعد المحتوى عن النافبار */
+  padding: 20px;
+}
+
+
+
 /* تصميم متجاوب */
 @media (max-width: 768px) {
   .navbar {
