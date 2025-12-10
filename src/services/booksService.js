@@ -204,7 +204,17 @@ getAllCategories: async () => {
       throw error;
     }
   },
-  
+  // جلب كل الأسئلة لكتاب معيّن (بدون إجابات)
+getQuestionsByBook: async (bookId) => {
+  try {
+    const response = await api.get(`/admin/books/${bookId}/questions`);
+    // الباكند يرسل: { success: true, book: {...}, questions: [...] }
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+},
+
   
   // ============================================================
   // 🟦 الإجابات (Answers)

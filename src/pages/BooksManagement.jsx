@@ -411,7 +411,58 @@ if (selectedFile) {
       alert('حدث خطأ أثناء حذف السؤال');
     }
   };
-  
+  // جلب أسئلة لكتاب محدد (باستخدام الـ API الجديد)
+const fetchQuestionsByBook = async (bookId) => {
+  if (!bookId) return;
+  try {
+    setLoading(true);
+    const res = await booksService.getQuestionsByBook(bookId);
+    // res.questions => array من الأسئلة
+    const list = res.questions || [];
+    const formatted = list.map(q => ({
+      id: q.id,
+      text: q.question_text,
+      book_title: res.book?.title || books.find(b => b.id === q.book_id)?.title || "غير معروف",
+      book_id: q.book_id,
+    }));
+    setQuestions(formatted);
+    // هذه الـ API لا تعطي pagination (حسب ما أريتني) -> نضبط الصفحات على 1
+    setCurrentPage(1);
+    setLastPage(1);
+  } catch (error) {
+    console.error("Error fetching questions by book:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// دالة ذكية لإعادة جلب الأسئلة حسب وضع الفلتر (إما paginated أو by-book)
+const refetchQuestions = async (pageToFetch = 1) => {
+  try {
+    if (searchTypeQuestion === 'book' && searchBookId) {
+      await fetchQuestionsByBook(searchBookId);
+    } else {
+      // تستخدم الدالة الموجودة التي لديك حالياً لجلب كل الأسئلة صفحة/صفحة
+      setLoading(true);
+      const res = await booksService.getPaginatedQuestions(pageToFetch, perPage);
+      const list = res.list || [];
+      const formatted = list.map(q => ({
+        id: q.id,
+        text: q.question_text,
+        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_id: q.book_id,
+      }));
+      setQuestions(formatted);
+      setLastPage(res.last_page || 1);
+      setCurrentPage(res.current_page || pageToFetch);
+      setLoading(false);
+    }
+  } catch (err) {
+    console.error("refetchQuestions error:", err);
+    setLoading(false);
+  }
+};
+
   //دوال ادارة الاجوبة 
 
   const openAddAnswer = (questionId = null) => {
@@ -569,40 +620,30 @@ if (selectedFile) {
     setFilteredQuestions(filtered);
   }, [questions, searchTypeQuestion, searchQuestionTerm, searchBookId]);
   
-  useEffect(() => {
-    if (activeSection === 'questions') {
-      const fetchQuestions = async () => {
-        try {
-          setLoading(true);
-  
-          const response = await booksService.getPaginatedQuestions(currentPage, perPage);
 
-// ← تحديث رقم آخر صفحة
-setLastPage(response.last_page);
+  // عند فتح قسم الأسئلة لأول مرة
+useEffect(() => {
+  if (activeSection === 'questions') {
+    refetchQuestions(1);
+  }
+}, [activeSection, books]);
+// راقب تغيّر الفلترة والصفحات
+useEffect(() => {
+  if (activeSection !== 'questions') return;
 
-// ← تجهيز البيانات
-const formatted = response.list.map(q => ({
-  id: q.id,
-  text: q.question_text,
-  book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
-  book_id: q.book_id,
-}));
-
-// ← حفظها في state
-setQuestions(formatted);
-
-  
-        } catch (error) {
-          console.error("Error fetching questions:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchQuestions();
+  if (searchTypeQuestion === "book") {
+    if (searchBookId) {
+      fetchQuestionsByBook(searchBookId);
+    } else {
+      refetchQuestions(1);
     }
-  }, [activeSection, currentPage, perPage, books]);
-  
+    return;
+  }
+
+  refetchQuestions(currentPage);
+
+}, [searchTypeQuestion, searchBookId, currentPage, perPage]);
+
 
 
 useEffect(() => {
