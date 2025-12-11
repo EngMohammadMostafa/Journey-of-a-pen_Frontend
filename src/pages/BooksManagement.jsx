@@ -66,6 +66,14 @@ const [answersPage, setAnswersPage] = useState(1);
 const [answersLastPage, setAnswersLastPage] = useState(1);
 const [loadingAnswers, setLoadingAnswers] = useState(false);
 const [isAnswersModalOpen, setIsAnswersModalOpen] = useState(false);
+// الحالة لتخزين السؤال المحدد مع جميع الإجابات
+
+const [selectedQuestionWithAnswers, setSelectedQuestionWithAnswers] = useState(null);
+
+const [answersForSelectedQuestion, setAnswersForSelectedQuestion] = useState([]);
+
+
+const [allQuestions, setAllQuestions] = useState([]); // ← لحفظ نسخة كاملة من كل الأسئلة
 
 
 // --- حالات مودالات الإجابات ---
@@ -81,6 +89,15 @@ const [isCorrect, setIsCorrect] = useState(false);
     correctAnswers: questions.filter(q => q.is_correct === 1).length,
     totalPoints: questions.reduce((sum, q) => sum + (q.points || 0), 0)
   };
+// تحديث الإجابات لكل الأسئلة الظاهرة
+const updateAnswersForVisibleQuestions = (questionsList) => {
+  if (!questionsList || questionsList.length === 0) {
+    setAnswersForSelectedQuestion([]);
+    return;
+  }
+  const allAnswers = questionsList.flatMap(q => q.answers || []);
+  setAnswersForSelectedQuestion(allAnswers);
+};
 
 
   const bookColumns = [
@@ -142,6 +159,9 @@ const [isCorrect, setIsCorrect] = useState(false);
           <button className="btn-secondary" onClick={() => openEditQuestionModal(question)}>تعديل</button>
           <button className="btn-danger" onClick={() => handleDeleteQuestion(question)}>حذف</button>
           <button className="btn btn-primary" onClick={() => openAddAnswer(question.id)}>إضافة جواب</button>
+          <button className="btn btn-primary" onClick={() => fetchQuestionWithAnswers(question.id)}>
+          عرض الإجابات
+        </button>
         </div>
       )
     }
@@ -331,7 +351,9 @@ if (selectedFile) {
       }));
   
       setQuestions(formatted);
-  
+      setQuestions(formatted);
+      setFilteredQuestions(formatted); // ← يفضل إضافة هذا أيضاً لتحديث الجدول مباشرة
+     
       alert('تم إضافة السؤال بنجاح');
       setNewQuestionText('');
       setSelectedBookId('');
@@ -372,7 +394,10 @@ if (selectedFile) {
         book_id: q.book_id,
       }));
   
-      setQuestions(formatted);
+      
+setAllQuestions(formatted);  // ← أضف هذا
+setQuestions(formatted);
+setFilteredQuestions(formatted);
   
       alert('تم تعديل السؤال بنجاح');
       setIsEditQuestionModalOpen(false);
@@ -402,7 +427,10 @@ if (selectedFile) {
         book_id: q.book_id,
       }));
   
-      setQuestions(formatted);
+      
+setAllQuestions(formatted);  // ← أضف هذا
+setQuestions(formatted);
+setFilteredQuestions(formatted);
   
       alert('تم حذف السؤال بنجاح');
   
@@ -439,27 +467,54 @@ const fetchQuestionsByBook = async (bookId) => {
 // دالة ذكية لإعادة جلب الأسئلة حسب وضع الفلتر (إما paginated أو by-book)
 const refetchQuestions = async (pageToFetch = 1) => {
   try {
+    setLoading(true);
+
     if (searchTypeQuestion === 'book' && searchBookId) {
       await fetchQuestionsByBook(searchBookId);
     } else {
-      // تستخدم الدالة الموجودة التي لديك حالياً لجلب كل الأسئلة صفحة/صفحة
-      setLoading(true);
       const res = await booksService.getPaginatedQuestions(pageToFetch, perPage);
       const list = res.list || [];
+      
       const formatted = list.map(q => ({
         id: q.id,
         text: q.question_text,
         book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
         book_id: q.book_id,
+        answers: q.answers || [], // حفظ الإجابات
       }));
+
+      setAllQuestions(formatted); // ← ضع هذا قبل setQuestions
       setQuestions(formatted);
+      setFilteredQuestions(formatted);                     // ← تحديث الجدول لجميع الأسئلة
       setLastPage(res.last_page || 1);
       setCurrentPage(res.current_page || pageToFetch);
-      setLoading(false);
+
+      // ← تعيين السؤال الافتراضي وإجابات هذا السؤال
+      setSelectedQuestionWithAnswers(formatted[0] || null);
+      setAnswersForSelectedQuestion(formatted[0]?.answers || []);
     }
+
   } catch (err) {
     console.error("refetchQuestions error:", err);
+  } finally {
     setLoading(false);
+  }
+};
+
+// --- دالة لجلب سؤال مع جميع الإجابات ---
+const fetchQuestionWithAnswers = async (questionId) => {
+  try {
+    const res = await booksService.getQuestionWithAnswers(questionId);
+    const question = res.question;
+    setSelectedQuestionWithAnswers({
+      id: question.id,
+      text: question.question_text,
+      book_id: question.book_id,
+      book_title: question.book?.title || books.find(b => b.id === question.book_id)?.title || "غير معروف"
+    });
+    setAnswersForSelectedQuestion(question.answers || []);
+  } catch (error) {
+    console.error("Error fetching question with answers:", error);
   }
 };
 
@@ -602,8 +657,55 @@ const refetchQuestions = async (pageToFetch = 1) => {
       fetchBooks();
     }
   }, [activeSection]);
-  
+// --- useEffect لجلب الأسئلة عند فتح صفحة الأسئلة أو تغيير الفلترة ---
 
+  useEffect(() => {
+    const fetchQuestionsForBook = async () => {
+      try {
+        setLoading(true);
+    
+        if (searchBookId) {
+          const res = await booksService.getQuestionsByBook(searchBookId);
+          const list = res.questions || [];
+          const formatted = list.map(q => ({
+            id: q.id,
+            text: q.question_text,
+            book_title: res.book?.title || books.find(b => b.id === q.book_id)?.title || "غير معروف",
+            book_id: q.book_id,
+            answers: q.answers || [],
+          }));
+          setAllQuestions(formatted);  // ← إضافة هنا
+          setQuestions(formatted);
+          setFilteredQuestions(formatted);
+    
+          if (formatted.length > 0) {
+            setSelectedQuestionWithAnswers(formatted[0]);
+            setAnswersForSelectedQuestion(formatted[0].answers || []);
+          } else {
+            setSelectedQuestionWithAnswers(null);
+            setAnswersForSelectedQuestion([]); 
+          }
+    
+          return;
+        }
+    
+        const paginated = await refetchQuestions(1);
+        setSelectedQuestionWithAnswers(paginated[0] || null);
+        setAnswersForSelectedQuestion(paginated[0]?.answers || []);
+    
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+  
+    if (activeSection === 'questions') {
+      fetchQuestionsForBook();
+    }
+  }, [searchBookId, activeSection, books]);
+  
   useEffect(() => {
     let filtered = books;
     if (searchTerm) {
@@ -613,38 +715,53 @@ const refetchQuestions = async (pageToFetch = 1) => {
     setFilteredBooks(filtered);
   }, [books, searchTerm, searchType]);
 
-  useEffect(() => {
-    let filtered = questions;
-    if (searchTypeQuestion === 'text' && searchQuestionTerm) filtered = questions.filter(q => q.text.toLowerCase().includes(searchQuestionTerm.toLowerCase()));
-    else if (searchTypeQuestion === 'book' && searchBookId) filtered = questions.filter(q => q.book_id === parseInt(searchBookId));
-    setFilteredQuestions(filtered);
-  }, [questions, searchTypeQuestion, searchQuestionTerm, searchBookId]);
-  
 
   // عند فتح قسم الأسئلة لأول مرة
-useEffect(() => {
-  if (activeSection === 'questions') {
-    refetchQuestions(1);
-  }
-}, [activeSection, books]);
+  useEffect(() => {
+    if (activeSection === 'questions') {
+      // جلب جميع الأسئلة مرة واحدة عند فتح القسم
+      refetchQuestions(1);
+    }
+  }, [activeSection,books]);
+  
+
+
 // راقب تغيّر الفلترة والصفحات
 useEffect(() => {
   if (activeSection !== 'questions') return;
 
   if (searchTypeQuestion === "book") {
     if (searchBookId) {
-      fetchQuestionsByBook(searchBookId);
+      const filtered = allQuestions.filter(q => q.book_id === parseInt(searchBookId));
+      setFilteredQuestions(filtered);
+      setSelectedQuestionWithAnswers(filtered[0] || null);
+      setAnswersForSelectedQuestion(filtered[0]?.answers || []);
     } else {
-      refetchQuestions(1);
+      // لا يوجد فلتر على الكتاب → عرض كل الأسئلة
+      setFilteredQuestions(allQuestions);
+      updateAnswersForVisibleQuestions(allQuestions);
+      setSelectedQuestionWithAnswers(null);
+      setAnswersForSelectedQuestion(allQuestions.flatMap(q => q.answers || [])); // ← تعديل هنا
     }
     return;
   }
 
-  refetchQuestions(currentPage);
-
-}, [searchTypeQuestion, searchBookId, currentPage, perPage]);
-
-
+  if (searchTypeQuestion === "text" && searchQuestionTerm) {
+    const filtered = allQuestions.filter(q =>
+      q.text.toLowerCase().includes(searchQuestionTerm.toLowerCase())
+    );
+    setFilteredQuestions(filtered);
+    updateAnswersForVisibleQuestions(filtered);
+    setSelectedQuestionWithAnswers(null);
+    setAnswersForSelectedQuestion(filtered.flatMap(q => q.answers || []));
+  } else {
+    // أي تغيير آخر في نوع الفلترة → إعادة جميع الأسئلة
+    setFilteredQuestions(allQuestions);
+    updateAnswersForVisibleQuestions(allQuestions);
+    setSelectedQuestionWithAnswers(null);
+    setAnswersForSelectedQuestion(allQuestions.flatMap(q => q.answers || [])); // ← تعديل هنا
+  }
+}, [searchTypeQuestion, searchBookId, searchQuestionTerm, currentPage, allQuestions]);
 
 useEffect(() => {
   if (activeSection === 'questions') {
@@ -676,7 +793,6 @@ useEffect(() => {
 
 
 
-  // ====== جلب الإجابات مع Pagination ======
 
 
 
@@ -835,17 +951,33 @@ useEffect(() => {
       </div>
 
       {searchTypeQuestion === 'text' && (
-        <div className="filter-section">
-          <input
-            type="text"
-            placeholder="Search For A Question"
-            value={searchQuestionTerm}
-            onChange={(e) => setSearchQuestionTerm(e.target.value)}
-            className="search-input"
-          />
-          <button className="btn-secondary" onClick={() => setSearchQuestionTerm('')}>View All Questions</button>
-        </div>
-      )}
+  <div className="filter-section">
+    <select
+      value={selectedQuestionId || ""}
+      onChange={(e) => {
+        const qId = e.target.value;
+        setSelectedQuestionId(qId);
+        if (qId) {
+          fetchQuestionWithAnswers(qId); // جلب جميع الإجابات للسؤال المختار
+          const selectedQ = questions.find(q => q.id === parseInt(qId));
+          setFilteredQuestions(selectedQ ? [selectedQ] : []);
+        } else {
+          setFilteredQuestions(questions); // عرض كل الأسئلة
+          setAnswersForSelectedQuestion([]); // عرض كل الإجابات حسب pagination
+        }
+      }}
+      className="filter-select"
+    >
+      <option value="">-- اختر سؤال --</option>
+      {questions.map(q => (
+        <option key={q.id} value={q.id}>
+          {q.text.slice(0, 50)}...
+        </option>
+      ))}
+    </select>
+  </div>
+)}
+
 
       {searchTypeQuestion === 'book' && (
         <div className="filter-section">
@@ -892,7 +1024,10 @@ useEffect(() => {
 
       <DataTable 
         columns={answerColumns}
-        data={filteredAnswers}
+        data={selectedQuestionWithAnswers
+          ? answersForSelectedQuestion   // إذا اختار المستخدم سؤال
+          : answers                     // إذا لم يختر أي سؤال → عرض كل الإجابات
+              }
         loading={loadingAnswers}
       />
 

@@ -215,7 +215,16 @@ getQuestionsByBook: async (bookId) => {
   }
 },
 
-  
+  // جلب سؤال واحد مع جميع الإجابات
+getQuestionWithAnswers: async (questionId) => {
+  try {
+    const response = await api.get(`/admin/questions/${questionId}`);
+    return response.data; // ← سيحتوي على question + answers
+  } catch (error) {
+    throw error;
+  }
+},
+
   // ============================================================
   // 🟦 الإجابات (Answers)
   // ============================================================
