@@ -49,6 +49,14 @@ getAllCategories: async () => {
       throw error;
     }
   },
+  // حذف قسم (Admin)
+deleteCategory: async (categoryId) => {
+  try {
+    const response = await api.delete(`/admin/categories/${categoryId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }},
 
   // ============================================================
   // 🟦 الكتب (Books)

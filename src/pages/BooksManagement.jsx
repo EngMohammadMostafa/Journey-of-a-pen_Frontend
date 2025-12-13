@@ -319,12 +319,34 @@ if (selectedFile) {
   };
   
 
-  const handleDeleteCategory = (category) => {
-    if (window.confirm(`هل أنت متأكد من حذف القسم "${category.name}"؟`)) {
-      setCategories(categories.filter(c => c.id !== category.id));
-      alert('تم حذف القسم (محاكاة)');
+  const handleDeleteCategory = async (category) => {
+    const confirmDelete = window.confirm(
+      `⚠️ تحذير!\nسيتم حذف القسم "${category.name}" وكل الكتب والأسئلة والأجوبة التابعة له.\nهل أنت متأكد؟`
+    );
+  
+    if (!confirmDelete) return;
+  
+    try {
+      // استدعاء API الحقيقي
+      await booksService.deleteCategory(category.id);
+  
+      // تحديث الأقسام في الواجهة
+      setCategories(prev => prev.filter(c => c.id !== category.id));
+  
+      // (اختياري) تحديث الكتب إذا كان قسم الكتب مفتوح
+      if (activeSection === 'books' || activeSection === 'questions') {
+        const booksData = await booksService.getAllBooks();
+        setBooks(booksData.books || booksData);
+      }
+  
+      alert(' تم حذف القسم وكل ما بداخله بنجاح');
+  
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert(' حدث خطأ أثناء حذف القسم');
     }
   };
+  
 
   // --- دوال إدارة الأسئلة ---
   const handleAddQuestion = async () => {
