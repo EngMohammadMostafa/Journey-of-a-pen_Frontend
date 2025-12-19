@@ -103,20 +103,20 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
 
   const bookColumns = [
     { key: 'id', title: 'ID' },
-    { key: 'author', title: 'المؤلف' },
-    { key: 'title', title: 'عنوان الكتاب' },
-    { key: 'description', title: 'الوصف' },
-    { key: 'price', title: 'السعر' },
+    { key: 'author', title: 'Author' },
+    { key: 'title', title: 'Book Name' },
+    { key: 'description', title: 'Description' },
+    { key: 'price', title: 'Price' },
     { 
       key: 'book_type', 
-      title: 'نوع الكتاب', 
-      render: (value) => value === 'paid' ? 'مدفوع' : 'مجاني' 
+      title: 'Book Type', 
+      render: (value) => value === 'paid' ? 'Paid' : 'Free' 
     },
-    { key: 'discount_rate', title: 'نسبة الخصم' },
-    { key: 'number_of_likes', title: 'عدد الإعجابات' },
+    { key: 'discount_rate', title: 'Discount Rate ' },
+    { key: 'number_of_likes', title: 'Number of Likes ' },
     { 
       key: 'category_id', 
-      title: 'القسم',
+      title: 'Category',
       render: (value) => {
         const category = categories.find(cat => cat.id === value);
         return category ? category.name : value;
@@ -124,11 +124,11 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
     },
     {
       key: 'actions',
-      title: 'الإجراءات',
+      title: 'Actions',
       render: (_, book) => (
         <div>
-          <button className="btn-secondary" onClick={() => handleEditBook(book)}>تعديل</button>
-          <button className="btn-danger" onClick={() => handleDeleteBook(book)}>حذف</button>
+          <button className="btn-secondary" onClick={() => handleEditBook(book)}>Edit</button>
+          <button className="btn-danger" onClick={() => handleDeleteBook(book)}>Delete</button>
         </div>
       )
     }
@@ -136,13 +136,13 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
 
   const categoryColumns = [
     { key: 'id', title: 'ID' },
-    { key: 'name', title: 'اسم القسم' },
+    { key: 'name', title: 'Category Name' },
     {
       key: 'actions',
-      title: 'الإجراءات',
+      title: 'Actions',
       render: (_, category) => (
         <div>
-          <button className="btn-danger" onClick={() => handleDeleteCategory(category)}>حذف</button>
+          <button className="btn-danger" onClick={() => handleDeleteCategory(category)}>Delete</button>
         </div>
       )
     }
@@ -983,7 +983,7 @@ useEffect(() => {
       }}
       className="filter-select"
     >
-      <option value="">-- اختر سؤال --</option>
+      <option value="">-- Choose One Question  --</option>
       {questions.map(q => (
         <option key={q.id} value={q.id}>
           {q.text.slice(0, 50)}...
@@ -997,12 +997,11 @@ useEffect(() => {
       {searchTypeQuestion === 'book' && (
         <div className="filter-section">
           <select value={searchBookId} onChange={(e) => setSearchBookId(e.target.value)} className="filter-select">
-            <option value="">-- كل الكتب --</option>
+            <option value="">-- Choose One Book  --</option>
             {books.map(book => (
               <option key={book.id} value={book.id}>{book.title}</option>
             ))}
           </select>
-          <button className="btn-secondary" onClick={() => setSearchBookId('')}>عرض كل الأسئلة</button>
         </div>
       )}
     </div>
