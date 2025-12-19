@@ -19,12 +19,12 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
 
   // أعمدة الجدول
   const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'text', label: 'نص الاقتباس' },
-    { key: 'book_name', label: 'اسم الكتاب' },
-    { key: 'user_id', label: 'معرف المستخدم' },
-    { key: 'created_at', label: 'تاريخ الإنشاء' },
-    { key: 'actions', label: 'الإجراءات' }
+    { key: 'id', title: 'ID' },
+    { key: 'text', title: 'نص الاقتباس' },
+    { key: 'book_name', title: 'اسم الكتاب' },
+    { key: 'user_id', title: 'معرف المستخدم' },
+    { key: 'created_at', title: 'تاريخ الإنشاء' },
+    { key: 'actions', title: 'الإجراءات' }
   ];
 
   // جلب البيانات من API

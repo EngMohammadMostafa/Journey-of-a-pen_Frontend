@@ -31,32 +31,32 @@ const UsersManagement = () => {
   // --- أعمدة جدول المستخدمين ---
   const userColumns = [
     { key: 'id', title: 'ID' },
-    { key: 'username', title: 'اسم المستخدم' },
-    { key: 'email', title: 'البريد الإلكتروني' },
+    { key: 'username', title: ' Username' },
+    { key: 'email', title: 'Email ' },
     { 
       key: 'age', 
-      title: 'العمر',
-      render: (value) => value || 'غير محدد'
+      title: 'Age',
+      render: (value) => value || 'Not Set'
     },
     { 
       key: 'gender', 
-      title: 'الجنس',
-      render: (value) => ({ male: 'ذكر', female: 'أنثى' }[value] || value)
+      title: 'Gender',
+      render: (value) => ({ male: 'Male', female: 'Female' }[value] || value)
     },
     { 
       key: 'user_type', 
-      title: 'نوع المستخدم',
-      render: (value) => value === 1 ? 'عادي' : 'مدير'
+      title: 'User Type',
+      render: (value) => value === 1 ? 'Normal User' : 'Admin'
     },
-    { key: 'points', title: 'النقاط' },
-    { key: 'purchases_count', title: 'عدد المشتريات' },
+    { key: 'points', title: 'Points' },
+    { key: 'purchases_count', title: 'Purchases Count' },
     {
       key: 'actions',
-      title: 'الإجراءات',
+      title: 'Actions',
       render: (_, user) => (
         <div>
-          <button className="btn-primary" onClick={() => handleEdit(user)}>تعديل</button>
-          <button className="btn-danger" onClick={() => handleDelete(user)}>حذف</button>
+          <button className="btn-primary" onClick={() => handleEdit(user)}>Edit</button>
+          <button className="btn-danger" onClick={() => handleDelete(user)}>Delete</button>
         </div>
       )
     }
@@ -241,7 +241,6 @@ const UsersManagement = () => {
     total: users.length,
     regular: users.filter(u => u.user_type === 1).length,
     admin: users.filter(u => u.user_type === 2).length,
-    withPurchases: users.filter(u => u.purchases_count > 0).length
   };
 
   
@@ -258,7 +257,6 @@ const UsersManagement = () => {
       <div className="user-stats">
         <div className="stat-card"><h3>Total Number Of Users</h3><span>{userStats.total}</span></div>
         <div className="stat-card"><h3>Number Of Admins </h3><span>{userStats.admin}</span></div>
-        <div className="stat-card"><h3>المستخدمين الذين لديهم مشتريات</h3><span>{userStats.withPurchases}</span></div>
       </div>
 
       <div className="users-filters">

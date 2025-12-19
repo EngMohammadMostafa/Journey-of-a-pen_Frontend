@@ -99,6 +99,7 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
   setAnswersForSelectedQuestion(allAnswers);
 };
 
+//عواميد الجداول 
 
   const bookColumns = [
     { key: 'id', title: 'ID' },
@@ -167,7 +168,7 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
     }
   ];
 
-  // ↘ هنا بعد questionColumns تضيف:
+  
   const answerColumns = [
     { key: 'id', title: 'ID' },
     { key: 'answer_text', title: 'النص' },
@@ -198,6 +199,7 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
   const handleBooks = () => setActiveSection('books');
   const handleQuestions = () => setActiveSection('questions');
   const handleCategories = () => setActiveSection('categories');
+
 
   // --- دوال إدارة الكتب ---
   const handleAddBook = () => {
@@ -321,7 +323,7 @@ if (selectedFile) {
 
   const handleDeleteCategory = async (category) => {
     const confirmDelete = window.confirm(
-      `⚠️ تحذير!\nسيتم حذف القسم "${category.name}" وكل الكتب والأسئلة والأجوبة التابعة له.\nهل أنت متأكد؟`
+      ` تحذير!\nسيتم حذف القسم "${category.name}" وكل الكتب والأسئلة والأجوبة التابعة له.\nهل أنت متأكد؟`
     );
   
     if (!confirmDelete) return;
@@ -387,8 +389,6 @@ if (selectedFile) {
     }
   };
 
-
-  
 
   const openEditQuestionModal = (question) => {
     setEditingQuestion(question);
@@ -461,6 +461,7 @@ setFilteredQuestions(formatted);
       alert('حدث خطأ أثناء حذف السؤال');
     }
   };
+
   // جلب أسئلة لكتاب محدد (باستخدام الـ API الجديد)
 const fetchQuestionsByBook = async (bookId) => {
   if (!bookId) return;
@@ -540,8 +541,8 @@ const fetchQuestionWithAnswers = async (questionId) => {
   }
 };
 
-  //دوال ادارة الاجوبة 
 
+  //دوال ادارة الاجوبة 
   const openAddAnswer = (questionId = null) => {
     setSelectedQuestionId(questionId);
     setAnswerText("");
@@ -646,8 +647,9 @@ const fetchQuestionWithAnswers = async (questionId) => {
   };
   
 
-  
   // --- useEffect ---
+
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -787,8 +789,6 @@ useEffect(() => {
 
 useEffect(() => {
   if (activeSection === 'questions') {
-   
-   
     const fetchAnswers = async () => {
       try {
         setLoadingAnswers(true);

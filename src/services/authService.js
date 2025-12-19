@@ -24,11 +24,11 @@ print
         },
       });
 
-      console.log('✅ استجابة تسجيل الدخول:', response.data);
+      console.log('استجابة تسجيل الدخول:', response.data);
       return response.data;
     } catch (error) {
       console.log('dddddddddddddddddddddddddddddddddd')
-      console.error('❌ خطأ في تسجيل الدخول:', error);
+      console.error(' خطأ في تسجيل الدخول:', error);
     }
 
   

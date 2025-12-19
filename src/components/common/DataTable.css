@@ -130,6 +130,61 @@
   transform: translateY(-1px);
 }
 
+/* --- تصميم الأزرار داخل DataTable --- */
+.data-table .btn-primary,
+.data-table .btn-danger {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 70px;
+  justify-content: center;
+}
+
+/* زر التعديل */
+.data-table .btn-primary {
+  background: #266e95;
+  color: #fff;
+}
+
+.data-table .btn-primary:hover {
+  background: #1c597b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* زر الحذف */
+.data-table .btn-danger {
+  background: #dba163;
+  color: #fff;
+}
+
+.data-table .btn-danger:hover {
+  background: #cd794c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ترتيب الأزرار داخل الخلية */
+.data-table td > div {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+@media (max-width: 768px) {
+  .data-table td > div {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
 /* تجاوب مع الشاشات الصغيرة */
 @media (max-width: 768px) {
   .table-header {

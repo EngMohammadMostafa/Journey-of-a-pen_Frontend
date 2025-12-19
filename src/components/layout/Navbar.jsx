@@ -10,7 +10,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const [isHeroVisible, setIsHeroVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
-  // ✅ تمت إضافته لإخفاء النافبار
+  //  تمت إضافته لإخفاء النافبار
   const [hideNavbar, setHideNavbar] = useState(false)
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const Navbar = ({ onToggleSidebar }) => {
 
   return (
     <>
-      {/* ✅ إضافة كلاس hidden للنافبار */}
+      {/*  إضافة كلاس hidden للنافبار */}
       <nav className={`navbar ${hideNavbar ? "hidden" : ""}`}>
         <div className="navbar-left">
           <div className="navbar-brand">
@@ -58,21 +58,19 @@ const Navbar = ({ onToggleSidebar }) => {
             <div className="nav-item">
               <button className="nav-icon-btn">
                 <span className="icon">🔔</span>
-                <span className="badge">3</span>
+                <span className="label">Notifications</span>
+
+                
               </button>
             </div>
 
-            <div className="nav-item">
-              <button className="nav-icon-btn">
-                <span className="icon">⚙️</span>
-              </button>
-            </div>
+            
 
             <div className="nav-item user-menu">
               <div className="user-avatar-small">👤</div>
               <div className="user-info">
-                <span className="user-name">الأدمن</span>
-                <span className="user-role">مدير النظام</span>
+                <span className="user-name">Admin</span>
+                <span className="user-role"> System Administator</span>
               </div>
             </div>
 
@@ -82,14 +80,14 @@ const Navbar = ({ onToggleSidebar }) => {
                 onClick={() => navigate('/dashboard')}
               >
                 <span className="icon">🏠</span>
-                <span className="label">العودة للوحة التحكم</span>
+                <span className="label"> Welcome Dashboard </span>
               </button>
             </div>
 
             <div className="nav-item">
               <button className="nav-icon-btn" onClick={handleLogout}>
                 <span className="icon">🚪</span>
-                <span className="label">خروج</span>
+                <span className="label">Exite</span>
               </button>
             </div>
           </div>
