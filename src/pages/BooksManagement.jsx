@@ -195,7 +195,6 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
 
 
   // --- التبديل بين الأقسام ---
-  const handleRequests = () => setActiveSection('requests');
   const handleBooks = () => setActiveSection('books');
   const handleQuestions = () => setActiveSection('questions');
   const handleCategories = () => setActiveSection('categories');
@@ -813,6 +812,18 @@ useEffect(() => {
   }
 }, [activeSection, answersPage]);
 
+useEffect(() => {
+  if (activeSection !== 'questions') return;
+
+  // إذا تم تغيير نوع الفلترة إلى "text" (بحث عن السؤال)
+  if (searchTypeQuestion === "text") {
+    // إعادة جلب الأسئلة من API (paginated)
+    refetchQuestions(1);
+
+    // مسح أي فلترة على الكتاب
+    setSearchBookId(""); 
+  }
+}, [searchTypeQuestion, activeSection]);
 
 
 
@@ -850,11 +861,19 @@ useEffect(() => {
       )}
 
     </div>
-  
+    <div className="main-stats" style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+  <div className="stat-card">
+    <h3>Total Number Of Books</h3>
+    <span className="stat-number">{bookStats.total}</span>
+  </div>
+  <div className="stat-card">
+    <h3>Total Number Of Questions</h3>
+    <span className="stat-number">{questionStats.totalQuestions}</span>
+  </div>
+</div>
+
       <div className="buttons-container">
-        <button className={`btn ${activeSection === 'requests' ? 'btn-primary' : 'btn-outline'}`} onClick={handleRequests}>
-          Book Order Content Management
-        </button>
+        
         <button className={`btn ${activeSection === 'books' ? 'btn-primary' : 'btn-outline'}`} onClick={handleBooks}>
           Book Management
         </button>
@@ -877,20 +896,7 @@ useEffect(() => {
     </div>
 
   
-          <div className="book-stats">
-            <div className="stat-card">
-              <h3>Total Number Of Books</h3>
-              <span className="stat-number">{bookStats.total}</span>
-            </div>
-            <div className="stat-card">
-              <h3>Number Of Free Books</h3>
-              <span className="stat-number">{bookStats.free}</span>
-            </div>
-            <div className="stat-card">
-              <h3>Number Of Non-Free Books</h3>
-              <span className="stat-number">{bookStats.paid}</span>
-            </div>
-          </div>
+         
   
           <div className="books-filters">
             <div className="search-section">
@@ -949,20 +955,7 @@ useEffect(() => {
       <h2>Questions and Answers Section</h2>
     </div>
 
-    <div className="question-stats">
-      <div className="stat-card">
-        <h3>Total Number Of Questions</h3>
-        <span className="stat-number">{questionStats.totalQuestions}</span>
-      </div>
-      <div className="stat-card">
-        <h3>Number Of Correct Answers</h3>
-        <span className="stat-number">{questionStats.correctAnswers}</span>
-      </div>
-      <div className="stat-card">
-        <h3>Total Number Of Points Earned</h3>
-        <span className="stat-number">{questionStats.totalPoints}</span>
-      </div>
-    </div>
+   
 
     <div className="questions-filters">
       <div className="filter-section">
