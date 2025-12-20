@@ -27,18 +27,17 @@ const [filteredNotifications, setFilteredNotifications] = useState([])
  //  إحصائيات الإشعارات
 const notificationStats = {
   total: notifications.length,
-  // الإشعارات المعلقة انتبه ان ياخد بعين الاعتبار ان 2 هي معلقه
-  pending: notifications.filter(n => n.status === 2).length 
+  
 }
 
 
   const columns = [
     { key: 'notification_id', title: 'ID' },
-    { key: 'title', title: 'عنوان الإشعار' },
-    { key: 'content', title: 'المحتوى' },
-    { key: 'type', title: 'النوع' },
-    { key: 'status', title: 'الحالة', render: (value) => value === 0 ? 'نشط' : 'غير نشط' },
-    { key: 'created_at', title: 'تاريخ الإنشاء' }
+    { key: 'title', title: 'Notification Title' },
+    { key: 'content', title: 'Content' },
+    { key: 'type', title: 'Type' },
+    { key: 'status', title: 'Status', render: (value) => value === 0 ? 'Active' : 'Inactive' },
+    { key: 'created_at', title: 'Created At' }
   ]
 
   const fetchNotifications = async () => {
@@ -84,18 +83,18 @@ const notificationStats = {
 
   const handleSendNotification = async () => {
     if (!formData.title || !formData.content) {
-      alert('الرجاء ملء جميع الحقول المطلوبة')
+      alert('Please Fill In All Required Fields')
       return
     }
 
     try {
       await notificationsService.addNotification(formData, token)
-      alert('تم إرسال الإشعار بنجاح')
+      alert('The Notification Was Sent Successfully ')
       setIsModalOpen(false)
       fetchNotifications()
     } catch (error) {
       console.error('Error sending notification:', error)
-      alert('حدث خطأ أثناء إرسال الإشعار')
+      alert('An Error Occurred While Sending The Notification ')
     }
   }
 
@@ -115,10 +114,7 @@ const notificationStats = {
     <h3> Total  Number Of Notification</h3>
     <span className="stat-number">{notificationStats.total}</span>
   </div>
-  <div className="stat-card">
-    <h3>Pending Notification</h3>
-    <span className="stat-number">{notificationStats.pending}</span>
-  </div>
+  
 </div>
 
 
@@ -148,7 +144,7 @@ const notificationStats = {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="إضافة إشعار جديد"
+        title=" Add New Notification"
       >
         <div className="notification-form">
           <div className="form-group">
