@@ -30,24 +30,17 @@ const [filteredCompetitions, setFilteredCompetitions] = useState([]);
   // أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
-    { key: 'name', title: 'اسم المسابقة' },
-    { key: 'status', title: 'الحالة' },
-    { key: 'start_date', title: 'تاريخ البداية' },
-    { key: 'end_date', title: 'تاريخ النهاية' },
-    { key: 'max_users', title: 'الحد الأقصى للمستخدمين' }
+    { key: 'name', title: 'Competition Name' },
+    { key: 'status', title: 'Status' },
+    { key: 'start_date', title: 'Start Date' },
+    { key: 'end_date', title: 'End Date' },
+    { key: 'max_users', title: 'Max Users ' }
   ]
 
 // إحصائيات المسابقات
 const competitionStats = {
-  total: competitions.length,
-  completed: competitions.filter(c => c.status === 'completed').length,
-  stopped: competitions.filter(c => {
-    const ended = new Date(c.end_date) < new Date();
-    return ended && c.status !== 'completed';
-  }).length
+  total: competitions.length
 };
-
-
 
   // جلب المسابقات
   const fetchCompetitions = async () => {
@@ -195,16 +188,6 @@ useEffect(() => {
   <div className="stat-card">
     <h3>Total Number Of Competitions</h3>
     <span className="stat-number">{competitionStats.total}</span>
-  </div>
-
-  <div className="stat-card">
-    <h3> Number Of Completed Competitions</h3>
-    <span className="stat-number">{competitionStats.completed}</span>
-  </div>
-
-  <div className="stat-card">
-  <h3> Number Of Non Completed Competitions</h3>
-  <span className="stat-number">{competitionStats.stopped}</span>
   </div>
 </div>
 
