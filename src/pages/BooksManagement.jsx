@@ -150,18 +150,18 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
 
   const questionColumns = [
     { key: 'id', title: 'ID' },
-    { key: 'text', title: 'السؤال' },
-    { key: 'book_title', title: 'الكتاب' },
+    { key: 'text', title: 'Question Text' },
+    { key: 'book_title', title: 'Book Name' },
     {
       key: 'actions',
-      title: 'الإجراءات',
+      title: 'Actions',
       render: (_, question) => (
         <div>
-          <button className="btn-secondary" onClick={() => openEditQuestionModal(question)}>تعديل</button>
-          <button className="btn-danger" onClick={() => handleDeleteQuestion(question)}>حذف</button>
-          <button className="btn btn-primary" onClick={() => openAddAnswer(question.id)}>إضافة جواب</button>
+          <button className="btn-secondary" onClick={() => openEditQuestionModal(question)}>Edit</button>
+          <button className="btn-danger" onClick={() => handleDeleteQuestion(question)}>Delete</button>
+          <button className="btn btn-primary" onClick={() => openAddAnswer(question.id)}>Add Answer</button>
           <button className="btn btn-primary" onClick={() => fetchQuestionWithAnswers(question.id)}>
-          عرض الإجابات
+          View The Answers
         </button>
         </div>
       )
@@ -171,20 +171,20 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
   
   const answerColumns = [
     { key: 'id', title: 'ID' },
-    { key: 'answer_text', title: 'النص' },
-    { key: 'question_id', title: 'ID السؤال' },
+    { key: 'answer_text', title: 'Answer Text' },
+    { key: 'question_id', title: 'Question Id ' },
     { 
       key: 'is_correct', 
-      title: 'صحيح أم خطأ',
-      render: (value) => value ? " صحيحة" : " خاطئة"
+      title: ' False Or True',
+      render: (value) => value ? " True" : " False"
     },
     {
       key: 'actions',
-      title: 'الإجراءات',
+      title: 'Actions',
       render: (_, answer) => (
         <div>
-          <button onClick={() => openEditAnswer(answer)} className="btn btn-warning">تعديل</button>
-          <button onClick={() => handleDeleteAnswer(answer.id)} className="btn btn-danger">حذف</button>
+          <button onClick={() => openEditAnswer(answer)} className="btn btn-warning">Edit</button>
+          <button onClick={() => handleDeleteAnswer(answer.id)} className="btn btn-danger">Delete</button>
         </div>
       )
     }
