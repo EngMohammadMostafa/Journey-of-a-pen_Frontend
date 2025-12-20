@@ -55,18 +55,9 @@ const Navbar = ({ onToggleSidebar }) => {
 
         <div className="navbar-right">
           <div className="navbar-items">
-            <div className="nav-item">
-              <button className="nav-icon-btn">
-                <span className="icon">🔔</span>
-                <span className="label">Notifications</span>
 
-                
-              </button>
-            </div>
 
-            
-
-            <div className="nav-item user-menu">
+          <div className="nav-item user-menu">
               <div className="user-avatar-small">👤</div>
               <div className="user-info">
                 <span className="user-name">Admin</span>
@@ -84,6 +75,16 @@ const Navbar = ({ onToggleSidebar }) => {
               </button>
             </div>
 
+            <div className="nav-item">
+              <button className="nav-icon-btn">
+                <span className="icon">🔔</span>
+                <span className="label">Notifications</span>
+
+                
+              </button>
+            </div>
+
+            
             <div className="nav-item">
               <button className="nav-icon-btn" onClick={handleLogout}>
                 <span className="icon">🚪</span>
