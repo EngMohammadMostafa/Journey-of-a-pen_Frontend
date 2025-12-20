@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,24 +13,9 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
     with SingleTickerProviderStateMixin {
 
   List<Map<String, dynamic>> books = [
-    {
-      "id": "book_1",
-      "title": "ظلال القمر",
-      "likes_count": 120,
-      "filePath": null,
-    },
-    {
-      "id": "book_2",
-      "title": "رحلة إلى المجهول",
-      "likes_count": 95,
-      "filePath": null,
-    },
-    {
-      "id": "book_3",
-      "title": "حكاية الشتاء",
-      "likes_count": 180,
-      "filePath": null,
-    },
+    {"id": "book_1", "title": "ظلال القمر", "likes_count": 120},
+    {"id": "book_2", "title": "رحلة إلى المجهول", "likes_count": 95},
+    {"id": "book_3", "title": "حكاية الشتاء", "likes_count": 180},
   ];
 
   bool _loading = true;
@@ -50,51 +34,31 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
     _loadState();
   }
 
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadState() async {
     final prefs = await SharedPreferences.getInstance();
-    final likedList = prefs.getStringList('liked_books') ?? [];
-
-    setState(() {
-      likedBooks = likedList.toSet();
-      books.sort((a, b) =>
-          (b['likes_count'] as int).compareTo(a['likes_count'] as int));
-      _loading = false;
-    });
+    likedBooks = (prefs.getStringList('liked_books') ?? []).toSet();
+    books.sort((a, b) => b['likes_count'].compareTo(a['likes_count']));
+    setState(() => _loading = false);
   }
 
-  Future<void> _saveLikes() async {
+  void _toggleLike(String id) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('liked_books', likedBooks.toList());
-  }
-
-  void _toggleLike(String bookId) {
     setState(() {
-      final index = books.indexWhere((b) => b['id'] == bookId);
-      if (index == -1) return;
-
-      if (likedBooks.contains(bookId)) {
-        likedBooks.remove(bookId);
-        books[index]['likes_count']--;
+      final i = books.indexWhere((e) => e['id'] == id);
+      if (likedBooks.contains(id)) {
+        likedBooks.remove(id);
+        books[i]['likes_count']--;
       } else {
-        likedBooks.add(bookId);
-        books[index]['likes_count']++;
+        likedBooks.add(id);
+        books[i]['likes_count']++;
       }
-
-      books.sort((a, b) =>
-          (b['likes_count'] as int).compareTo(a['likes_count'] as int));
+      books.sort((a, b) => b['likes_count'].compareTo(a['likes_count']));
     });
-
-    _saveLikes();
+    prefs.setStringList('liked_books', likedBooks.toList());
   }
 
   Widget _bookCard(Map<String, dynamic> book, int rank) {
-    final bool isLiked = likedBooks.contains(book['id']);
+    final isLiked = likedBooks.contains(book['id']);
 
     return ScaleTransition(
       scale: _anim,
@@ -104,9 +68,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 8)
-          ],
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
         ),
         child: Row(
           children: [
@@ -114,45 +76,29 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
               radius: 18,
               backgroundColor:
               rank == 1 ? Colors.amber : const Color(0xFF1C597B),
-              child: Text("$rank",
-                  style: const TextStyle(color: Colors.white)),
+              child: Text("$rank", style: const TextStyle(color: Colors.white)),
             ),
             const SizedBox(width: 12),
-
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    book['title'],
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1C597B)),
-                  ),
-                ],
+              child: Text(
+                book['title'],
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1C597B)),
               ),
             ),
-
-            // 🔹 عدد المتفاعلين + زر الإعجاب
             Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  onPressed: () => _toggleLike(book['id']),
                   icon: Icon(
                     isLiked ? Icons.favorite : Icons.favorite_border,
                     color: isLiked ? Colors.red : Colors.grey,
                   ),
+                  onPressed: () => _toggleLike(book['id']),
                 ),
-                Text(
-                  "${book['likes_count']}",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
-                ),
+                Text("${book['likes_count']}",
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -160,166 +106,138 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
       ),
     );
   }
-  // 🔹 نموذج الانضمام
-  void _showJoinDialog() {
-    final titleController = TextEditingController();
-    final authorController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          title: const Text(
-            "الانضمام للمسابقة",
-            style: TextStyle(
-                color: Color(0xFF1C597B), fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: "عنوان الكتاب",
-                  prefixIcon: Icon(Icons.book),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: authorController,
-                decoration: const InputDecoration(
-                  labelText: "اسم الكاتب",
-                  prefixIcon: Icon(Icons.person),
-                ),
-              ),
-              const SizedBox(height: 14),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("اختيار الملف غير مفعل حالياً")),
-                  );
-                },
-                icon: const Icon(Icons.upload_file),
-                label: const Text("رفع ملف الكتاب"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1C597B),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("إلغاء"),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1C597B),
-              ),
-              onPressed: () {
-                if (titleController.text.isEmpty ||
-                    authorController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("يرجى تعبئة جميع الحقول")),
-                  );
-                  return;
-                }
-
-                setState(() {
-                  books.add({
-                    "id": "book_${DateTime.now().millisecondsSinceEpoch}",
-                    "title": titleController.text,
-                    "author": authorController.text,
-                    "likes_count": 0,
-                    "filePath": null,
-                  });
-                });
-
-                Navigator.pop(context);
-              },
-              child: const Text("إرسال"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality( // 🔹 RTL عام
+    return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFEAF6FB),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1C597B),
-          title: const Text("مسابقة الكتابة"),
-          centerTitle: true,
-        ),
-        body: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF1C597B),
+                Color(0xFF4C869F),
+                Color(0xFF7199AA),
+                Color(0xFFE3F2FD),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                : SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
                 ),
-                child:  Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("المسابقة الحالية",
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+
+                      /// 🔹 Header بدل AppBar
+                      const Text(
+                        "مسابقة الكتابة",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18)),
-                    SizedBox(height: 6),
-                    Text("اكتب قصة قصيرة مكونة من 1000 كلمة",
-                        style: TextStyle(color: Colors.white70)),
-                    SizedBox(height: 8),
-                    Text("الوقت المتبقي: 12 يوم",
-                        style: TextStyle(color: Colors.white70)),
-                  ],
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // البطاقة الأساسية للمسابقة
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text("المسابقة الحالية", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                            SizedBox(height: 6),
+                            Text("اكتب قصة قصيرة مكونة من 1000 كلمة. الجوائز للمراكز الثلاثة الأولى.", style: TextStyle(color: Colors.white70)),
+                            SizedBox(height: 8),
+                            Text("الوقت المتبقي: 12 يوم", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.menu_book_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text(
+                                "الكتب المشاركة",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+
+                          ElevatedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.edit_note_rounded,
+                              size: 20,
+                            ),
+                            label: const Text(
+                              "الانضمام",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF1C597B),
+                              elevation: 4,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+                      ...List.generate(
+                          books.length, (i) => _bookCard(books[i], i + 1)),
+                    ],
+                  ),
                 ),
               ),
-
-              const SizedBox(height: 20),
-              const Text("الكتب المشاركة",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-
-              ...List.generate(
-                  books.length, (i) => _bookCard(books[i], i + 1)),
-
-              const SizedBox(height: 24),
-
-              Center(
-                child: ElevatedButton(
-                  onPressed: _showJoinDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1C597B),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: const Text(
-                    "الانضمام للمسابقة",
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
