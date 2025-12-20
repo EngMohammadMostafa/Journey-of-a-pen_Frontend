@@ -71,7 +71,7 @@ const UsersManagement = () => {
       setFilteredUsers(response.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setErrorMessage('حدث خطأ في جلب بيانات المستخدمين');
+      setErrorMessage('An Error Occured While Fetching User Data');
       setTimeout(() => setErrorMessage(''), 3000);
     } finally {
       setLoading(false);
@@ -99,32 +99,32 @@ const UsersManagement = () => {
   const handleSaveNewUser = async () => {
     // تحقق واجهة بسيطة قبل الإرسال
     if (!formData.username || !formData.email || !formData.password || !formData.password_confirmation || !formData.age || !formData.gender) {
-      alert('الرجاء ملء جميع الحقول المطلوبة (بما في ذلك تأكيد كلمة المرور والعمر).');
+      alert('   Please Fill In All Requierd Fields (Including Password Confirmation And Age)');
       return;
     }
   
     // تحقق من تساوي الباسوورد
     if (formData.password !== formData.password_confirmation) {
-      alert('كلمة المرور وتأكيدها غير متطابقين.');
+      alert('The Password And Confirmation Do Not Match');
       return;
     }
   
     // تحقق مبدئي لشرط الباكند: طول وكلفة الباسور (تقديري)
     if (formData.password.length < 8) {
-      alert('كلمة المرور يجب أن تكون على الأقل 8 أحرف.');
+      alert(' The Password Must Be At Least 8 Characters Long');
       return;
     }
     // (اختياري) تحقق وجود حرف كبير، حرف صغير، رقم، ورمز
     const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
     if (!pwdRegex.test(formData.password)) {
-      alert('كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص.');
+      alert('  The Password Must Contain A Capital Letter, A Lowercase Letter And A Symbol');
       return;
     }
   
     // تأكد من العمر integer و >=10
     const ageInt = parseInt(formData.age, 10);
     if (isNaN(ageInt) || ageInt < 10) {
-      alert('الرجاء إدخال عمر صالح (عدد صحيح >= 10).');
+      alert('Please Enter An Age Greater Than 10');
       return;
     }
   
@@ -140,14 +140,14 @@ const UsersManagement = () => {
     try {
       // **هنا نرسل التوكن أيضاً** (token موجود من useAuth)
       await usersService.addUser(newUser, token);
-      alert('تم إضافة المستخدم بنجاح');
+      alert('The User Was Added Successfully');
       fetchUsers();
       setIsModalOpen(false);
       setFormData({ username: '', email: '', password: '', password_confirmation: '', age: '', gender: 'male' });
     } catch (error) {
       console.error('Error adding user:', error);
       // أفضل استخراج رسالة خطأ من الباك (422 validation)
-      const msg = error?.response?.data?.errors ? JSON.stringify(error.response.data.errors) : 'حدث خطأ في إضافة المستخدم';
+      const msg = error?.response?.data?.errors ? JSON.stringify(error.response.data.errors) : 'An Error Occured While Adding The User ';
       setErrorMessage(msg);
       setTimeout(() => setErrorMessage(''), 5000);
     }
@@ -160,16 +160,16 @@ const UsersManagement = () => {
       // التحقق من كلمة المرور
       if (userData.password) {
         if (!userData.password_confirmation) {
-          alert('الرجاء إدخال تأكيد كلمة المرور');
+          alert('Please Enter Your Password Confirmation');
           return;
         }
         if (userData.password !== userData.password_confirmation) {
-          alert('كلمة المرور وتأكيدها غير متطابقين.');
+          alert('The Password And Confirmation Do Not Match');
           return;
         }
         const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
         if (!pwdRegex.test(userData.password)) {
-          alert('كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص.');
+          alert('The Password Must Contain A Capital Letter, A Lowercase Letter And A Symbol');
           return;
         }
       } else {
@@ -181,39 +181,39 @@ const UsersManagement = () => {
       if (userData.age !== '') {
         const ageInt = parseInt(userData.age, 10);
         if (isNaN(ageInt) || ageInt < 10) {
-          alert('الرجاء إدخال عمر صالح (عدد صحيح >= 10).');
+          alert('Please Enter An Age Greater Than 10');
           return;
         }
         userData.age = ageInt;
       } else {
-        alert('العمر حقل مطلوب.');
+        alert('Age Field Required');
         return;
       }
   
       // إرسال البيانات للباكند مع التوكن
       await usersService.updateUser(editingUser.id, userData, token);
   
-      alert('تم تحديث بيانات المستخدم بنجاح');
+      alert(' User Data Was Successfully Updated');
       setIsModalOpen(false);
       setEditingUser(null);
       fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
-      setErrorMessage('حدث خطأ في تحديث بيانات المستخدم');
+      setErrorMessage('An Error Occurred While Updating User Data ');
       setTimeout(() => setErrorMessage(''), 3000);
     }
   };
   
 
   const handleDelete = async (user) => {
-    if (window.confirm(`هل أنت متأكد من حذف المستخدم "${user.username}"؟`)) {
+    if (window.confirm(`Are You Sure You Deleted The User  "${user.username}"؟`)) {
       try {
         await usersService.deleteUser(user.id, token);
-        alert('تم حذف المستخدم بنجاح');
+        alert(' The User Was Successfully Deleted');
         fetchUsers();
       } catch (error) {
         console.error('Error deleting user:', error);
-        setErrorMessage('حدث خطأ في حذف المستخدم');
+        setErrorMessage('An Error Occurred While Deleting The User ');
         setTimeout(() => setErrorMessage(''), 3000);
       }
     }
@@ -281,7 +281,7 @@ const UsersManagement = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingUser(null); }}
-        title={editingUser ? 'تعديل بيانات المستخدم' : 'إضافة مستخدم جديد'}
+        title={editingUser ? 'Edit User Data' : ' Add New User'}
       >
         <div className="user-form">
           <div className="form-group">
@@ -298,7 +298,7 @@ const UsersManagement = () => {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder={editingUser ? "اتركها فارغة للحفاظ على الحالية" : "أدخل كلمة المرور"}
+              placeholder={editingUser ? "اتركها فارغة للحفاظ على الحالية" : "Enter Your Password  "}
               required={!editingUser}
             />
           </div>
@@ -337,7 +337,7 @@ const UsersManagement = () => {
           </div>
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-            <button className="btn-primary" onClick={handleFormSubmit}>{editingUser ? 'حفظ التغييرات' : 'Add User '}</button>
+            <button className="btn-primary" onClick={handleFormSubmit}>{editingUser ? 'Save User Edit Changes  ' : 'Add User '}</button>
           </div>
         </div>
       </Modal>
