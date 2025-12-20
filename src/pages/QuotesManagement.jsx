@@ -20,11 +20,11 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
   // أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
-    { key: 'text', title: 'نص الاقتباس' },
-    { key: 'book_name', title: 'اسم الكتاب' },
-    { key: 'user_id', title: 'معرف المستخدم' },
-    { key: 'created_at', title: 'تاريخ الإنشاء' },
-    { key: 'actions', title: 'الإجراءات' }
+    { key: 'text', title: 'Quote Text' },
+    { key: 'book_name', title: 'Book Name ' },
+    { key: 'user_id', title: 'User ID ' },
+    { key: 'created_at', title: 'Created At' },
+    { key: 'actions', title: 'Actions' }
   ];
 
   // جلب البيانات من API
@@ -47,11 +47,11 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
     }
   };
 
-  useEffect(() => {
-    fetchQuotes();
-  }, []);
 
 //هذا يجلب البينات من الباك بينما اللي بعده للفلترة
+
+
+
   useEffect(() => {
     fetchQuotes(); // جلب البيانات عند تحميل الصفحة
   }, []);
@@ -104,37 +104,37 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
         await fetchQuotes();
         setDeleteModal({ isOpen: false, quote: null });
       } else {
-        setError('فشل في حذف الاقتباس');
+        setError('Faild To Delete The Quote ');
       }
     } catch (err) {
-      setError('حدث خطأ أثناء الحذف');
+      setError(' An Error Occurred During Deletion');
       console.error('Error deleting quote:', err);
     }
   };
 
   // تنسيق البيانات للجدول
-  const formatTableData = () => {
-
+  const tableData = React.useMemo(() => {
     return filteredQuotes.map(quote => ({
       id: quote.id,
       text: quote.text,
       book_name: quote.book_name,
       user_id: quote.user_id,
-      created_at: new Date(quote.created_at).toLocaleDateString('ar-SA'),
+      created_at: new Date(quote.created_at).toLocaleDateString('en-US'),
       actions: (
         <div className="actions-buttons">
           <button 
             className="btn btn-danger btn-sm"
             onClick={() => handleDeleteClick(quote)}
           >
-            حذف
+            Delete
           </button>
         </div>
       )
     }));
-  };
+  }, [filteredQuotes]);
+  
 
-  if (loading) return <LoadingSpinner />;
+ 
 
   return (
     <div className="quotes-management">
@@ -151,25 +151,10 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
     <span className="stat-number">{quotes.length}</span>
   </div>
 
-  <div className="stat-card">
-    <h3>أكثر كتاب يحتوي على اقتباسات تاكد من مشكلهربط </h3>
-    <span className="stat-number">
-      {(() => {
-        if (quotes.length === 0) return "لا يوجد بيانات";
-        const countMap = {};
-        quotes.forEach(q => {
-          countMap[q.book_name] = (countMap[q.book_name] || 0) + 1;
-        });
-        const topBook = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0];
-        return `${topBook[0]} (${topBook[1]} اقتباسات)`;
-      })()}
-    </span>
-  </div>
+  
 </div>
 
-    
-
-
+  
 
 {/*للفلترة والبحث */}
 <div className="quotes-filters">
@@ -191,7 +176,7 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
     >
       <option value="all">All Quotes</option>
       <option value="text">Search For The Quote Title</option>
-      <option value="book">حسب اسم الكتاب</option>
+      
     </select>
   </div>
 
@@ -202,7 +187,8 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
 
       <DataTable
         columns={columns}
-        data={formatTableData()}
+        data={tableData} 
+        loading={loading}  
         emptyMessage="لا توجد اقتباسات لعرضها"
       />
 
@@ -210,27 +196,27 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
       <Modal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, quote: null })}
-        title="تأكيد الحذف"
+        title="Deletion Confirmation Message"
       >
         <div className="delete-confirmation">
-          <p>هل أنت متأكد من أنك تريد حذف هذا الاقتباس؟</p>
+          <p>Are You Sure You Want To Delete This Quote? </p>
           <div className="quote-preview">
-            <strong>الاقتباس:</strong> 
+            <strong>Quote:</strong> 
             <p>"{deleteModal.quote?.text}"</p>
-            <small>الكتاب: {deleteModal.quote?.book_name}</small>
+            <small>Book: {deleteModal.quote?.book_name}</small>
           </div>
           <div className="modal-actions">
             <button 
               className="btn btn-secondary"
               onClick={() => setDeleteModal({ isOpen: false, quote: null })}
             >
-              إلغاء
+              Cancel
             </button>
             <button 
               className="btn btn-danger"
               onClick={confirmDelete}
             >
-              تأكيد الحذف
+             Delete
             </button>
           </div>
         </div>
