@@ -19,6 +19,14 @@ export const competitionsService = {
     } catch (error) {
       throw error;
     }
+  },
+  updateCompetition: async (id, competitionData) => {
+    try {
+      const response = await api.put(`/admin/competitions/${id}`, competitionData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 
 };

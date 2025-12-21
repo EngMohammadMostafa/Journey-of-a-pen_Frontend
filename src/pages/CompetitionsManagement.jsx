@@ -35,7 +35,19 @@ const [filteredCompetitions, setFilteredCompetitions] = useState([]);
     { key: 'status', title: 'Status' },
     { key: 'startdate', title: 'Start Date' },
     { key: 'enddate', title: 'End Date' },
-    { key: 'max_user', title: 'Max Users' }
+    { key: 'max_user', title: 'Max Users' },
+    { 
+      key: 'actions', 
+      title: 'Actions',
+      render: (_, comp) => (
+        <div>
+          <button className="btn-primary" onClick={() => handleEdit(comp)}>Edit</button>
+          <button className="btn-danger" onClick={() => handleDelete(comp)}>Delete</button>
+        </div>
+      )
+    }
+  
+  
   ]
   
 
@@ -93,8 +105,11 @@ const competitionStats = {
   const handleSave = async () => {
     try {
       if (editingCompetition) {
-        await competitionsService.updateCompetition(editingCompetition.id, formData, token)
-        alert('تم تعديل المسابقة بنجاح')
+
+        await competitionsService.updateCompetition(editingCompetition.id, {
+          max_user: formData.max_user
+        })
+          alert('تم تعديل المسابقة بنجاح')
       } else {
         await competitionsService.addCompetition(formData, token)
         alert('تم إضافة المسابقة بنجاح')
