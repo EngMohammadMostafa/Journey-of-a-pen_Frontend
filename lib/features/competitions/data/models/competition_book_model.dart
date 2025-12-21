@@ -47,4 +47,22 @@ class CompetitionBookModel {
           : null,
     );
   }
+
+  CompetitionBookModel copyWith({
+    int? likesCount,
+  }) {
+    return CompetitionBookModel(
+      id: id,
+      competitionId: competitionId,
+      userId: userId,
+      title: title,
+      filePath: filePath,
+      fileType: fileType,
+      fileSize: fileSize,
+      likesCount: likesCount ?? this.likesCount,
+      owner: owner,
+      likedUsers: likedUsers,
+    );
+  }
+
 }

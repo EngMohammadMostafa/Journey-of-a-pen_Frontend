@@ -17,6 +17,9 @@ import 'features/auth/presentation/pages/success_page.dart';
 import 'features/question/provider/quiz_provider.dart';
 import 'features/question/repository/quiz_repository.dart';
 import 'features/quotes/presentation/pages/quote.dart';
+import 'features/competitions/provider/competition_provider.dart';
+import 'features/competitions/repository/competition_repository.dart';
+
 
 // Provider و Repository
 import 'features/profile/provider/profile_provider.dart';
@@ -76,6 +79,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => QuizProvider(QuizRepository(apiService)),
         ),
+
+        // Competition Provider
+        ChangeNotifierProvider(
+          create: (_) => CompetitionProvider(
+            repository: CompetitionRepository(),
+          ),
+        ),
+
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
