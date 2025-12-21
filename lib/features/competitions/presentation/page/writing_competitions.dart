@@ -24,6 +24,9 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
   late AnimationController _animController;
   late Animation<double> _anim;
 
+  bool hasJoined = false;
+  int maxParticipants = 5; // الحد الأقصى للمشاركين
+
   @override
   void initState() {
     super.initState();
@@ -37,9 +40,13 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
   Future<void> _loadState() async {
     final prefs = await SharedPreferences.getInstance();
     likedBooks = (prefs.getStringList('liked_books') ?? []).toSet();
+
+    hasJoined = prefs.getBool('has_joined') ?? false; // ✅ إضافة
+
     books.sort((a, b) => b['likes_count'].compareTo(a['likes_count']));
     setState(() => _loading = false);
   }
+
 
   void _toggleLike(String id) async {
     final prefs = await SharedPreferences.getInstance();
@@ -55,6 +62,81 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage>
       books.sort((a, b) => b['likes_count'].compareTo(a['likes_count']));
     });
     prefs.setStringList('liked_books', likedBooks.toList());
+  }
+
+  void _showJoinDialog() async {
+    if (books.length >= maxParticipants) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ اكتمل عدد المشاركين")),
+      );
+      return;
+    }
+
+    final titleController = TextEditingController();
+    bool pdfSelected = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("الانضمام للمسابقة"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: "عنوان الكتاب",
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () {
+                  pdfSelected = true; // محاكاة اختيار PDF
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("✔ تم اختيار ملف PDF")),
+                  );
+                },
+                icon: const Icon(Icons.picture_as_pdf),
+                label: const Text("إرفاق ملف PDF"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("إلغاء"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.isEmpty || !pdfSelected) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("يرجى إدخال العنوان وإرفاق ملف PDF")),
+                  );
+                  return;
+                }
+
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('has_joined', true);
+
+                setState(() {
+                  hasJoined = true;
+                  books.add({
+                    "id": "user_book",
+                    "title": titleController.text,
+                    "likes_count": 0,
+                  });
+                });
+
+                Navigator.pop(context);
+              },
+              child: const Text("إرسال"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _bookCard(Map<String, dynamic> book, int rank) {

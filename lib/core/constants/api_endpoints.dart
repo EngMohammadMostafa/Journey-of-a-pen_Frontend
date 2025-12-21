@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl = "http://192.168.0.103:8000/api";
+  static const String baseUrl = "http://192.168.241.251:8000/api";
 
   //  Auth
   static const String register = "/auth/register";
@@ -36,4 +36,11 @@ class ApiEndpoints {
   static String recordAnswer(int bookId) => "/books/$bookId/session/answer"; // POST تسجيل إجابة
   static String submitAnswers(int bookId) => "/books/$bookId/session/submit"; // POST إنهاء الجلسة
   static String exitSession(int bookId) => "/books/$bookId/session/exit"; // POST الخروج من الجلسة
+
+  // ---------- COMPETITIONS ----------
+  static const String competitions = "/competitions"; // GET جميع المسابقات
+  static String competitionBooks(int competitionId) => "/competitions/$competitionId/books"; // GET كتب المسابقة
+  static String participateInCompetition(int competitionId) => "/competitions/$competitionId/participate"; // POST رفع كتاب للمسابقة
+  static String likeCompetitionBook(int competitionBookId) => "/competition-books/$competitionBookId/like"; // POST لايك / إلغاء لايك
+  static String downloadCompetitionBook(int competitionBookId) => "/competition-books/$competitionBookId/download"; // GET تحميل الكتاب
 }
