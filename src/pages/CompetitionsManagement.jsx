@@ -106,9 +106,17 @@ const competitionStats = {
     try {
       if (editingCompetition) {
 
-        await competitionsService.updateCompetition(editingCompetition.id, {
-          max_user: formData.max_user
-        })
+        await competitionsService.updateCompetition(
+          editingCompetition.id,
+          {
+            name: formData.name,
+            status: formData.status,
+            startdate: formData.startdate,
+            enddate: formData.enddate,
+            max_user: formData.max_user
+          }
+        )
+        
           alert('تم تعديل المسابقة بنجاح')
       } else {
         await competitionsService.addCompetition(formData, token)
@@ -118,11 +126,12 @@ const competitionStats = {
       setEditingCompetition(null)
       setFormData({
         name: '',
-        status: 'ongoing',
-        start_date: '',
-        end_date: '',
-        max_users: ''
+        status: 'active',
+        startdate: '',
+        enddate: '',
+        max_user: 1
       })
+      
       fetchCompetitions()
     } catch (error) {
       console.error('Error saving competition:', error)
@@ -265,13 +274,14 @@ useEffect(() => {
               <div className="form-group">
                 <label>Statu:</label>
                 <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 >
-                  <option value="ongoing">جارية</option>
-                  <option value="active">نشطة</option>
-                  <option value="completed">منتهية</option>
+                    <option value="active">نشطة</option>
+                    <option value="inactive">غير نشطة</option>
+                    <option value="finished">منتهية</option>
                 </select>
+
               </div>
 
               <div className="form-group">
