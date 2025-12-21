@@ -60,26 +60,6 @@ const competitionStats = {
     }
   }
 
-  useEffect(() => {
-    if (showCompetitionsTable) {
-      fetchCompetitions()
-    }
-  }, [showCompetitionsTable])
-
-
-  // فلترة حسب اسم المسابقة
-useEffect(() => {
-  let filtered = competitions;
-
-  if (searchTerm) {
-    filtered = filtered.filter(c =>
-      c.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
-
-  setFilteredCompetitions(filtered);
-}, [searchTerm, competitions]);
-
 
   // فتح مودال الإضافة
   const handleAddCompetition = () => {
@@ -150,6 +130,30 @@ useEffect(() => {
   }
 
   const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'Add New Competation  '
+
+
+
+  
+  useEffect(() => {
+    if (showCompetitionsTable) {
+      fetchCompetitions()
+    }
+  }, [showCompetitionsTable])
+
+
+  // فلترة حسب اسم المسابقة
+useEffect(() => {
+  let filtered = competitions;
+
+  if (searchTerm) {
+    filtered = filtered.filter(c =>
+      c.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  setFilteredCompetitions(filtered);
+}, [searchTerm, competitions]);
+
 
   return (
 
@@ -278,11 +282,12 @@ useEffect(() => {
                 <input
                   type="number"
                   value={formData.max_user}
+                    min="1"
                   onChange={(e) =>
                     setFormData({ ...formData, max_user: Number(e.target.value) })
                   }
                   
-                  min="1"
+                
                 />
               </div>
 

@@ -10,5 +10,15 @@ export const competitionsService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  getAllCompetitions: async () => {
+    try {
+      const response = await api.get('/admin/competitions');
+      return response.data; // { success: true, competitions: [...] }
+    } catch (error) {
+      throw error;
+    }
   }
+
 };
