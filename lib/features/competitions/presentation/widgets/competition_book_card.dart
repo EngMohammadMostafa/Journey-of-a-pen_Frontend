@@ -175,7 +175,7 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                               color: widget.isLiked ? Colors.red : Colors.grey,
                             ),
                             onPressed: widget.onLikeToggle,
-                            iconSize: 25,
+                            iconSize: 24,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),

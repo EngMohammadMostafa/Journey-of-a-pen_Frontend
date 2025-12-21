@@ -255,13 +255,13 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                competition!['description'] ?? "",
-                                style: const TextStyle(color: Colors.white70),
+                                competition!['description'] ?? "الجوائز للمراكز الثلاثة الأولى",
+                                style: const TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                "الوقت المتبقي: ${competition!['time_remaining'] ?? 'غير معروف'}",
-                                style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+                                "وقت الانتهاء: ${competition!['enddate'] ?? 'غير معروف'}",
+                                style: const TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
