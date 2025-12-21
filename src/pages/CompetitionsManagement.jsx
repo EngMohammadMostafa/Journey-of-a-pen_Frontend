@@ -134,15 +134,16 @@ const competitionStats = {
   const handleDelete = async (competition) => {
     if (window.confirm(`هل أنت متأكد من حذف المسابقة "${competition.name}"؟`)) {
       try {
-        await competitionsService.deleteCompetition(competition.id, token)
-        alert('تم حذف المسابقة بنجاح')
-        fetchCompetitions()
+        await competitionsService.deleteCompetition(competition.id, token);
+        alert('تم حذف المسابقة بنجاح');
+        fetchCompetitions(); // تحديث الجدول بعد الحذف
       } catch (error) {
-        console.error('Error deleting competition:', error)
-        alert('حدث خطأ في حذف المسابقة')
+        console.error('Error deleting competition:', error);
+        alert('حدث خطأ في حذف المسابقة');
       }
     }
   }
+  
 
   const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'Add New Competation  '
 

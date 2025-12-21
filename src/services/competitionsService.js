@@ -27,6 +27,17 @@ export const competitionsService = {
     } catch (error) {
       throw error;
     }
+  },
+
+// حذف مسابقة
+deleteCompetition: async (id) => {
+  try {
+    const response = await api.delete(`/admin/competitions/${id}`);
+    return response.data; // { message: "تم الحذف" }
+  } catch (error) {
+    throw error;
   }
+}
+
 
 };
