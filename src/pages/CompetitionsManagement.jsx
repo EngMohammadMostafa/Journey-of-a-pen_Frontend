@@ -21,21 +21,23 @@ const [filteredCompetitions, setFilteredCompetitions] = useState([]);
 
   const [formData, setFormData] = useState({
     name: '',
-    status: 'ongoing',
-    start_date: '',
-    end_date: '',
-    max_users: ''
+    status: 'active',
+    startdate: '',
+    enddate: '',
+    max_user: 1
   })
+  
 
   // أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
     { key: 'name', title: 'Competition Name' },
     { key: 'status', title: 'Status' },
-    { key: 'start_date', title: 'Start Date' },
-    { key: 'end_date', title: 'End Date' },
-    { key: 'max_users', title: 'Max Users ' }
+    { key: 'startdate', title: 'Start Date' },
+    { key: 'enddate', title: 'End Date' },
+    { key: 'max_user', title: 'Max Users' }
   ]
+  
 
 // إحصائيات المسابقات
 const competitionStats = {
@@ -84,11 +86,12 @@ useEffect(() => {
     setEditingCompetition(null)
     setFormData({
       name: '',
-      status: 'ongoing',
-      start_date: '',
-      end_date: '',
-      max_users: ''
+      status: 'active',
+      startdate: '',
+      enddate: '',
+      max_user: 1
     })
+    
     setIsModalOpen(true)
   }
 
@@ -97,11 +100,12 @@ useEffect(() => {
     setEditingCompetition(competition)
     setFormData({
       name: competition.name || '',
-      status: competition.status || 'ongoing',
-      start_date: competition.start_date || '',
-      end_date: competition.end_date || '',
-      max_users: competition.max_users || ''
+      status: competition.status || 'active',
+      startdate: competition.startdate || '',
+      enddate: competition.enddate || '',
+      max_user: competition.max_user || 1
     })
+    
     setIsModalOpen(true)
   }
 
@@ -254,8 +258,9 @@ useEffect(() => {
                 <label>Start Date:</label>
                 <input
                   type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  value={formData.startdate}
+                  onChange={(e) => setFormData({ ...formData, startdate: e.target.value })}
+                  
                 />
               </div>
 
@@ -263,8 +268,8 @@ useEffect(() => {
                 <label>End Date :</label>
                 <input
                   type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  value={formData.enddate}
+                  onChange={(e) => setFormData({ ...formData, enddate: e.target.value })}                  
                 />
               </div>
 
@@ -272,8 +277,11 @@ useEffect(() => {
                 <label>Maximum Number Of Usres :</label>
                 <input
                   type="number"
-                  value={formData.max_users}
-                  onChange={(e) => setFormData({ ...formData, max_users: e.target.value })}
+                  value={formData.max_user}
+                  onChange={(e) =>
+                    setFormData({ ...formData, max_user: Number(e.target.value) })
+                  }
+                  
                   min="1"
                 />
               </div>

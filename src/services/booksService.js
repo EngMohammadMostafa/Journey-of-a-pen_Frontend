@@ -1,22 +1,12 @@
 // src/services/booksService.js
-import api from './api'; // ⬅️ baseURL + token already included
+import api from './api'; 
 
 export const booksService = {
 
   // ============================================================
-  // 🟦 الأقسام (Categories)
+  //  الأقسام (Categories)
   // ============================================================
 
-  // جلب كل الأقسام
-  /* getAllCategories: async () => {
-    try {
-      const response = await api.get('/categories');
-      return response.data; // { success:true, categories:[...] }
-    } catch (error) {
-      throw error;
-    }
-  },
-*/
 
 // جلب كل الأقسام
 getAllCategories: async () => {
@@ -92,15 +82,7 @@ deleteCategory: async (categoryId) => {
     }
   },
 
-  
-/*  addBookToCategory: async (categoryId, bookData) => {
-    try {
-      const response = await api.post(`/admin/categories/${categoryId}/books`, bookData);
-      return response.data; // { success:true, book:{...} }
-    } catch (error) {
-      throw error;
-    }
-  },*/
+
   // إضافة كتاب داخل قسم (Admin)
 
   addBookToCategory: async (categoryId, bookData) => {
