@@ -60,24 +60,34 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
   }
 
   Future<void> _toggleLike(int bookId) async {
+    final index =
+    books.indexWhere((b) => b['competition_book_id'] == bookId);
+
+    if (index == -1) return;
+
+    final isCurrentlyLiked = likedBooks.contains(bookId);
+
+    setState(() {
+      if (isCurrentlyLiked) {
+        // إزالة الإعجاب
+        likedBooks.remove(bookId);
+        books[index]['likes_count'] =
+            (books[index]['likes_count'] ?? 1) - 1;
+      } else {
+        // إضافة إعجاب
+        likedBooks.add(bookId);
+        books[index]['likes_count'] =
+            (books[index]['likes_count'] ?? 0) + 1;
+      }
+    });
+
+    // استدعاء الباك (Toggle حقيقي)
     try {
-      final likeResp = await api.post('/competition-books/$bookId/like');
-      final data = likeResp.data;
-
-      setState(() {
-        final index =
-        books.indexWhere((b) => b['competition_book_id'] == bookId);
-
-        if (index != -1) {
-          books[index]['likes_count'] =
-              (books[index]['likes_count'] ?? 0) + 1;
-        }
-      });
+      await api.post('/competition-books/$bookId/like');
     } catch (e) {
       print("Error toggling like: $e");
     }
   }
-
 
   void _showJoinDialog() {
     if (books.length >= (competition?['max_user'] ?? 5)) {
@@ -296,8 +306,8 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                             rank: books.indexOf(b) + 1,
                             title: b['title'],
                             likesCount: b['likes_count'],
-                            isLiked: likedBooks.contains(b['id']),
-                            imagePath: "assets/images/book_placeholder.png",
+                                isLiked: likedBooks.contains(b['competition_book_id']),
+                                imagePath: "assets/images/book_placeholder.png",
                             onLikeToggle: () => _toggleLike(b['competition_book_id']),
                             onRead: () {
                               Navigator.push(
