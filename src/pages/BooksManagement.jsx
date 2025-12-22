@@ -29,11 +29,9 @@ const BooksManagement = () => {
 
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const bookStats = {
-    total: books.length,
-    free: books.filter(b => b.is_free === 1).length,
-    paid: books.filter(b => b.is_free === 0).length
-  };
+  const [totalBooks, setTotalBooks] = useState(0); // ← عدد الكتب الكلي من API
+
+  
 
   // --- حالات الأقسام ---
   const [categories, setCategories] = useState([]);
@@ -83,11 +81,7 @@ const [selectedAnswer, setSelectedAnswer] = useState(null);
 const [answerText, setAnswerText] = useState("");
 const [isCorrect, setIsCorrect] = useState(false);
 
-  const questionStats = {
-    totalQuestions: questions.length,
-    correctAnswers: questions.filter(q => q.is_correct === 1).length,
-    totalPoints: questions.reduce((sum, q) => sum + (q.points || 0), 0)
-  };
+ 
 // تحديث الإجابات لكل الأسئلة الظاهرة
 const updateAnswersForVisibleQuestions = (questionsList) => {
   if (!questionsList || questionsList.length === 0) {
@@ -232,7 +226,11 @@ const bookColumns = [
       await booksService.deleteBook(book.id);
   
       setBooks(prev => prev.filter(b => b.id !== book.id));
-  
+
+          // ← تحديث إحصاء عدد الكتب الكلي تلقائيًا
+    await fetchTotalBooks();
+
+
       alert("تم حذف الكتاب بنجاح");
     } catch (error) {
       console.error("خطأ أثناء حذف الكتاب:", error);
@@ -284,6 +282,10 @@ const bookColumns = [
       const updatedBooks = await booksService.getAllBooks();
       setBooks(updatedBooks.books || updatedBooks);
   
+          // ← تحديث إحصاء عدد الكتب الكلي تلقائيًا
+    await fetchTotalBooks();
+
+
       setIsModalOpen(false);
       setEditingBook(null);
       setSelectedFile(null);
@@ -488,6 +490,17 @@ const fetchQuestionsByBook = async (bookId) => {
     setLoading(false);
   }
 };
+//احصاء باك عدد الكتب الكلي
+const fetchTotalBooks = async () => {
+  try {
+    const stats = await booksService.getTotalBooks();
+    setTotalBooks(stats.total_books);
+  } catch (error) {
+    console.error("Error fetching total books:", error);
+  }
+};
+
+
 
 // دالة ذكية لإعادة جلب الأسئلة حسب وضع الفلتر (إما paginated أو by-book)
 const refetchQuestions = async (pageToFetch = 1) => {
@@ -829,10 +842,33 @@ useEffect(() => {
 }, [searchTypeQuestion, activeSection]);
 
 
+//احصاء عدد الكتب الكلي باك
+useEffect(() => {
+  const fetchBooksAndStats = async () => {
+    try {
+      setLoading(true);
+
+      // 1️⃣ جلب الكتب
+      const booksData = await booksService.getAllBooks();
+      setBooks(booksData.books || booksData);
+
+      // 2️⃣ جلب إحصاء عدد الكتب الكلي
+      const stats = await booksService.getTotalBooks();
+      setTotalBooks(stats.total_books);
+    } catch (error) {
+      console.error("Error fetching books or stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (activeSection === "books") {
+    fetchBooksAndStats();
+    
+  }
+}, [activeSection]);
 
 
-
-  
   return (
     <div className="books-management">
     <div className="page-header">
@@ -867,11 +903,11 @@ useEffect(() => {
     <div className="main-stats" style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
   <div className="stat-card">
     <h3>Total Number Of Books</h3>
-    <span className="stat-number">{bookStats.total}</span>
+    <span className="stat-number">{totalBooks}</span>
   </div>
   <div className="stat-card">
     <h3>Total Number Of Questions</h3>
-    <span className="stat-number">{questionStats.totalQuestions}</span>
+    <span className="stat-number">{/* سيتم ربطه بالـ API لاحقًا */}</span>
   </div>
 </div>
 
@@ -1122,7 +1158,7 @@ useEffect(() => {
           
           <div className="form-group">
             <label>Section *</label>
-            <select value={formData.sectionid} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })} required>
+            <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })} required>
               <option value="">-- Choose one Section --</option>
               {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
             </select>

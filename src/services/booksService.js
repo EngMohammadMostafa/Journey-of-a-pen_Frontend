@@ -141,6 +141,15 @@ deleteCategory: async (categoryId) => {
       throw error;
     }
   },
+// جلب عدد الكتب الكلي
+getTotalBooks: async () => {
+  try {
+    const response = await api.get('/admin/stats/total-books');
+    return response.data; // ← سيحتوي على { total_books: 25 }
+  } catch (error) {
+    throw error;
+  }
+},
 
   // ============================================================
   // 🟦 الأسئلة (Questions)
