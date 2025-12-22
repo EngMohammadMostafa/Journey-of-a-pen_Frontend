@@ -64,7 +64,21 @@ getTotalCompetitions: async (token) => {
   } catch (error) {
     throw error;
   }
-}
+},
+// حذف كتاب مشارك من مسابقة (Admin)
+deleteCompetitionBook: async (competition_book_id, token) => {
+  try {
+    const response = await api.delete(`/admin/competition-books/${competition_book_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    return response.data; // { message: "Competition book deleted successfully", deleted_book_id: ... }
+  } catch (error) {
+    throw error;
+  }
+},
+
 
 
 

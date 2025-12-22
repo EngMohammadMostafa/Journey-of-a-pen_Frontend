@@ -73,6 +73,20 @@ const [competitionStats, setCompetitionStats] = useState({ total: 0 });
       key: 'file_size',
       title: 'File Size (KB)',
       render: (_, book) => ((book.file_size || 0) / 1024).toFixed(2)
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      render: (_, book) => (
+        <>
+          <button
+            className="btn-danger"
+            onClick={() => handleDeleteCompetitionBook(book.competition_book_id)}
+          >
+            Delete Book
+          </button>
+        </>
+      )
     }
   ];
   
@@ -202,8 +216,25 @@ const fetchCompetitionStats = async () => {
 
   const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'Add New Competation  '
 
-
-
+//حذف مشترك اي كتابه من المشابقه وجميع تفاصيله بعد
+  const handleDeleteCompetitionBook = async (competition_book_id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا الكتاب من المسابقة؟')) return;
+  
+    try {
+      const response = await competitionsService.deleteCompetitionBook(competition_book_id, token);
+      alert(response.message);
+  
+      // تحديث الجدول مباشرة بعد الحذف
+      setCompetitionDetails(prev => ({
+        ...prev,
+        books: prev.books.filter(b => b.competition_book_id !== competition_book_id)
+      }));
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ أثناء حذف الكتاب من المسابقة');
+    }
+  };
+  
   
   useEffect(() => {
     if (showCompetitionsTable || showParticipantsTable) {

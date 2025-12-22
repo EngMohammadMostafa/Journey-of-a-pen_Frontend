@@ -22,11 +22,10 @@ const BooksManagement = () => {
     title: '',
     description: '',
     price: '',
-    //is_free: 0,
-    book_type: 'paid', 
-    discount_rate: '',
-    sectionid: ''
+    book_type: 'paid',
+    category_id: ''
   });
+  
 
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -100,39 +99,34 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
 };
 
 //عواميد الجداول 
-
-  const bookColumns = [
-    { key: 'id', title: 'ID' },
-    { key: 'author', title: 'Author' },
-    { key: 'title', title: 'Book Name' },
-    { key: 'description', title: 'Description' },
-    { key: 'price', title: 'Price' },
-    { 
-      key: 'book_type', 
-      title: 'Book Type', 
-      render: (value) => value === 'paid' ? 'Paid' : 'Free' 
-    },
-    { key: 'discount_rate', title: 'Discount Rate ' },
-    { key: 'number_of_likes', title: 'Number of Likes ' },
-    { 
-      key: 'category_id', 
-      title: 'Category',
-      render: (value) => {
-        const category = categories.find(cat => cat.id === value);
-        return category ? category.name : value;
-      }
-    },
-    {
-      key: 'actions',
-      title: 'Actions',
-      render: (_, book) => (
-        <div>
-          <button className="btn-secondary" onClick={() => handleEditBook(book)}>Edit</button>
-          <button className="btn-danger" onClick={() => handleDeleteBook(book)}>Delete</button>
-        </div>
-      )
-    }
-  ];
+const bookColumns = [
+  { key: 'id', title: 'ID' },
+  { key: 'author', title: 'Author' },
+  { key: 'title', title: 'Book Name' },
+  { key: 'description', title: 'Description' },
+  { key: 'price', title: 'Price' },
+  { 
+    key: 'book_type', 
+    title: 'Book Type', 
+    render: (value) => value === 'paid' ? 'Paid' : 'Free' 
+  },
+  { key: 'likes_count', title: 'Likes' },
+  { 
+    key: 'category', 
+    title: 'Category',
+    render: (value) => value || '-'  // يعرض القسم أو "-" إذا فارغ
+  },
+  {
+    key: 'actions',
+    title: 'Actions',
+    render: (_, book) => (
+      <div>
+        <button className="btn-secondary" onClick={() => handleEditBook(book)}>Edit</button>
+        <button className="btn-danger" onClick={() => handleDeleteBook(book)}>Delete</button>
+      </div>
+    )
+  }
+];
 
   const categoryColumns = [
     { key: 'id', title: 'ID' },
@@ -203,8 +197,15 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
   // --- دوال إدارة الكتب ---
   const handleAddBook = () => {
     setEditingBook(null);
-    setFormData({ author: '', title: '', description: '', price: '', is_free: 0, book_type: '', discount_rate: '', sectionid: '' });
-    setIsModalOpen(true);
+    setFormData({
+      author: '',
+      title: '',
+      description: '',
+      price: '',
+      book_type: 'paid',
+      category_id: ''
+    });
+        setIsModalOpen(true);
   };
 
   const handleEditBook = (book) => {
@@ -214,11 +215,10 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
       title: book.title || '',
       description: book.description || '',
       price: book.price || '',
-      is_free: book.is_free || 0,
-      book_type: book.book_type || '',
-      discount_rate: book.discount_rate || '',
-      sectionid: book.sectionid || ''
+      book_type: book.book_type || 'paid',
+      category_id: book.category_id || ''
     });
+    
     setIsModalOpen(true);
   };
 
@@ -240,45 +240,47 @@ const updateAnswersForVisibleQuestions = (questionsList) => {
     }
   };
   
-
   const handleSaveBook = async () => {
-    if (!formData.author || !formData.title || !formData.description || !formData.price || !formData.sectionid) {
+    const { author, title, description, price, book_type, category_id } = formData;
+  
+    if (!author || !title || !description || !price || !category_id) {
       alert('يرجى ملء جميع الحقول المطلوبة');
       return;
-  }
+    }
   
     try {
-      // إنشاء FormData لرفع الملف
-      const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('author', formData.author);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', Number(formData.price));
-      formDataToSend.append('book_type', formData.book_type);
-      formDataToSend.append('discount_rate', Number(formData.discount_rate) || 0);
-      formDataToSend.append('category_id', formData.sectionid); // ← هنا التعديل
-if (selectedFile) {
-  formDataToSend.append('file', selectedFile);
-}
-      console.log("بيانات الكتاب المرسلة:", {
-        title: formData.title,
-        author: formData.author,
-        price: formData.price,
-        book_type: formData.book_type,
-        file: selectedFile.name
-      });
-  
       if (editingBook) {
-        // تعديل كتاب موجود
-        await booksService.updateBook(editingBook.id, formDataToSend);
+        // 🔹 تعديل كتاب (JSON فقط)
+        await booksService.updateBook(editingBook.id, {
+          author,
+          title,
+          description,
+          price: Number(price),
+          book_type,
+          category_id
+        });
+  
         alert('تم تعديل الكتاب بنجاح');
+  
       } else {
-        // إضافة كتاب جديد
-        await booksService.addBookToCategory(formData.sectionid, formDataToSend);
+        // 🔹 إضافة كتاب جديد (FormData)
+        if (!selectedFile) {
+          alert('يرجى اختيار ملف الكتاب');
+          return;
+        }
+  
+        const fd = new FormData();
+        fd.append('author', author);
+        fd.append('title', title);
+        fd.append('description', description);
+        fd.append('price', Number(price));
+        fd.append('book_type', book_type);
+        fd.append('file', selectedFile);
+  
+        await booksService.addBookToCategory(category_id, fd);
         alert('تم إضافة الكتاب بنجاح');
       }
   
-      // إعادة تحميل الكتب
       const updatedBooks = await booksService.getAllBooks();
       setBooks(updatedBooks.books || updatedBooks);
   
@@ -288,9 +290,10 @@ if (selectedFile) {
   
     } catch (error) {
       console.error('خطأ في حفظ الكتاب:', error);
-      alert('حدث خطأ أثناء حفظ الكتاب: ' + (error.message || 'خطأ غير معروف'));
+      alert('حدث خطأ أثناء حفظ الكتاب');
     }
   };
+  
   
   // --- دوال إدارة الأقسام ---
   const handleAddCategory = () => {
@@ -1116,13 +1119,10 @@ useEffect(() => {
   </select>
 </div>
 
-          <div className="form-group">
-            <label>Discount Rate </label>
-            <input type="number" value={formData.discount_rate} onChange={(e) => setFormData({ ...formData, discount_rate: e.target.value })} />
-          </div>
+          
           <div className="form-group">
             <label>Section *</label>
-            <select value={formData.sectionid} onChange={(e) => setFormData({ ...formData, sectionid: e.target.value })} required>
+            <select value={formData.sectionid} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })} required>
               <option value="">-- Choose one Section --</option>
               {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
             </select>
