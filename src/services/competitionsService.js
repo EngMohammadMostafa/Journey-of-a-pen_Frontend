@@ -37,7 +37,37 @@ deleteCompetition: async (id) => {
   } catch (error) {
     throw error;
   }
+},
+
+// جلب تفاصيل مسابقة كاملة (المسابقة + الكتب + المشاركين + اللايكات)
+getCompetitionDetails: async (competitionId, token) => {
+  try {
+    const response = await api.get(`/admin/competitions/${competitionId}/details`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data; // سترجع { competition: {...}, books: [...] }
+  } catch (error) {
+    throw error;
+  }
+},
+// جلب العدد الكلي للمسابقات
+getTotalCompetitions: async (token) => {
+  try {
+    const response = await api.get('/admin/stats/total-competitions', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data; // { total_competitions: 10 }
+  } catch (error) {
+    throw error;
+  }
 }
+
+
+
 
 
 };

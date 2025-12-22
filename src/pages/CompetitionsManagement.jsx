@@ -27,8 +27,17 @@ const [filteredCompetitions, setFilteredCompetitions] = useState([]);
     max_user: 1
   })
   
+// للمشاركة وعرض الكتب
+const [showParticipantsTable, setShowParticipantsTable] = useState(false);
+const [competitionDetails, setCompetitionDetails] = useState(null); // لتخزين البيانات من API
+const [participantsLoading, setParticipantsLoading] = useState(false);
+const [selectedCompetitionId, setSelectedCompetitionId] = useState(null);
 
-  // أعمدة الجدول
+
+//احصاء عدد مسابقات من الباكند 
+const [competitionStats, setCompetitionStats] = useState({ total: 0 });
+
+// أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
     { key: 'name', title: 'Competition Name' },
@@ -48,13 +57,26 @@ const [filteredCompetitions, setFilteredCompetitions] = useState([]);
     }
   
   
-  ]
+  ];
+  // أعمدة جدول المشاركين والكتب (مطابقة للـ API)
+  const participantColumns = [
+    { key: 'competition_book_id', title: 'ID' },
+    { key: 'title', title: 'Book Title' },
+    { 
+      key: 'owner',
+      title: 'Owner',
+      render: (_, book) => book.owner?.username || '-'
+    },
+    { key: 'likes_count', title: 'Likes Count' },
+    { key: 'file_type', title: 'File Type' },
+    {
+      key: 'file_size',
+      title: 'File Size (KB)',
+      render: (_, book) => ((book.file_size || 0) / 1024).toFixed(2)
+    }
+  ];
   
 
-// إحصائيات المسابقات
-const competitionStats = {
-  total: competitions.length
-};
 
   // جلب المسابقات
   const fetchCompetitions = async () => {
@@ -70,7 +92,31 @@ const competitionStats = {
     } finally {
       setLoading(false)
     }
+  };
+
+const fetchCompetitionDetails = async (competitionId) => {
+  setParticipantsLoading(true);
+  try {
+    const response = await competitionsService.getCompetitionDetails(competitionId, token);
+    setCompetitionDetails(response); // تحتوي على competition + books
+  } catch (error) {
+    console.error("Error fetching competition details:", error);
+    alert("حدث خطأ في جلب بيانات المسابقة");
+  } finally {
+    setParticipantsLoading(false);
   }
+};
+
+const fetchCompetitionStats = async () => {
+  try {
+    const data = await competitionsService.getTotalCompetitions(token);
+    setCompetitionStats({ total: data.total_competitions || 0 });
+  } catch (error) {
+    console.error('Error fetching competition stats:', error);
+    setCompetitionStats({ total: 0 });
+  }
+};
+
 
 
   // فتح مودال الإضافة
@@ -160,11 +206,11 @@ const competitionStats = {
 
   
   useEffect(() => {
-    if (showCompetitionsTable) {
-      fetchCompetitions()
+    if (showCompetitionsTable || showParticipantsTable) {
+      fetchCompetitions();
     }
-  }, [showCompetitionsTable])
-
+  }, [showCompetitionsTable, showParticipantsTable]);
+  
 
   // فلترة حسب اسم المسابقة
 useEffect(() => {
@@ -179,6 +225,12 @@ useEffect(() => {
   setFilteredCompetitions(filtered);
 }, [searchTerm, competitions]);
 
+useEffect(() => {
+  if (showCompetitionsTable) {
+    fetchCompetitions();
+    fetchCompetitionStats(); // ← هنا نجيب الإحصاء من الباكند
+  }
+}, [showCompetitionsTable]);
 
   return (
 
@@ -199,21 +251,61 @@ useEffect(() => {
   )}
 </div>
 
-      <div className="buttons-container">
+<div className="buttons-container">
+  {/* زر عرض جدول المسابقات */}
   <button
     className={`btn ${showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
-    onClick={() => setShowCompetitionsTable(true)}
+    onClick={() => {
+      setShowCompetitionsTable(true);      // عرض جدول المسابقات
+      setShowParticipantsTable(false);     // إخفاء جدول المشاركين إذا كان ظاهر
+    }}
   >
     Competitions Management
   </button>
 
+  {/* زر عرض جدول المشاركين والكتب */}
   <button
-    className={`btn ${!showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
-    onClick={() => setShowCompetitionsTable(false)}
+    className={`btn ${showParticipantsTable ? 'btn-primary' : 'btn-outline'}`}
+    onClick={() => {
+      setShowCompetitionsTable(false);     // إخفاء جدول المسابقات
+      setShowParticipantsTable(true);      // عرض جدول المشاركين/الكتب
+      setSelectedCompetitionId(null);      // إعادة تعيين المسابقة المختارة
+      setCompetitionDetails(null);         // مسح البيانات السابقة
+    }}
   >
-    Pareicipant & Book Managemnt
+    Participant & Book Management
   </button>
 </div>
+
+{showParticipantsTable && (
+  <div className="participants-section">
+    <h2>Participant & Book Management</h2>
+
+    {/* اختيار المسابقة */}
+    <select
+      value={selectedCompetitionId || ''}
+      onChange={(e) => {
+        const compId = e.target.value;
+        setSelectedCompetitionId(compId);
+        fetchCompetitionDetails(compId);
+      }}
+    >
+      <option value="" disabled>Select Competition</option>
+      {competitions.map(c => (
+        <option key={c.id} value={c.id}>{c.name}</option>
+      ))}
+    </select>
+
+    {/* عرض جدول الكتب إذا تم اختيار مسابقة */}
+    {selectedCompetitionId && competitionDetails && (
+      <DataTable
+        columns={participantColumns}        // الأعمدة معرفة أعلى الكومبوننت
+        data={competitionDetails.books}     // البيانات من API
+        loading={participantsLoading}       // حالة التحميل
+      />
+    )}
+  </div>
+)}
 
       {showCompetitionsTable && (
         <>
