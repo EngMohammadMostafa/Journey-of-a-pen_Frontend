@@ -258,6 +258,11 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                                 competition!['description'] ?? "الجوائز للمراكز الثلاثة الأولى",
                                 style: const TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
                               ),
+                              const SizedBox(height: 6),
+                              Text(
+                                competition!['description'] ?? " ستتم مكافأة المركز الاول بنشر كتابه",
+                                style: const TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
+                              ),
                               const SizedBox(height: 8),
                               Text(
                                 "وقت الانتهاء: ${competition!['enddate'] ?? 'غير معروف'}",
