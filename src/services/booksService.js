@@ -223,6 +223,15 @@ getQuestionWithAnswers: async (questionId) => {
     throw error;
   }
 },
+// جلب عدد الأسئلة الكلي لجميع الكتب
+getTotalQuestions: async () => {
+  try {
+    const response = await api.get('/admin/stats/total-questions');
+    return response.data; // سيعيد { total_questions: 120 }
+  } catch (error) {
+    throw error;
+  }
+},
 
   // ============================================================
   // 🟦 الإجابات (Answers)

@@ -56,6 +56,9 @@ const [currentPage, setCurrentPage] = useState(1);
 const [perPage, setPerPage] = useState(10);
 const [lastPage, setLastPage] = useState(1);
 
+//احصاء باكند عدد الاسئله الكلي
+const [totalQuestions, setTotalQuestions] = useState(0);
+
 // --- حالات الاجوبة ---
 const [answers, setAnswers] = useState([]);
 const [filteredAnswers, setFilteredAnswers] = useState([]);
@@ -382,6 +385,9 @@ const bookColumns = [
       setQuestions(formatted);
       setFilteredQuestions(formatted); // ← يفضل إضافة هذا أيضاً لتحديث الجدول مباشرة
      
+      await fetchTotalQuestions();
+
+
       alert('تم إضافة السؤال بنجاح');
       setNewQuestionText('');
       setSelectedBookId('');
@@ -425,6 +431,10 @@ setAllQuestions(formatted);  // ← أضف هذا
 setQuestions(formatted);
 setFilteredQuestions(formatted);
   
+// ← **تحديث الإحصاء بعد التعديل**
+await fetchTotalQuestions();
+
+
       alert('تم تعديل السؤال بنجاح');
       setIsEditQuestionModalOpen(false);
       setEditingQuestion(null);
@@ -458,6 +468,9 @@ setAllQuestions(formatted);  // ← أضف هذا
 setQuestions(formatted);
 setFilteredQuestions(formatted);
   
+// ← **تحديث الإحصاء بعد الحذف**
+await fetchTotalQuestions();
+
       alert('تم حذف السؤال بنجاح');
   
     } catch (error) {
@@ -499,7 +512,15 @@ const fetchTotalBooks = async () => {
     console.error("Error fetching total books:", error);
   }
 };
-
+//احصاء باكند عدد اللاسئله الكلي
+const fetchTotalQuestions = async () => {
+  try {
+    const stats = await booksService.getTotalQuestions();
+    setTotalQuestions(stats.total_questions);
+  } catch (error) {
+    console.error("Error fetching total questions:", error);
+  }
+};
 
 
 // دالة ذكية لإعادة جلب الأسئلة حسب وضع الفلتر (إما paginated أو by-book)
@@ -867,7 +888,29 @@ useEffect(() => {
     
   }
 }, [activeSection]);
+//احصاء باكند عدد الاسئله الكلي
+useEffect(() => {
+  const fetchQuestionsAndStats = async () => {
+    try {
+      setLoading(true);
 
+      // 1️⃣ إعادة جلب جميع الأسئلة (paginated أو حسب الفلتر)
+      await refetchQuestions(1);
+
+      // 2️⃣ جلب إحصاء عدد الأسئلة الكلي
+      await fetchTotalQuestions();
+
+    } catch (error) {
+      console.error("Error fetching questions or stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (activeSection === "questions") {
+    fetchQuestionsAndStats();
+  }
+}, [activeSection]);
 
   return (
     <div className="books-management">
@@ -907,7 +950,7 @@ useEffect(() => {
   </div>
   <div className="stat-card">
     <h3>Total Number Of Questions</h3>
-    <span className="stat-number">{/* سيتم ربطه بالـ API لاحقًا */}</span>
+    <span className="stat-number">{totalQuestions}</span>
   </div>
 </div>
 
