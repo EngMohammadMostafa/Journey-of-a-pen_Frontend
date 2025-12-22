@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 
+import '../../data/pdf_service.dart';
+
 class CompetitionBookCard extends StatefulWidget {
   final int rank;
   final String title;
@@ -189,10 +191,13 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                         IconButton(
                           icon: const Icon(Icons.download_rounded,
                               color: Color(0xFF1C597B)),
-                          onPressed: () {
-                            widget.onRead();
+                          onPressed: () async {
+                            await PdfService.openCompetitionBook(
+                              context: context,
+                              bookId: widget.rank, // أو competition_book_id الحقيقي
+                              title: widget.title,
+                            );
 
-                            // Scroll تلقائي للأعلى عند التحميل
                             if (widget.scrollController != null) {
                               widget.scrollController!.animateTo(
                                 0,
@@ -201,6 +206,7 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                               );
                             }
                           },
+
                           iconSize: 25,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),

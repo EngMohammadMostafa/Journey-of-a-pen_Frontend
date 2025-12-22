@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/api/api_service.dart';
 import '../widgets/competition_book_card.dart';
+import 'competition_book_reader_page.dart';
 
 class WritingCompetitionsPage extends StatefulWidget {
   const WritingCompetitionsPage({super.key});
@@ -319,13 +320,19 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                                 isLiked: likedBooks.contains(b['competition_book_id']),
                                 imagePath: "assets/images/book_placeholder.png",
                             onLikeToggle: () => _toggleLike(b['competition_book_id']),
-                            onRead: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => BookReaderPage(title: b['title'])),
-                              );
-                            },
-                          ),
+                                onRead: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CompetitionBookReaderPage(
+                                        bookId: b['competition_book_id'],
+                                        title: b['title'],
+                                      ),
+                                    ),
+                                  );
+                                },
+
+                              ),
                         ),
                     ],
                   ),
@@ -339,28 +346,3 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
   }
 }
 
-class BookReaderPage extends StatelessWidget {
-  final String title;
-
-  const BookReaderPage({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: const Color(0xFF1C597B)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1C597B))),
-              const SizedBox(height: 12),
-              const Text("هنا يتم عرض محتوى الكتاب بصيغة احترافية...", style: TextStyle(fontSize: 18, height: 1.5)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

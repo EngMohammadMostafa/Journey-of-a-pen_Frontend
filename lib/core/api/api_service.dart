@@ -6,13 +6,14 @@ class ApiService {
   factory ApiService() => _instance;
 
   late Dio _dio;
+  Dio get dio => _dio;
   String? _authToken;
 
   final bool isMockMode;
 
   ApiService._internal({this.isMockMode = false}) {
     BaseOptions options = BaseOptions(
-      baseUrl: "http://192.168.241.251:8000/api",
+      baseUrl: "http://192.168.0.103:8000/api",
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       headers: {
@@ -149,6 +150,6 @@ class ApiService {
   }
 
   Future<Response> download(String endpoint, {Options? options}) async {
-    return await _dio.post(endpoint, options: options);
+    return await _dio.get(endpoint, options: options);
   }
 }
