@@ -21,6 +21,7 @@ class CompetitionBookReaderPage extends StatefulWidget {
 class _CompetitionBookReaderPageState extends State<CompetitionBookReaderPage> {
   bool _loading = true;
   PDFDocument? _document;
+  String _loadingText = "جاري تحميل الكتاب...";
 
   @override
   void initState() {
@@ -30,11 +31,19 @@ class _CompetitionBookReaderPageState extends State<CompetitionBookReaderPage> {
 
   Future<void> _loadPdf() async {
     try {
+      setState(() {
+        _loadingText = "جاري تحميل الملف...";
+      });
+
       final File file = await PdfService.downloadCompetitionBook(
         context: context,
         bookId: widget.bookId,
         title: widget.title,
       );
+
+      setState(() {
+        _loadingText = "جاري تجهيز العرض...";
+      });
 
       _document = await PDFDocument.fromFile(file);
     } catch (e) {
@@ -43,7 +52,9 @@ class _CompetitionBookReaderPageState extends State<CompetitionBookReaderPage> {
       );
     }
 
-    setState(() => _loading = false);
+    setState(() {
+      _loading = false;
+    });
   }
 
   @override
@@ -54,7 +65,21 @@ class _CompetitionBookReaderPageState extends State<CompetitionBookReaderPage> {
         backgroundColor: const Color(0xFF1C597B),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(
+            _loadingText,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color(0xFF1C597B),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      )
           : _document == null
           ? const Center(child: Text("لا يمكن عرض الملف"))
           : PDFViewer(document: _document!),

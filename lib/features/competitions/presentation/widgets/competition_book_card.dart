@@ -7,7 +7,8 @@ import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/constants/api_endpoints.dart';
-import '../../data/pdf_service.dart'; // إذا لازلت تستخدم PdfService لقراءة الكتب
+import '../../data/pdf_service.dart';
+import '../page/competition_book_reader_page.dart'; // إذا لازلت تستخدم PdfService لقراءة الكتب
 
 class CompetitionBookCard extends StatefulWidget {
   final int rank;
@@ -198,10 +199,14 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                           icon: const Icon(Icons.download_rounded, color: Color(0xFF1C597B)),
                           onPressed: () async {
                             try {
-                              await PdfService.openCompetitionBook(
-                                context: context,
-                                bookId: widget.competitionBookId,
-                                title: widget.title,
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CompetitionBookReaderPage(
+                                    bookId: widget.competitionBookId,
+                                    title: widget.title,
+                                  ),
+                                ),
                               );
 
                               if (widget.scrollController != null) {
