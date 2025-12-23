@@ -1,7 +1,13 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
-
-import '../../data/pdf_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/api/api_service.dart';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../data/pdf_service.dart'; // إذا لازلت تستخدم PdfService لقراءة الكتب
 
 class CompetitionBookCard extends StatefulWidget {
   final int rank;
@@ -11,7 +17,8 @@ class CompetitionBookCard extends StatefulWidget {
   final VoidCallback onLikeToggle;
   final VoidCallback onRead;
   final String imagePath;
-  final ScrollController? scrollController; // ScrollController لإمكانية Scroll تلقائي
+  final int competitionBookId; // المعرف الحقيقي للكتاب
+  final ScrollController? scrollController;
 
   const CompetitionBookCard({
     super.key,
@@ -22,6 +29,7 @@ class CompetitionBookCard extends StatefulWidget {
     required this.onLikeToggle,
     required this.onRead,
     required this.imagePath,
+    required this.competitionBookId,
     this.scrollController,
   });
 
@@ -48,7 +56,6 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
         .chain(CurveTween(curve: Curves.easeOutBack))
         .animate(_controller);
 
-    // Shake Animation: اهتزاز عند الإعجاب
     _shakeAnimation = TweenSequence([
       TweenSequenceItem(tween: Tween(begin: 0.0, end: -8.0), weight: 1),
       TweenSequenceItem(tween: Tween(begin: -8.0, end: 8.0), weight: 2),
@@ -64,7 +71,6 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
     if (!oldWidget.isLiked && widget.isLiked) {
       _controller.forward(from: 0);
 
-      // Scroll تلقائي للأعلى عند الإعجاب
       if (widget.scrollController != null) {
         widget.scrollController!.animateTo(
           0,
@@ -81,7 +87,6 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
     super.dispose();
   }
 
-  // دالة لإرجاع Badge حسب الترتيب
   Widget _buildBadge(int rank) {
     switch (rank) {
       case 1:
@@ -129,7 +134,7 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                           CircleAvatar(
                             radius: 20,
                             backgroundColor: widget.rank == 1
-                                ? Color(0xFF1C597B)
+                                ? const Color(0xFF1C597B)
                                 : const Color(0xFF4C869F),
                             child: Text(
                               "${widget.rank}",
@@ -188,29 +193,36 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 16),
+                        // زر التحميل الجديد
                         IconButton(
-                          icon: const Icon(Icons.download_rounded,
-                              color: Color(0xFF1C597B)),
+                          icon: const Icon(Icons.download_rounded, color: Color(0xFF1C597B)),
                           onPressed: () async {
-                            await PdfService.openCompetitionBook(
-                              context: context,
-                              bookId: widget.rank, // أو competition_book_id الحقيقي
-                              title: widget.title,
-                            );
-
-                            if (widget.scrollController != null) {
-                              widget.scrollController!.animateTo(
-                                0,
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeInOut,
+                            try {
+                              await PdfService.openCompetitionBook(
+                                context: context,
+                                bookId: widget.competitionBookId,
+                                title: widget.title,
                               );
+
+                              if (widget.scrollController != null) {
+                                widget.scrollController!.animateTo(
+                                  0,
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("فشل تحميل الكتاب")),
+                              );
+                              print("Download error: $e");
                             }
                           },
-
                           iconSize: 25,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
+
                       ],
                     ),
                   ),

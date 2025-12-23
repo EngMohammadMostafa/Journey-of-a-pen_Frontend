@@ -40,8 +40,11 @@ dependencies:
   intl: ^0.18.1
 
   path_provider: ^2.0.15
-  open_file: ^3.2.1     # يمكن تركها – لكن لم تعد ضرورية مع PDFView
+  open_file: ^3.2.1     # لم تعد ضرورية مع PDFView
   advance_pdf_viewer2: ^2.0.5
+  file_picker: ^5.2.10
+
+
 
 
 

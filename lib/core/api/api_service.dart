@@ -65,10 +65,15 @@ class ApiService {
   }
 
   // تعيين توكن المصادقة لجميع الطلبات
+// تعيين توكن المصادقة لجميع الطلبات
   void setAuthToken(String token) {
     _authToken = token;
     print(" Token set successfully: $token");
   }
+
+//  Getter آمن للقراءة فقط
+  String? get token => _authToken;
+
 
   // دوال عامة
   Future<Response> get(String endpoint, {Map<String, dynamic>? params}) async {

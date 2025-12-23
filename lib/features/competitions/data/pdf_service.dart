@@ -1,15 +1,11 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
-
 import '../../../core/api/api_service.dart';
 
 class PdfService {
-  static final Dio _dio = ApiService().dio;
-
   /// تحميل أو فتح كتاب مسابقة PDF
   static Future<void> openCompetitionBook({
     required BuildContext context,
@@ -21,26 +17,39 @@ class PdfService {
       final filePath = '${dir.path}/$title.pdf';
       final file = File(filePath);
 
-      // ✅ إذا كان الملف موجود محليًا → افتحه مباشرة
+      // إذا كان الملف موجود محليًا → افتحه مباشرة
       if (await file.exists()) {
         await OpenFile.open(file.path);
         return;
       }
 
-      // ⬇️ تحميل من الباك
-      await _dio.download(
+      final token = ApiService().token;
+      if (token == null) {
+        _showSnack(context, 'لم يتم تسجيل الدخول');
+        return;
+      }
+
+      // ⬇️ تحميل من الباك مع التوكن
+      await ApiService().dio.download(
         '/competition-books/$bookId/download',
         filePath,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+          responseType: ResponseType.bytes,
+        ),
       );
 
       await OpenFile.open(filePath);
     } on DioException catch (e) {
       _handleDioError(context, e);
-    } catch (_) {
+    } catch (e) {
       _showSnack(context, 'حدث خطأ غير متوقع');
     }
   }
 
+  /// تحميل كتاب PDF بدون فتحه مباشرة
   static Future<File> downloadCompetitionBook({
     required BuildContext context,
     required int bookId,
@@ -48,18 +57,27 @@ class PdfService {
   }) async {
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final filePath = '${dir.path}/$title.pdf';
+      String safeTitle = title.replaceAll(RegExp(r'[^\w\s-]'), '');
+      final filePath = '${dir.path}/$safeTitle.pdf';
+
       final file = File(filePath);
 
-      // إذا كان موجود محليًا
       if (await file.exists()) {
         return file;
       }
 
-      // تحميل من الباك
+      final token = ApiService().token;
+      if (token == null) {
+        throw Exception('لم يتم تسجيل الدخول');
+      }
+
       await ApiService().dio.download(
         '/competition-books/$bookId/download',
         filePath,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          responseType: ResponseType.bytes,
+        ),
       );
 
       return file;
@@ -72,13 +90,11 @@ class PdfService {
     }
   }
 
-
-
   // ================== Helpers ==================
 
   static void _handleDioError(BuildContext context, DioException e) {
     if (e.response == null) {
-      _showSnack(context, 'لا يوجد اتصال بالإنترنت');
+      _showSnack(context, 'فشل الاتصال بالخادم');
       return;
     }
 

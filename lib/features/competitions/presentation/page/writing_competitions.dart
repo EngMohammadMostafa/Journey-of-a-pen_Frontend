@@ -1,5 +1,12 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/utils/prefs_helper.dart';
 import '../widgets/competition_book_card.dart';
 import 'competition_book_reader_page.dart';
 
@@ -27,12 +34,10 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
   Future<void> _loadCompetitionData() async {
     try {
-      // جلب بيانات المسابقة الحالية
       final compResp = await api.get('/competitions');
       final compData = compResp.data;
 
       if ((compData['competitions'] as List).isEmpty) {
-        // لا توجد مسابقات
         setState(() {
           _loading = false;
           competition = null;
@@ -42,16 +47,14 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
       competition = compData['competitions'][0];
 
-      // جلب كتب المسابقة
       final booksResp = await api.get('/competitions/${competition!['id']}/books');
       final booksData = booksResp.data;
 
       books = List<Map<String, dynamic>>.from(booksData['books']);
 
-      // التحقق إذا كان المستخدم قد انضم مسبقاً
-      hasJoined = books.any((b) => b['user_id'] == 1); // عدّل 1 إلى id المستخدم الفعلي
+      final userId = await PrefsHelper.getUserId();
+      hasJoined = books.any((b) => b['user_id'] == userId);
 
-      // مجموعة الكتب المعجب بها من قبل المستخدم
       likedBooks = {};
     } catch (e) {
       print("Error loading competition: $e");
@@ -62,15 +65,11 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
   Future<void> _toggleLike(int bookId) async {
     try {
-      final response =
-      await api.post('/competition-books/$bookId/like');
-
+      final response = await api.post('/competition-books/$bookId/like');
       final data = response.data;
 
       setState(() {
-        final index = books.indexWhere(
-                (b) => b['competition_book_id'] == bookId);
-
+        final index = books.indexWhere((b) => b['competition_book_id'] == bookId);
         if (index == -1) return;
 
         books[index]['likes_count'] = data['likes_count'];
@@ -81,21 +80,23 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
           likedBooks.remove(bookId);
         }
 
-        //  ترتيب مباشر
         books.sort(
-              (a, b) => (b['likes_count'] ?? 0)
-              .compareTo(a['likes_count'] ?? 0),
+              (a, b) => (b['likes_count'] ?? 0).compareTo(a['likes_count'] ?? 0),
         );
       });
-
-
     } catch (e) {
       print("Error toggling like: $e");
     }
   }
 
+  void _showJoinDialog() async {
+    final userId = await PrefsHelper.getUserId() ?? 0;
 
-  void _showJoinDialog() {
+// جلب التوكن من المفتاح المستخدم فعليًا في AuthRepository
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+
     if (books.length >= (competition?['max_user'] ?? 5)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("❌ اكتمل عدد المشاركين")),
@@ -104,7 +105,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
     }
 
     final titleController = TextEditingController();
-    bool pdfSelected = false;
+    File? selectedPdf;
 
     showDialog(
       context: context,
@@ -119,7 +120,11 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
               children: [
                 const Text(
                   "الانضمام للمسابقة",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1C597B)),
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1C597B),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -127,21 +132,31 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                   controller: titleController,
                   decoration: InputDecoration(
                     labelText: "عنوان الكتاب",
-                    labelStyle: const TextStyle(color: Color(0xFF1C597B)),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    pdfSelected = true;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("✔ تم اختيار ملف PDF")),
-                    );
-                  },
                   icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text("إرفاق ملف PDF"),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1C597B)),
+                  label: const Text("اختيار ملف PDF"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1C597B),
+                  ),
+                  onPressed: () async {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['pdf'],
+                    );
+
+                    if (result != null && result.files.single.path != null) {
+                      selectedPdf = File(result.files.single.path!);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("✔ تم اختيار ملف PDF")),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -149,32 +164,81 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "إلغاء",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1C597B)),
-                        ),
+                        child: const Text("إلغاء"),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1C597B),
+                        ),
+                        child: const Text("إرسال"),
                         onPressed: () async {
-                          if (titleController.text.isEmpty || !pdfSelected) {
+                          if (titleController.text.isEmpty || selectedPdf == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text("يرجى إدخال العنوان وإرفاق ملف PDF")),
                             );
                             return;
                           }
 
-                          // رفع الكتاب باستخدام Multipart POST عبر ApiService
-                          // final file = MultipartFile.fromFile(filePath, filename: 'file.pdf');
-                          // await api.post('/competitions/${competition!['id']}/books', data: {'title': titleController.text, 'file': file});
+                          // التحقق إذا كان المستخدم قد شارك مسبقًا
+                          if (books.any((b) => b['user_id'] == userId)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("❌ أنت مشارك مسبقًا في هذه المسابقة")),
+                            );
+                            return;
+                          }
 
-                          setState(() => hasJoined = true);
-                          Navigator.pop(context);
+                          if (token == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("❌ لم يتم تسجيل الدخول")),
+                            );
+                            return;
+                          }
+
+                          try {
+                            final formData = FormData.fromMap({
+                              'title': titleController.text,
+                              'file': await MultipartFile.fromFile(
+                                selectedPdf!.path,
+                                filename: selectedPdf!.path.split('/').last,
+                              ),
+                            });
+
+                            await api.dio.post(
+                              ApiEndpoints.participateInCompetition(competition!['id']),
+                              data: formData,
+                              options: Options(
+                                headers: {
+                                  'Authorization': 'Bearer $token',
+                                  'Content-Type': 'multipart/form-data',
+                                },
+                              ),
+                            );
+
+                            await _loadCompetitionData();
+                            Navigator.pop(context);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("✔ تم رفع الكتاب بنجاح")),
+                            );
+                          } on DioException catch (e) {
+                            if (e.response?.statusCode == 409) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.response?.data['message'] ?? "مشارك مسبقًا")),
+                              );
+                            } else if (e.response?.statusCode == 403) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.response?.data['message'] ?? "المسابقة غير متاحة")),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("فشل رفع الكتاب")),
+                              );
+                            }
+                          }
                         },
-                        child: const Text("إرسال"),
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1C597B)),
                       ),
                     ),
                   ],
@@ -187,6 +251,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -194,7 +259,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
       child: Scaffold(
         body: Stack(
           children: [
-            // الخلفية الثابتة
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -218,8 +282,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                         style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 20),
-
-                      // إذا لم توجد مسابقات
                       if (competition == null)
                         Container(
                           padding: const EdgeInsets.all(20),
@@ -234,7 +296,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                           ),
                         )
                       else
-                      // عرض بيانات المسابقة
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
@@ -256,12 +317,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                competition!['description'] ?? "الجوائز للمراكز الثلاثة الأولى",
-                                style: const TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                competition!['description'] ?? " ستتم مكافأة المركز الاول بنشر كتابه",
+                                competition!['description'] ?? "الجوائز للمراكز الثلاثة الأولى\n ستتم مكافأة المركز الاول بنشر الكتاب",
                                 style: const TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 8),
@@ -273,7 +329,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                           ),
                         ),
                       const SizedBox(height: 20),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -293,19 +348,25 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                             ],
                           ),
                           ElevatedButton.icon(
-                            onPressed: hasJoined || competition == null ? null : _showJoinDialog,
+                            onPressed: (!_loading && !hasJoined && competition != null)
+                                ? _showJoinDialog
+                                : null,
                             icon: const Icon(Icons.edit_note_rounded, size: 20),
-                            label: const Text("الانضمام", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            label: const Text(
+                              "الانضمام",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1C597B),
+                              backgroundColor: (!_loading && !hasJoined && competition != null)
+                                  ? const Color(0xFF1C597B)
+                                  : Colors.grey.shade400, // لون باهت عند التعطيل
+                              foregroundColor: Colors.white,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
 
-                      // عرض الكتب المشاركة
+                      const SizedBox(height: 10),
                       if (books.isEmpty && competition != null)
                         const Text(
                           "لا توجد كتب مشاركة حتى الآن",
@@ -316,24 +377,25 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                               (b) => CompetitionBookCard(
                             rank: books.indexOf(b) + 1,
                             title: b['title'],
-                                likesCount: (b['likes_count'] ?? 0),
-                                isLiked: likedBooks.contains(b['competition_book_id']),
-                                imagePath: "assets/images/book_placeholder.png",
+                            likesCount: (b['likes_count'] ?? 0),
+                            isLiked: likedBooks.contains(b['competition_book_id']),
+                            imagePath: "assets/images/book_placeholder.png",
+                            competitionBookId: b['competition_book_id'], // <-- مهم
                             onLikeToggle: () => _toggleLike(b['competition_book_id']),
-                                onRead: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => CompetitionBookReaderPage(
-                                        bookId: b['competition_book_id'],
-                                        title: b['title'],
-                                      ),
-                                    ),
-                                  );
-                                },
-
-                              ),
+                            onRead: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CompetitionBookReaderPage(
+                                    bookId: b['competition_book_id'],
+                                    title: b['title'],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
+
                     ],
                   ),
                 ),
@@ -345,4 +407,3 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
     );
   }
 }
-
