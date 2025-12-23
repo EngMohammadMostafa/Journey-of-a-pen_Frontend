@@ -58,10 +58,11 @@ class PdfService {
     try {
       final dir = await getApplicationDocumentsDirectory();
       String safeTitle = title.replaceAll(RegExp(r'[^\w\s-]'), '');
-      final filePath = '${dir.path}/$safeTitle.pdf';
+      final filePath = '${dir.path}/$safeTitle-$bookId.pdf';
 
       final file = File(filePath);
 
+      // ✅ إذا كان الملف موجودًا لا تعيد تحميله
       if (await file.exists()) {
         return file;
       }
@@ -71,20 +72,26 @@ class PdfService {
         throw Exception('لم يتم تسجيل الدخول');
       }
 
-      await ApiService().dio.download(
+      // ✅ التحميل الصحيح للـ PDF
+      final response = await ApiService().dio.get(
         '/competition-books/$bookId/download',
-        filePath,
         options: Options(
-          headers: {'Authorization': 'Bearer $token'},
-          responseType: ResponseType.bytes,
+          responseType: ResponseType.bytes, // 🔴 مهم جدًا
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/pdf',
+          },
         ),
       );
+
+      // ✅ حفظ الـ bytes كملف حقيقي
+      await file.writeAsBytes(response.data, flush: true);
 
       return file;
     } on DioException catch (e) {
       _handleDioError(context, e);
       rethrow;
-    } catch (_) {
+    } catch (e) {
       _showSnack(context, 'حدث خطأ غير متوقع');
       rethrow;
     }
