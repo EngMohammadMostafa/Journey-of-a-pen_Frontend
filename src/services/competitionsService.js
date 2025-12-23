@@ -80,6 +80,23 @@ deleteCompetitionBook: async (competition_book_id, token) => {
 },
 
 
+// قبول أو رفض كتاب مشارك في مسابقة (Admin)
+approveOrRejectBook: async (competition_book_id, data, token) => {
+  try {
+    const response = await api.post(
+      `/admin/competition-books/${competition_book_id}/approve-or-reject`,
+      data, // { status: 'accepted' | 'rejected' }
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+},
 
 
 

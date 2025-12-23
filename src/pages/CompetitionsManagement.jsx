@@ -75,10 +75,42 @@ const [competitionStats, setCompetitionStats] = useState({ total: 0 });
       render: (_, book) => ((book.file_size || 0) / 1024).toFixed(2)
     },
     {
+      key: 'status',
+      title: 'Status',
+      render: (_, book) => (
+        <span>
+          {book.status === 'pending' ? 'Pending' : 'Accepted'}
+        </span>
+      )
+    },
+    
+    {
       key: 'actions',
       title: 'Actions',
       render: (_, book) => (
         <>
+         {/* أزرار القبول والرفض فقط للحالة pending */}
+      {book.status === 'pending' && (
+        <>
+          <button
+            className="btn-success"
+            onClick={() =>
+              handleApproveOrReject(book.competition_book_id, 'accepted')
+            }
+          >
+            Accept
+          </button>
+
+          <button
+            className="btn-warning"
+            onClick={() =>
+              handleApproveOrReject(book.competition_book_id, 'rejected')
+            }
+          >
+            Reject
+          </button>
+        </>
+      )}
           <button
             className="btn-danger"
             onClick={() => handleDeleteCompetitionBook(book.competition_book_id)}
@@ -232,6 +264,49 @@ const fetchCompetitionStats = async () => {
     } catch (error) {
       console.error(error);
       alert('حدث خطأ أثناء حذف الكتاب من المسابقة');
+    }
+  };
+  
+
+  const handleApproveOrReject = async (competition_book_id, status) => {
+    const confirmMessage =
+      status === 'accepted'
+        ? 'هل أنت متأكد من قبول هذا الكتاب؟'
+        : 'هل أنت متأكد من رفض الكتاب؟ سيتم حذفه نهائيًا';
+  
+    if (!window.confirm(confirmMessage)) return;
+  
+    try {
+      const response = await competitionsService.approveOrRejectBook(
+        competition_book_id,
+        { status },
+        token
+      );
+  
+      alert(response.message);
+  
+      if (status === 'rejected') {
+        // حذف من الجدول لأن الباك حذف السجل
+        setCompetitionDetails(prev => ({
+          ...prev,
+          books: prev.books.filter(
+            b => b.competition_book_id !== competition_book_id
+          )
+        }));
+      } else {
+        // تحديث الحالة إلى accepted
+        setCompetitionDetails(prev => ({
+          ...prev,
+          books: prev.books.map(b =>
+            b.competition_book_id === competition_book_id
+              ? { ...b, status: 'accepted' }
+              : b
+          )
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ أثناء تنفيذ العملية');
     }
   };
   
