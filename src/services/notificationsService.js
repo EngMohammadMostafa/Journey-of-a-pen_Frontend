@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost:8000/api'
 
 export const notificationsService = {
 
-  //  إضافة إشعار (Admin فقط)
+  // إضافة إشعار
   addNotification: async (data, token) => {
     try {
       const response = await axios.post(
@@ -18,18 +18,17 @@ export const notificationsService = {
           }
         }
       )
-
       return response.data
     } catch (error) {
-      console.error('خطأ أثناء إضافة الإشعار:', error)
       throw error.response?.data || { message: 'حدث خطأ أثناء إضافة الإشعار' }
     }
   },
 
+  // عرض الإشعارات
   getAllNotifications: async (token) => {
     try {
       const response = await axios.get(
-        'http://localhost:8000/api/notifications',
+        `${API_BASE_URL}/notifications`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -37,12 +36,22 @@ export const notificationsService = {
           }
         }
       )
-  
       return response.data
     } catch (error) {
       throw error.response?.data || { message: 'حدث خطأ أثناء جلب الإشعارات' }
     }
+  },
+
+  // حذف إشعار (Admin فقط)
+  deleteNotification: async (id, token) => {
+    const response = await axios.delete(`${API_BASE_URL}/admin/notifications/${id}`, { // ← هنا التغيير
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    })
+    return response.data
   }
   
-
+  
 }

@@ -33,7 +33,21 @@ const columns = [
   { key: 'notification_id', title: 'ID' },
   { key: 'title', title: 'Notification Title' },
   { key: 'content', title: 'Content' },
-  { key: 'created_at', title: 'Created At' }
+  { key: 'created_at', title: 'Created At' },
+   // عمود زر الحذف
+   {
+    key: 'actions',
+    title: 'Actions',
+    render: (_, notification) => (
+      <button
+        className="btn-danger"
+        onClick={() => handleDeleteNotification(notification)}
+      >
+        Delete
+      </button>
+    )
+  }
+  
 ]
 
 
@@ -52,6 +66,26 @@ const columns = [
       setLoading(false)
     }
   }
+
+  const handleDeleteNotification = async (notification) => {
+    console.log('حذف إشعار:', notification)
+    const confirmDelete = window.confirm('هل أنت متأكد من حذف هذا الإشعار؟')
+    if (!confirmDelete) return
+  
+    try {
+      const response = await notificationsService.deleteNotification(notification.notification_id, token)
+      console.log('Response:', response)
+      alert(response.message || 'تم حذف الإشعار بنجاح')
+      fetchNotifications()
+    } catch (error) {
+      console.error(error)
+      alert(error.message || 'حدث خطأ أثناء الحذف')
+    }
+  }
+  
+  
+  
+
 //لجلب الاشعارات من الباك
   useEffect(() => {
     fetchNotifications()
@@ -99,6 +133,8 @@ const columns = [
     }
   }
 
+  
+  
   return (
     <div className="notifications-management">
       <div className="page-header">
@@ -136,10 +172,8 @@ const columns = [
 
       <DataTable
         columns={columns}
-        //تم تغيير هذا من اجل الفلتر كان  data={notifications}
         data={filteredNotifications} // ← هنا استخدام البيانات المفلترة
         loading={loading}
-        actions={[]}
       />
 
       <Modal
@@ -181,4 +215,4 @@ const columns = [
   )
 }
 
-export default NotificationsManagement
+export default NotificationsManagement  
