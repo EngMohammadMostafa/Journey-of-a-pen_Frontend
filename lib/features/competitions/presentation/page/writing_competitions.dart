@@ -25,6 +25,93 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
   bool hasJoined = false;
   Set<int> likedBooks = {};
   final api = ApiService();
+  void _showCompetitionRules() {
+    showDialog(
+      context: context,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF1C597B),
+                  Color(0xFF4C869F),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.info_outline, color: Colors.white, size: 30),
+                    SizedBox(width: 10),
+                    Text(
+                      "شروط الاشتراك",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                const Text(
+                  "• المشاركة متاحة مرة واحدة فقط لكل مستخدم\n"
+                      "• يجب رفع الكتاب بصيغة PDF\n"
+                      "• الحد الأقصى لحجم الملف 10 ميغابايت\n"
+                      "• يتم عرض الكتاب بعد موافقة الإدارة\n"
+                      "• عدد المشاركين محدود",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    height: 1.6,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF1C597B),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "حسناً",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -90,29 +177,25 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
       debugPrint("Error toggling like: $e");
     }
   }
+// داخل _showJoinDialog() فقط استبدل المعالجة الحالية بالآتي
 
   void _showJoinDialog() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ لم يتم تسجيل الدخول")),
-      );
+      _showErrorDialog("❌ لم يتم تسجيل الدخول");
       return;
     }
 
     if (books.length >= (competition?['max_user'] ?? 5)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ اكتمل عدد المشاركين")),
-      );
+      _showErrorDialog("❌ اكتمل عدد المشاركين");
       return;
     }
 
     final titleController = TextEditingController();
     File? selectedPdf;
 
-    // متغيرات حالة الحقول الفارغة
     bool titleEmpty = false;
     bool fileEmpty = false;
 
@@ -140,7 +223,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                     ),
                     const SizedBox(height: 12),
 
-                    // رسالة للمستخدم إذا كان قد شارك مسبقًا
                     if (hasJoined)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -154,7 +236,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                         ),
                       ),
 
-                    // حقل العنوان
                     TextField(
                       controller: titleController,
                       decoration: InputDecoration(
@@ -171,11 +252,10 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                           borderSide: BorderSide(color: titleEmpty ? Colors.red : Colors.blue),
                         ),
                       ),
-                      enabled: !hasJoined, // تعطيل الحقل إذا كان قد شارك مسبقًا
+                      enabled: !hasJoined,
                     ),
                     const SizedBox(height: 16),
 
-                    // زر اختيار ملف PDF
                     ElevatedButton.icon(
                       icon: const Icon(Icons.picture_as_pdf),
                       label: Text(selectedPdf != null
@@ -199,17 +279,13 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                             result.files.single.path != null) {
                           setStateDialog(() {
                             selectedPdf = File(result.files.single.path!);
-                            fileEmpty = false; // إزالة التحديد الأحمر عند اختيار الملف
+                            fileEmpty = false;
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("✔ تم اختيار ملف PDF")),
-                          );
                         }
                       },
                     ),
                     const SizedBox(height: 20),
 
-                    // أزرار الإلغاء والإرسال
                     Row(
                       children: [
                         Expanded(
@@ -234,11 +310,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                               });
 
                               if (titleEmpty || fileEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("يرجى تعبئة جميع الحقول المطلوبة"),
-                                  ),
-                                );
+                                _showErrorDialog("يرجى تعبئة جميع الحقول المطلوبة");
                                 return;
                               }
 
@@ -252,8 +324,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                                 });
 
                                 await api.dio.post(
-                                  ApiEndpoints.participateInCompetition(
-                                      competition!['id']),
+                                  ApiEndpoints.participateInCompetition(competition!['id']),
                                   data: formData,
                                   options: Options(
                                     headers: {
@@ -266,121 +337,26 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                                 await _loadCompetitionData();
                                 Navigator.pop(context);
 
-                                // رسالة نجاح واضحة
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => Directionality(
-                                    textDirection: TextDirection.rtl,
-                                    child: Dialog(
-                                      backgroundColor: Colors.transparent, // لجعل التدرج يظهر
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [
-                                              Color(0xFF1C597B),
-                                              Color(0xFF4C869F),
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                          borderRadius: BorderRadius.circular(14),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color: Colors.black12,
-                                              blurRadius: 8,
-                                              offset: Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        padding: const EdgeInsets.all(20),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            Row(
-                                              children: const [
-                                                Icon(Icons.check_circle, color: Colors.white, size: 36),
-                                                SizedBox(width: 12),
-                                                Expanded(
-                                                  child: Text(
-                                                    "تم الإرسال بنجاح",
-                                                    style: TextStyle(
-                                                      fontSize: 20,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 12),
-                                            const Text(
-                                              "تم إرسال الكتاب للمراجعة بانتظار موافقة الإدارة.\n"
-                                                  "سيتم عرض الكتاب على الصفحة بمجرد الموافقة.",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.white70,
-                                                height: 1.4,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 20),
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.white,
-                                                foregroundColor: Color(0xFF1C597B),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                              ),
-                                              onPressed: () => Navigator.pop(context),
-                                              child: const Text(
-                                                "حسناً",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                _showSuccessDialog(
+                                    "تم إرسال الكتاب للمراجعة بانتظار موافقة الإدارة.\nسيتم عرض الكتاب على الصفحة بمجرد الموافقة."
                                 );
 
                               } on DioException catch (e) {
-                                if (e.response?.statusCode == 409) {
-                                  // إذا كان المستخدم قد شارك مسبقًا
-                                  setStateDialog(() {
-                                    titleEmpty = true;
-                                    fileEmpty = true;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          e.response?.data['message'] ??
-                                              "لقد شاركت مسبقًا في هذه المسابقة"),
-                                    ),
-                                  );
-                                } else if (e.response?.data != null &&
-                                    e.response?.data['errors'] != null) {
-                                  final errors = e.response!.data['errors'] as Map;
-                                  setStateDialog(() {
-                                    titleEmpty = errors.containsKey('title');
-                                    fileEmpty = errors.containsKey('file');
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          e.response?.data['message'] ?? "فشل رفع الكتاب"),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("فشل رفع الكتاب")),
-                                  );
+                                String errorMsg = "فشل رفع الكتاب";
+
+                                if (e.response?.data != null) {
+                                  if (e.response?.data['message'] != null) {
+                                    errorMsg = e.response!.data['message'];
+                                  }
+                                  if (e.response?.data['errors'] != null) {
+                                    final errors = e.response!.data['errors'] as Map;
+                                    errors.forEach((key, value) {
+                                      errorMsg += "\n• ${value.join(', ')}";
+                                    });
+                                  }
                                 }
+
+                                _showErrorDialog(errorMsg);
                               }
                             },
                           ),
@@ -394,6 +370,135 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
           },
         );
       },
+    );
+  }
+
+// إضافة الدوال المساعدة لعرض Dialog
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.check_circle, color: Colors.white, size: 36),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "نجاح",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF1C597B),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("حسناً", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1C597B), Color(0xFF4C869F)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.error, color: Colors.red, size: 36),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "خطأ",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF1C597B),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("حسناً", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -450,8 +555,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
                     // قسم الكتب
                     Row(
-                      mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: const [
@@ -469,35 +573,51 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                             ),
                           ],
                         ),
-                        ElevatedButton.icon(
-                          onPressed: (!_loading && competition != null && !hasJoined)
-                              ? _showJoinDialog
-                              : hasJoined
-                              ? () {
-                            // رسالة توضح أنه قد شارك مسبقًا
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  " لقد شاركت مسبقًا في هذه المسابقة",
+
+                        Row(
+                          children: [
+                            // 🔹 أيقونة شروط المسابقة
+                            InkWell(
+                              onTap: _showCompetitionRules,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Icon(
+                                  Icons.info_outline,
+                                  color: Colors.white,
+                                  size: 22,
                                 ),
                               ),
-                            );
-                          }
-                              : null,
-                          icon: const Icon(Icons.edit_note_rounded, size: 20),
-                          label: const Text(
-                            "الانضمام",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: (!_loading && !hasJoined && competition != null)
-                                ? const Color(0xFF1C597B)
-                                : Colors.grey.shade400,
-                            foregroundColor: Colors.white,
-                          ),
+
+                            const SizedBox(width: 8),
+
+                            // 🔹 زر الانضمام
+                            ElevatedButton.icon(
+                              onPressed: (!_loading && competition != null && !hasJoined)
+                                  ? _showJoinDialog
+                                  : hasJoined
+                                  ? () {
+                                _showErrorDialog("لقد شاركت مسبقًا في هذه المسابقة");
+                              }
+                                  : null,
+                              icon: const Icon(Icons.edit_note_rounded, size: 20),
+                              label: const Text(
+                                "الانضمام",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: (!_loading && !hasJoined && competition != null)
+                                    ? const Color(0xFF1C597B)
+                                    : Colors.grey.shade400,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
