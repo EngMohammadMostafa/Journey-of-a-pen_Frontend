@@ -2,9 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../data/models/notification_model.dart';
 import '../../provider/notification_provider.dart';
-
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -15,6 +15,11 @@ class NotificationsPage extends StatelessWidget {
 
     final List<NotificationModel> notifications =
         notificationProvider.notifications;
+
+    /// ✅ عند فتح الصفحة: تعليم كل الإشعارات كمقروءة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notificationProvider.markAllAsRead();
+    });
 
     return Scaffold(
       body: Container(
@@ -87,10 +92,14 @@ class NotificationsPage extends StatelessWidget {
                           final formattedDate = DateFormat('yyyy/MM/dd')
                               .format(notification.createdAt);
 
+                          final bool isNew = notification.isNew;
+
                           const icon = Icons.notifications;
 
                           return GestureDetector(
                             onTap: () {
+                              notificationProvider.markAsRead(notification);
+
                               showGeneralDialog(
                                 context: context,
                                 barrierDismissible: true,
@@ -103,9 +112,12 @@ class NotificationsPage extends StatelessWidget {
                                     children: [
                                       BackdropFilter(
                                         filter: ImageFilter.blur(
-                                            sigmaX: 4, sigmaY: 4),
+                                          sigmaX: 4,
+                                          sigmaY: 4,
+                                        ),
                                         child: Container(
-                                          color: Colors.black.withOpacity(0.2),
+                                          color:
+                                          Colors.black.withOpacity(0.2),
                                         ),
                                       ),
                                       Center(
@@ -117,20 +129,26 @@ class NotificationsPage extends StatelessWidget {
                                           child: FadeTransition(
                                             opacity: animation,
                                             child: Dialog(
-                                              shape: RoundedRectangleBorder(
+                                              shape:
+                                              RoundedRectangleBorder(
                                                 borderRadius:
-                                                BorderRadius.circular(20),
+                                                BorderRadius.circular(
+                                                    20),
                                               ),
                                               child: Container(
                                                 padding:
-                                                const EdgeInsets.all(20),
+                                                const EdgeInsets.all(
+                                                    20),
                                                 decoration: BoxDecoration(
                                                   borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  BorderRadius.circular(
+                                                      20),
                                                   gradient:
                                                   const LinearGradient(
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
+                                                    begin:
+                                                    Alignment.topLeft,
+                                                    end: Alignment
+                                                        .bottomRight,
                                                     colors: [
                                                       Color(0xFF1C597B),
                                                       Color(0xFF4C869F),
@@ -139,47 +157,63 @@ class NotificationsPage extends StatelessWidget {
                                                   ),
                                                 ),
                                                 child: Column(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                  MainAxisSize.min,
                                                   children: [
                                                     const Icon(
                                                       icon,
                                                       size: 50,
-                                                      color: Colors.white,
+                                                      color:
+                                                      Colors.white,
                                                     ),
-                                                    const SizedBox(height: 15),
+                                                    const SizedBox(
+                                                        height: 15),
                                                     Text(
                                                       notification.title,
-                                                      style: const TextStyle(
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                      style:
+                                                      const TextStyle(
                                                         fontSize: 22,
                                                         fontWeight:
-                                                        FontWeight.bold,
-                                                        color: Colors.white,
+                                                        FontWeight
+                                                            .bold,
+                                                        color:
+                                                        Colors.white,
                                                       ),
-                                                      textAlign: TextAlign.center,
                                                     ),
-                                                    const SizedBox(height: 10),
+                                                    const SizedBox(
+                                                        height: 10),
                                                     Text(
                                                       notification.content,
-                                                      textAlign: TextAlign.center,
-                                                      style: const TextStyle(
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                      style:
+                                                      const TextStyle(
                                                         fontSize: 16,
                                                         height: 1.5,
-                                                        color: Colors.white,
+                                                        color:
+                                                        Colors.white,
                                                       ),
                                                     ),
-                                                    const SizedBox(height: 20),
+                                                    const SizedBox(
+                                                        height: 20),
                                                     SizedBox(
-                                                      width: double.infinity,
+                                                      width:
+                                                      double.infinity,
                                                       child: ElevatedButton(
-                                                        style: ElevatedButton
+                                                        style:
+                                                        ElevatedButton
                                                             .styleFrom(
                                                           backgroundColor:
-                                                          Colors.white,
+                                                          Colors
+                                                              .white,
                                                           foregroundColor:
                                                           const Color(
                                                               0xFF1C597B),
-                                                          elevation: 3,
-                                                          padding: const EdgeInsets.symmetric(
+                                                          padding:
+                                                          const EdgeInsets
+                                                              .symmetric(
                                                             vertical: 12,
                                                           ),
                                                           shape:
@@ -193,12 +227,14 @@ class NotificationsPage extends StatelessWidget {
                                                         onPressed: () =>
                                                             Navigator.pop(
                                                                 context),
-                                                        child: const Text(
+                                                        child:
+                                                        const Text(
                                                           "حسناً",
                                                           style: TextStyle(
                                                             fontSize: 18,
                                                             fontWeight:
-                                                            FontWeight.bold,
+                                                            FontWeight
+                                                                .bold,
                                                           ),
                                                         ),
                                                       ),
@@ -216,22 +252,47 @@ class NotificationsPage extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              margin: const EdgeInsets.only(bottom: 16),
+                              margin: const EdgeInsets.only(
+                                  bottom: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius:
+                                BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black
+                                        .withOpacity(0.1),
                                     blurRadius: 6,
-                                    offset: const Offset(0, 4),
+                                    offset:
+                                    const Offset(0, 4),
                                   ),
                                 ],
                               ),
                               child: ListTile(
-                                leading: const CircleAvatar(
-                                  backgroundColor: Color(0xFF1C597B),
-                                  child: Icon(icon, color: Colors.white),
+                                leading: Stack(
+                                  children: [
+                                    const CircleAvatar(
+                                      backgroundColor:
+                                      Color(0xFF1C597B),
+                                      child: Icon(icon,
+                                          color: Colors.white),
+                                    ),
+                                    if (isNew)
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        child: Container(
+                                          width: 10,
+                                          height: 10,
+                                          decoration:
+                                          const BoxDecoration(
+                                            color: Colors.red,
+                                            shape:
+                                            BoxShape.circle,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 title: Text(
                                   notification.title,
@@ -243,7 +304,8 @@ class NotificationsPage extends StatelessWidget {
                                 subtitle: Text(
                                   notification.content,
                                   maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                  overflow:
+                                  TextOverflow.ellipsis,
                                 ),
                                 trailing: Text(
                                   formattedDate,

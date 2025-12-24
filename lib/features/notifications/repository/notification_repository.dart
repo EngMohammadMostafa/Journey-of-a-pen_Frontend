@@ -5,7 +5,8 @@ import '../../../core/constants/api_endpoints.dart';
 import '../data/models/notification_model.dart';
 
 class NotificationRepository {
-  final ApiService _api = ApiService();
+  final ApiService _api;
+  NotificationRepository(this._api);
 
   // ==========================
   // جلب جميع الإشعارات
@@ -24,7 +25,6 @@ class NotificationRepository {
           .map((json) =>
           NotificationModel.fromJson(json as Map<String, dynamic>))
           .toList();
-
     } on DioException catch (e) {
       throw Exception(_handleError(e));
     }

@@ -90,11 +90,13 @@ class MyApp extends StatelessWidget {
         ),
 
         // Notification Provider
+        // Notification Provider
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(
-            NotificationRepository(),
+            NotificationRepository(apiService),
           )..fetchNotifications(),
         ),
+
 
       ],
       child: MaterialApp(

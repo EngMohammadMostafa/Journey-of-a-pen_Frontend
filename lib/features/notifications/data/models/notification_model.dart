@@ -6,6 +6,9 @@ class NotificationModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// 🆕 حالة محلية فقط (لا تأتي من الباك)
+  bool isNew;
+
   NotificationModel({
     required this.notificationId,
     required this.title,
@@ -13,6 +16,7 @@ class NotificationModel {
     required this.userId,
     required this.createdAt,
     required this.updatedAt,
+    this.isNew = true, // افتراضيًا إشعار جديد
   });
 
   /// From JSON (Laravel → Flutter)
@@ -24,10 +28,12 @@ class NotificationModel {
       userId: json['user_id'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
+      // ❗ لا نلمس الباك
+      isNew: true,
     );
   }
 
-  /// To JSON 
+  /// To JSON (Flutter → Laravel)
   Map<String, dynamic> toJson() {
     return {
       'notification_id': notificationId,
@@ -36,6 +42,7 @@ class NotificationModel {
       'user_id': userId,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      // ❌ لا نرسل isNew
     };
   }
 }

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
 import '../data/models/notification_model.dart';
 import '../repository/notification_repository.dart';
 
@@ -14,12 +15,19 @@ class NotificationProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  /// 🆕 عدد الإشعارات السابقة (للمقارنة)
+  int _lastNotificationsCount = 0;
+
   // ==========================
   // Getters
   // ==========================
   List<NotificationModel> get notifications => _notifications;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// 🆕 عدد الإشعارات الجديدة (Badge)
+  int get unreadCount =>
+      _notifications.where((n) => n.isNew).length;
 
   // ==========================
   // جلب الإشعارات من الباك
@@ -32,8 +40,14 @@ class NotificationProvider extends ChangeNotifier {
     try {
       final list = await _repository.fetchNotifications();
 
-      /// Laravel: Notification::latest()->get()
-      /// إذن الترتيب جاهز من الباك
+      /// 🔔 اكتشاف إشعار جديد
+      if (list.length > _lastNotificationsCount) {
+        debugPrint("🔔 New notification arrived");
+        // هنا يمكن لاحقًا إضافة Sound / SnackBar
+      }
+
+      _lastNotificationsCount = list.length;
+
       _notifications = list;
 
     } catch (e) {
@@ -47,10 +61,28 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   // ==========================
-  // تحديث يدوي (Pull to refresh)
+  // تحديث يدوي
   // ==========================
   Future<void> refresh() async {
     await fetchNotifications();
+  }
+
+  // ==========================
+  // تعليم إشعار كمقروء
+  // ==========================
+  void markAsRead(NotificationModel notification) {
+    notification.isNew = false;
+    notifyListeners();
+  }
+
+  // ==========================
+  // تعليم الكل كمقروء
+  // ==========================
+  void markAllAsRead() {
+    for (final n in _notifications) {
+      n.isNew = false;
+    }
+    notifyListeners();
   }
 
   // ==========================
@@ -59,12 +91,13 @@ class NotificationProvider extends ChangeNotifier {
   int get notificationsCount => _notifications.length;
 
   // ==========================
-  // مسح البيانات محليًا (عند تسجيل الخروج)
+  // مسح البيانات محليًا
   // ==========================
   void clear() {
     _notifications = [];
     _errorMessage = null;
     _isLoading = false;
+    _lastNotificationsCount = 0;
     notifyListeners();
   }
 }
