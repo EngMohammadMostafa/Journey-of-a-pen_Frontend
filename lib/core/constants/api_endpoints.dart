@@ -43,4 +43,7 @@ class ApiEndpoints {
   static String participateInCompetition(int competitionId) => "/competitions/$competitionId/participate"; // POST رفع كتاب للمسابقة
   static String likeCompetitionBook(int competitionBookId) => "/competition-books/$competitionBookId/like"; // POST لايك / إلغاء لايك
   static String downloadCompetitionBook(int competitionBookId) => "/competition-books/$competitionBookId/download"; // GET تحميل الكتاب
+
+  // ---------- NOTIFICATIONS ----------
+  static const String notifications = "/notifications"; // GET جميع الإشعارات
 }

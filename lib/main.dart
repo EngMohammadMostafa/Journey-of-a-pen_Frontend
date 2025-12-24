@@ -11,6 +11,8 @@ import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/welcome_page.dart';
+import 'features/notifications/provider/notification_provider.dart';
+import 'features/notifications/repository/notification_repository.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/auth/presentation/pages/choose_interests_page.dart';
 import 'features/auth/presentation/pages/success_page.dart';
@@ -85,6 +87,13 @@ class MyApp extends StatelessWidget {
           create: (_) => CompetitionProvider(
             repository: CompetitionRepository(),
           ),
+        ),
+
+        // Notification Provider
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(
+            NotificationRepository(),
+          )..fetchNotifications(),
         ),
 
       ],
