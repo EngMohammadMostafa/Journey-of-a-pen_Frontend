@@ -112,151 +112,286 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
     final titleController = TextEditingController();
     File? selectedPdf;
 
+    // متغيرات حالة الحقول الفارغة
+    bool titleEmpty = false;
+    bool fileEmpty = false;
+
     showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  "الانضمام للمسابقة",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1C597B),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: "عنوان الكتاب",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text("اختيار ملف PDF"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1C597B),
-                  ),
-                  onPressed: () async {
-                    final result = await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['pdf'],
-                    );
-
-                    if (result?.files.single.path != null) {
-                      selectedPdf = File(result!.files.single.path!);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("✔ تم اختيار ملف PDF")),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(height: 20),
-                Row(
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("إلغاء"),
+                    const Text(
+                      "الانضمام للمسابقة",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1C597B),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1C597B),
+                    const SizedBox(height: 12),
+
+                    // رسالة للمستخدم إذا كان قد شارك مسبقًا
+                    if (hasJoined)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          "⚠️ لقد شاركت مسبقًا في هذه المسابقة",
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        child: const Text("إرسال"),
-                        onPressed: () async {
-                          if (titleController.text.isEmpty ||
-                              selectedPdf == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    "يرجى إدخال العنوان وإرفاق ملف PDF"),
-                              ),
-                            );
-                            return;
-                          }
-
-                          try {
-                            final formData = FormData.fromMap({
-                              'title': titleController.text,
-                              'file': await MultipartFile.fromFile(
-                                selectedPdf!.path,
-                                filename:
-                                selectedPdf!.path.split('/').last,
-                              ),
-                            });
-
-                            await api.dio.post(
-                              ApiEndpoints.participateInCompetition(
-                                  competition!['id']),
-                              data: formData,
-                              options: Options(
-                                headers: {
-                                  'Authorization': 'Bearer $token',
-                                  'Content-Type': 'multipart/form-data',
-                                },
-                              ),
-                            );
-
-                            await _loadCompetitionData();
-                            Navigator.pop(context);
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                  Text("✔ تم رفع الكتاب بنجاح")),
-                            );
-                          } on DioException catch (e) {
-                            if (e.response?.statusCode == 409) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    e.response?.data['message'] ??
-                                        "أنت مشارك مسبقًا",
-                                  ),
-                                ),
-                              );
-                            } else if (e.response?.statusCode == 403) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    e.response?.data['message'] ??
-                                        "المسابقة غير متاحة",
-                                  ),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("فشل رفع الكتاب")),
-                              );
-                            }
-                          }
-                        },
                       ),
+
+                    // حقل العنوان
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText: "عنوان الكتاب",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: titleEmpty ? Colors.red : Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: titleEmpty ? Colors.red : Colors.blue),
+                        ),
+                      ),
+                      enabled: !hasJoined, // تعطيل الحقل إذا كان قد شارك مسبقًا
+                    ),
+                    const SizedBox(height: 16),
+
+                    // زر اختيار ملف PDF
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.picture_as_pdf),
+                      label: Text(selectedPdf != null
+                          ? selectedPdf!.path.split('/').last
+                          : "اختيار ملف PDF"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: fileEmpty
+                            ? Colors.red.shade400
+                            : const Color(0xFF1C597B),
+                      ),
+                      onPressed: hasJoined
+                          ? null
+                          : () async {
+                        final result = await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf'],
+                        );
+
+                        if (result != null &&
+                            result.files.isNotEmpty &&
+                            result.files.single.path != null) {
+                          setStateDialog(() {
+                            selectedPdf = File(result.files.single.path!);
+                            fileEmpty = false; // إزالة التحديد الأحمر عند اختيار الملف
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("✔ تم اختيار ملف PDF")),
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // أزرار الإلغاء والإرسال
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("إلغاء"),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1C597B),
+                            ),
+                            child: const Text("إرسال"),
+                            onPressed: hasJoined
+                                ? null
+                                : () async {
+                              setStateDialog(() {
+                                titleEmpty = titleController.text.isEmpty;
+                                fileEmpty = selectedPdf == null;
+                              });
+
+                              if (titleEmpty || fileEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("يرجى تعبئة جميع الحقول المطلوبة"),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              try {
+                                final formData = FormData.fromMap({
+                                  'title': titleController.text,
+                                  'file': await MultipartFile.fromFile(
+                                    selectedPdf!.path,
+                                    filename: selectedPdf!.path.split('/').last,
+                                  ),
+                                });
+
+                                await api.dio.post(
+                                  ApiEndpoints.participateInCompetition(
+                                      competition!['id']),
+                                  data: formData,
+                                  options: Options(
+                                    headers: {
+                                      'Authorization': 'Bearer $token',
+                                      'Content-Type': 'multipart/form-data',
+                                    },
+                                  ),
+                                );
+
+                                await _loadCompetitionData();
+                                Navigator.pop(context);
+
+                                // رسالة نجاح واضحة
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: Dialog(
+                                      backgroundColor: Colors.transparent, // لجعل التدرج يظهر
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFF1C597B),
+                                              Color(0xFF4C869F),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(14),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        padding: const EdgeInsets.all(20),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            Row(
+                                              children: const [
+                                                Icon(Icons.check_circle, color: Colors.white, size: 36),
+                                                SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    "تم الإرسال بنجاح",
+                                                    style: TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 12),
+                                            const Text(
+                                              "تم إرسال الكتاب للمراجعة بانتظار موافقة الإدارة.\n"
+                                                  "سيتم عرض الكتاب على الصفحة بمجرد الموافقة.",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white70,
+                                                height: 1.4,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 20),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                foregroundColor: Color(0xFF1C597B),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                              ),
+                                              onPressed: () => Navigator.pop(context),
+                                              child: const Text(
+                                                "حسناً",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+
+                              } on DioException catch (e) {
+                                if (e.response?.statusCode == 409) {
+                                  // إذا كان المستخدم قد شارك مسبقًا
+                                  setStateDialog(() {
+                                    titleEmpty = true;
+                                    fileEmpty = true;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          e.response?.data['message'] ??
+                                              "لقد شاركت مسبقًا في هذه المسابقة"),
+                                    ),
+                                  );
+                                } else if (e.response?.data != null &&
+                                    e.response?.data['errors'] != null) {
+                                  final errors = e.response!.data['errors'] as Map;
+                                  setStateDialog(() {
+                                    titleEmpty = errors.containsKey('title');
+                                    fileEmpty = errors.containsKey('file');
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          e.response?.data['message'] ?? "فشل رفع الكتاب"),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("فشل رفع الكتاب")),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -335,23 +470,30 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                           ],
                         ),
                         ElevatedButton.icon(
-                          onPressed: (!_loading &&
-                              !hasJoined &&
-                              competition != null)
+                          onPressed: (!_loading && competition != null && !hasJoined)
                               ? _showJoinDialog
+                              : hasJoined
+                              ? () {
+                            // رسالة توضح أنه قد شارك مسبقًا
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  " لقد شاركت مسبقًا في هذه المسابقة",
+                                ),
+                              ),
+                            );
+                          }
                               : null,
-                          icon: const Icon(Icons.edit_note_rounded,
-                              size: 20),
+                          icon: const Icon(Icons.edit_note_rounded, size: 20),
                           label: const Text(
                             "الانضمام",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: (!_loading &&
-                                !hasJoined &&
-                                competition != null)
+                            backgroundColor: (!_loading && !hasJoined && competition != null)
                                 ? const Color(0xFF1C597B)
                                 : Colors.grey.shade400,
                             foregroundColor: Colors.white,
