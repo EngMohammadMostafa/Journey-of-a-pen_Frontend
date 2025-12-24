@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../widgets/competition_book_card.dart';
+import '../widgets/competition_card.dart';
 import 'competition_book_reader_page.dart';
 
 class WritingCompetitionsPage extends StatefulWidget {
@@ -305,55 +306,10 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
                     // كرت المسابقة العلوي
                     if (competition != null)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFF1C597B),
-                              Color(0xFF4C869F)
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 8,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              competition!['name'] ?? "المسابقة",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              competition!['description'] ??
-                                  " الجوائز للمراكز الثلاثة الأولى \n ستتم مكافأة المركز الأول بنشر الكتاب",
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "وقت الانتهاء: ${competition!['enddate'] ?? 'غير معروف'}",
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
+                      CompetitionCard(
+                        name: competition!['name'] ?? "المسابقة",
+                        description: competition!['description'],
+                        endDate: competition!['enddate'] ?? 'غير معروف',
                       ),
                     const SizedBox(height: 20),
 
