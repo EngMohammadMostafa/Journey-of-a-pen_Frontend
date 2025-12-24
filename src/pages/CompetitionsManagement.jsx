@@ -37,6 +37,13 @@ const [selectedCompetitionId, setSelectedCompetitionId] = useState(null);
 //احصاء عدد مسابقات من الباكند 
 const [competitionStats, setCompetitionStats] = useState({ total: 0 });
 
+// لحفظ بيانات اللايكات للكتاب المختار
+const [selectedBookId, setSelectedBookId] = useState(null);
+const [bookLikes, setBookLikes] = useState(null);
+const [filteredLikes, setFilteredLikes] = useState([]);
+const [likesSearchTerm, setLikesSearchTerm] = useState('');
+const [likesLoading, setLikesLoading] = useState(false);
+
 // أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
@@ -89,6 +96,7 @@ const [competitionStats, setCompetitionStats] = useState({ total: 0 });
       title: 'Actions',
       render: (_, book) => (
         <>
+       
          {/* أزرار القبول والرفض فقط للحالة pending */}
       {book.status === 'pending' && (
         <>
@@ -111,6 +119,13 @@ const [competitionStats, setCompetitionStats] = useState({ total: 0 });
           </button>
         </>
       )}
+      <button
+  className="btn-info"
+  onClick={() => handleDownloadBook(book.competition_book_id, book.title)}
+>
+  Download
+</button>
+
           <button
             className="btn-danger"
             onClick={() => handleDeleteCompetitionBook(book.competition_book_id)}
@@ -160,6 +175,18 @@ const fetchCompetitionStats = async () => {
   } catch (error) {
     console.error('Error fetching competition stats:', error);
     setCompetitionStats({ total: 0 });
+  }
+};
+const fetchBookLikes = async (bookId) => {
+  setLikesLoading(true);
+  try {
+    const response = await competitionsService.getBookLikes(bookId, token);
+    setBookLikes(response); // تخزين البيانات في الحالة
+  } catch (error) {
+    console.error("Error fetching book likes:", error);
+    alert("حدث خطأ في جلب بيانات اللايكات");
+  } finally {
+    setLikesLoading(false);
   }
 };
 
@@ -310,6 +337,23 @@ const fetchCompetitionStats = async () => {
     }
   };
   
+  const handleDownloadBook = async (competition_book_id, title) => {
+    try {
+      const blob = await competitionsService.downloadCompetitionBook(competition_book_id);
+  
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${title}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ أثناء تحميل الكتاب');
+    }
+  };
   
   useEffect(() => {
     if (showCompetitionsTable || showParticipantsTable) {
@@ -337,6 +381,25 @@ useEffect(() => {
     fetchCompetitionStats(); // ← هنا نجيب الإحصاء من الباكند
   }
 }, [showCompetitionsTable]);
+
+
+useEffect(() => {
+  if (bookLikes?.liked_users) {
+    let filtered = bookLikes.liked_users;
+
+    if (likesSearchTerm) {
+      filtered = filtered.filter(user =>
+        user.username?.toLowerCase().includes(likesSearchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredLikes(filtered);
+  } else {
+    setFilteredLikes([]);
+  }
+}, [bookLikes, likesSearchTerm]);
+
+
 
   return (
 
@@ -384,33 +447,101 @@ useEffect(() => {
 </div>
 
 {showParticipantsTable && (
-  <div className="participants-section">
-    <h2>Participant & Book Management</h2>
+ <div className="participants-section">
 
-    {/* اختيار المسابقة */}
-    <select
-      value={selectedCompetitionId || ''}
-      onChange={(e) => {
-        const compId = e.target.value;
-        setSelectedCompetitionId(compId);
-        fetchCompetitionDetails(compId);
-      }}
-    >
-      <option value="" disabled>Select Competition</option>
-      {competitions.map(c => (
-        <option key={c.id} value={c.id}>{c.name}</option>
-      ))}
-    </select>
+ {/* شريط البحث والفلترة في بوكس أبيض */}
+ <div className="users-filters">
 
-    {/* عرض جدول الكتب إذا تم اختيار مسابقة */}
-    {selectedCompetitionId && competitionDetails && (
-      <DataTable
-        columns={participantColumns}        // الأعمدة معرفة أعلى الكومبوننت
-        data={competitionDetails.books}     // البيانات من API
-        loading={participantsLoading}       // حالة التحميل
-      />
-    )}
-  </div>
+   {/* اختيار المسابقة */}
+   <div className="filter-section">
+     <select
+       value={selectedCompetitionId || ''}
+       onChange={(e) => {
+         const compId = e.target.value;
+         setSelectedCompetitionId(compId);
+         fetchCompetitionDetails(compId);
+       }}
+       className="filter-select"
+     >
+       <option value="" disabled>Select Competition</option>
+       {competitions.map(c => (
+         <option key={c.id} value={c.id}>{c.name}</option>
+       ))}
+     </select>
+   </div>
+
+   {/* اختيار الكتاب */}
+   {competitionDetails?.books?.length > 0 && (
+     <div className="filter-section">
+       <select
+         value={selectedBookId || ''}
+         onChange={(e) => {
+           const bookId = e.target.value;
+           setSelectedBookId(bookId);
+           fetchBookLikes(bookId);
+         }}
+         className="filter-select"
+       >
+         <option value="" disabled>-- Select Book --</option>
+         {competitionDetails.books.map(book => (
+           <option key={book.competition_book_id} value={book.competition_book_id}>
+             {book.title}
+           </option>
+         ))}
+       </select>
+     </div>
+   )}
+
+   {/* بحث المستخدمين الذين أعجبوا بالكتاب */}
+   {bookLikes && (
+     <div className="search-section">
+       <input
+         type="text"
+         placeholder="Search liked users..."
+         value={likesSearchTerm}
+         onChange={(e) => setLikesSearchTerm(e.target.value)}
+         className="search-input"
+       />
+       <div className="results-count">
+         Showing {filteredLikes.length} users
+       </div>
+     </div>
+   )}
+
+ </div> {/* نهاية users-filters */}
+
+ {/* تفاصيل اللايكات وقائمة المستخدمين */}
+ {bookLikes && (
+   <div className="book-details-section">
+     <h3>Likes for: {bookLikes.title} (Total: {bookLikes.likes_count})</h3>
+
+     <ul>
+       {filteredLikes.map(user => (
+         <li key={user.id}>
+           {user.username} (Liked at: {new Date(user.pivot.created_at).toLocaleString()})
+         </li>
+       ))}
+     </ul>
+
+     {likesLoading && <p>Loading likes...</p>}
+   </div>
+ )}
+
+ {/* جدول المشاركين/الكتب */}
+ {selectedCompetitionId && competitionDetails && (
+   <DataTable
+     columns={participantColumns}
+     data={competitionDetails.books}
+     loading={participantsLoading}
+   />
+ )}
+
+</div>
+
+
+
+
+
 )}
 
       {showCompetitionsTable && (

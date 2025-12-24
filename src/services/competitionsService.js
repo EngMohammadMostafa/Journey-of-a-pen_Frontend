@@ -97,7 +97,34 @@ approveOrRejectBook: async (competition_book_id, data, token) => {
     throw error;
   }
 },
+// تحميل كتاب مسابقة (Admin أو حسب الصلاحية)
+downloadCompetitionBook: async (competition_book_id) => {
+  try {
+    const response = await api.get(
+      `/admin/competition-books/${competition_book_id}/download`,
+      {
+        responseType: 'blob', // مهم لتحويل البيانات إلى ملف قابل للتحميل
+      }
+    );
+    return response.data; // سترجع بيانات الملف كـ blob
+  } catch (error) {
+    throw error;
+  }
+},
 
+// جلب عدد اللايكات ومعلومات المستخدمين الذين أعجبوا بالكتاب (Admin)
+getBookLikes: async (bookId, token) => {
+  try {
+    const response = await api.get(`/admin/competition-books/${bookId}/likes`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // سترجع { book_id, title, likes_count, liked_users: [...] }
+  } catch (error) {
+    throw error;
+  }
+},
 
 
 

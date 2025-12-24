@@ -18,8 +18,6 @@ const [filteredNotifications, setFilteredNotifications] = useState([])
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    type: 'competition',
-    status: 0
   })
   const { token } = useAuth()
 
@@ -31,14 +29,13 @@ const notificationStats = {
 }
 
 
-  const columns = [
-    { key: 'notification_id', title: 'ID' },
-    { key: 'title', title: 'Notification Title' },
-    { key: 'content', title: 'Content' },
-    { key: 'type', title: 'Type' },
-    { key: 'status', title: 'Status', render: (value) => value === 0 ? 'Active' : 'Inactive' },
-    { key: 'created_at', title: 'Created At' }
-  ]
+const columns = [
+  { key: 'notification_id', title: 'ID' },
+  { key: 'title', title: 'Notification Title' },
+  { key: 'content', title: 'Content' },
+  { key: 'created_at', title: 'Created At' }
+]
+
 
   const fetchNotifications = async () => {
     setLoading(true)
@@ -75,8 +72,6 @@ const notificationStats = {
     setFormData({
       title: '',
       content: '',
-      type: 'competition',
-      status: 0
     })
     setIsModalOpen(true)
   }
@@ -88,8 +83,14 @@ const notificationStats = {
     }
 
     try {
-      await notificationsService.addNotification(formData, token)
-      alert('The Notification Was Sent Successfully ')
+      await notificationsService.addNotification(
+        {
+          title: formData.title,
+          content: formData.content
+        },
+        token
+      )
+            alert('The Notification Was Sent Successfully ')
       setIsModalOpen(false)
       fetchNotifications()
     } catch (error) {
@@ -164,28 +165,6 @@ const notificationStats = {
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               required
             />
-          </div>
-
-          <div className="form-group">
-            <label>Notification Type</label>
-            <select
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-            >
-              <option value="competition">Competition Notification</option>
-              <option value="general">Global Notification</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Statu:</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: parseInt(e.target.value) })}
-            >
-              <option value={0}>نشط</option>
-              <option value={1}>غير نشط</option>
-            </select>
           </div>
 
           <div className="form-actions">
