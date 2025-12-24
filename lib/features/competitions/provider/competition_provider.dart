@@ -92,36 +92,24 @@ class CompetitionProvider extends ChangeNotifier {
       final result = await _repository.toggleLike(competitionBookId);
 
       final index = competitionBooks.indexWhere(
-              (b) => b.id == competitionBookId);
+            (b) => b.id == competitionBookId,
+      );
 
       if (index != -1) {
         competitionBooks[index] =
             competitionBooks[index].copyWith(
               likesCount: result.likesCount,
             );
+
+        //  تعديل بسيط مستحسن: ترتيب حسب الإعجابات
+        competitionBooks.sort(
+              (a, b) => b.likesCount.compareTo(a.likesCount),
+        );
       }
 
       notifyListeners();
     } catch (e) {
       error = e.toString();
-      notifyListeners();
-    }
-  }
-
-  // ================== Download ==================
-
-  /// تحميل كتاب مسابقة
-  Future<void> downloadCompetitionBook(int competitionBookId) async {
-    try {
-      loading = true;
-      notifyListeners();
-
-      await _repository.downloadCompetitionBook(competitionBookId);
-
-    } catch (e) {
-      error = e.toString();
-    } finally {
-      loading = false;
       notifyListeners();
     }
   }

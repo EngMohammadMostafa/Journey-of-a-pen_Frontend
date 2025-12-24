@@ -93,22 +93,9 @@ class CompetitionService {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
-      if (token == null || token.isEmpty) {
-        print('المستخدم غير مسجل الدخول');
-        return null;
-      }
+      if (token == null || token.isEmpty) return null;
 
       _api.setAuthToken(token);
-
-      // طلب رابط التحميل من السيرفر
-      final response = await _api.get(
-        '${ApiEndpoints.competitions}/books/${book.id}/download',
-      );
-
-      if (response.statusCode != 200) return null;
-
-      final downloadUrl = response.data['download_url'];
-      if (downloadUrl == null) return null;
 
       final dir = await getApplicationDocumentsDirectory();
       final filePath =
@@ -117,11 +104,17 @@ class CompetitionService {
       final file = File(filePath);
 
       if (!await file.exists()) {
-        final downloadResponse = await Dio().get<List<int>>(
-          downloadUrl,
-          options: Options(responseType: ResponseType.bytes),
+        final response = await Dio().get<List<int>>(
+          '${ApiEndpoints.competitionBooks}/${book.id}/download',
+          options: Options(
+            responseType: ResponseType.bytes,
+            headers: {
+              'Authorization': 'Bearer $token',
+            },
+          ),
         );
-        await file.writeAsBytes(downloadResponse.data!);
+
+        await file.writeAsBytes(response.data!);
       }
 
       await OpenFile.open(file.path);

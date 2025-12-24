@@ -45,16 +45,24 @@ class _CompetitionBookReaderPageState extends State<CompetitionBookReaderPage> {
         _loadingText = "جاري تجهيز العرض...";
       });
 
-      _document = await PDFDocument.fromFile(file);
+      final document = await PDFDocument.fromFile(file);
+
+      setState(() {
+        _document = document;
+        _loading = false;
+      });
+
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("فشل تحميل الكتاب")),
       );
-    }
 
-    setState(() {
-      _loading = false;
-    });
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override

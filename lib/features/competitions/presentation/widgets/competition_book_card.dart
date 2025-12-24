@@ -1,14 +1,7 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/api/api_service.dart';
-import '../../../../core/constants/api_endpoints.dart';
-import '../../data/pdf_service.dart';
-import '../page/competition_book_reader_page.dart'; // إذا لازلت تستخدم PdfService لقراءة الكتب
+
+import '../page/competition_book_reader_page.dart';
 
 class CompetitionBookCard extends StatefulWidget {
   final int rank;
@@ -18,7 +11,7 @@ class CompetitionBookCard extends StatefulWidget {
   final VoidCallback onLikeToggle;
   final VoidCallback onRead;
   final String imagePath;
-  final int competitionBookId; // المعرف الحقيقي للكتاب
+  final int competitionBookId;
   final ScrollController? scrollController;
 
   const CompetitionBookCard({

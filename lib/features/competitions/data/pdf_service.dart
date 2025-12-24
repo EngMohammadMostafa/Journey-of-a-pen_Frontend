@@ -29,7 +29,7 @@ class PdfService {
         return;
       }
 
-      // ⬇️ تحميل من الباك مع التوكن
+      //  تحميل من الباك مع التوكن
       await ApiService().dio.download(
         '/competition-books/$bookId/download',
         filePath,
@@ -62,7 +62,7 @@ class PdfService {
 
       final file = File(filePath);
 
-      // ✅ إذا كان الملف موجودًا لا تعيد تحميله
+      //  إذا كان الملف موجودًا لا تعيد تحميله
       if (await file.exists()) {
         return file;
       }
@@ -72,11 +72,11 @@ class PdfService {
         throw Exception('لم يتم تسجيل الدخول');
       }
 
-      // ✅ التحميل الصحيح للـ PDF
+      //  التحميل الصحيح للـ PDF
       final response = await ApiService().dio.get(
         '/competition-books/$bookId/download',
         options: Options(
-          responseType: ResponseType.bytes, // 🔴 مهم جدًا
+          responseType: ResponseType.bytes, //  مهم جدًا
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/pdf',
@@ -84,7 +84,7 @@ class PdfService {
         ),
       );
 
-      // ✅ حفظ الـ bytes كملف حقيقي
+      //  حفظ الـ bytes كملف حقيقي
       await file.writeAsBytes(response.data, flush: true);
 
       return file;

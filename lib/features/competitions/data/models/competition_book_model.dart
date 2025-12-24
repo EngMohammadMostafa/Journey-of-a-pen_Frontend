@@ -2,26 +2,26 @@ import 'user_lite_model.dart';
 
 class CompetitionBookModel {
   final int id;
-  final int competitionId;
-  final int userId;
+  final int? competitionId;
+  final int? userId;
   final String title;
-  final String filePath;
-  final String fileType;
-  final int fileSize;
+  final String? filePath;
+  final String? fileType;
+  final int? fileSize;
   final int likesCount;
 
-  // بيانات إضافية (تظهر فقط في admin APIs)
+  // تظهر فقط في admin APIs
   final UserLiteModel? owner;
   final List<UserLiteModel>? likedUsers;
 
   CompetitionBookModel({
     required this.id,
-    required this.competitionId,
-    required this.userId,
+    this.competitionId,
+    this.userId,
     required this.title,
-    required this.filePath,
-    required this.fileType,
-    required this.fileSize,
+    this.filePath,
+    this.fileType,
+    this.fileSize,
     required this.likesCount,
     this.owner,
     this.likedUsers,
@@ -36,7 +36,7 @@ class CompetitionBookModel {
       filePath: json['file_path'],
       fileType: json['file_type'],
       fileSize: json['file_size'],
-      likesCount: json['likes_count'],
+      likesCount: json['likes_count'] ?? 0,
       owner: json['owner'] != null
           ? UserLiteModel.fromJson(json['owner'])
           : null,
@@ -64,5 +64,4 @@ class CompetitionBookModel {
       likedUsers: likedUsers,
     );
   }
-
 }
