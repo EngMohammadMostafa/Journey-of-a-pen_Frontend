@@ -41,10 +41,10 @@ const columns = [
     setLoading(true)
     try {
       const response = await notificationsService.getAllNotifications(token)
-      setNotifications(response.notifications || [])
-      //من اجل الفلترة عن اشعار معين
-      setFilteredNotifications(response.notifications || []) // ← هذا السطر مهم للبحث
 
+      setNotifications(response)
+      setFilteredNotifications(response)
+      
     } catch (error) {
       console.error('Error fetching notifications:', error)
       alert('حدث خطأ في جلب بيانات الإشعارات')
