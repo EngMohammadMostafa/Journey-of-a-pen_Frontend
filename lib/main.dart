@@ -7,6 +7,7 @@ import 'core/api/api_service.dart';
 // صفحات التطبيق
 import 'features/auth/presentation/pages/auth_choice_page.dart';
 import 'features/auth/repository/auth_repository.dart';
+import 'features/books/provider/books_provider.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -66,8 +67,10 @@ class MyApp extends StatelessWidget {
         ),
 
         // Books Repository
-        ChangeNotifierProvider<BooksRepository>(
-          create: (_) => BooksRepository(apiService),
+        ChangeNotifierProvider(
+          create: (_) => BooksProvider(
+            repository: BooksRepository(apiService),
+          ),
         ),
 
         // Categories Repository

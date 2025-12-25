@@ -1,84 +1,88 @@
-import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../data/books_service.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import '../../../core/api/api_service.dart';
+import '../../../core/constants/api_endpoints.dart';
+import '../../../core/utils/prefs_helper.dart';
 import '../data/models/book_model.dart';
 import '../data/models/purchase_model.dart';
-import '../../../../../core/api/api_service.dart';
 
-class BooksRepository extends ChangeNotifier {
-  final BooksService _service;
-  final ApiService _api;
+class BooksRepository {
+  final ApiService api;
 
-  BooksRepository(ApiService api)
-      : _service = BooksService(api),
-        _api = api;
+  BooksRepository(this.api);
 
-  // جلب كل الكتب
-  Future<List<BookModel>> getAllBooks() => _service.fetchBooks();
+  // جلب الكتب المشتراة من الباك
+  Future<List<BookModel>> getPurchasedBooks() async {
+    final response = await api.get(ApiEndpoints.purchasedBooks);
+    final data = response.data as List;
+    final books = data.map((json) => BookModel.fromJson(json)).toList();
 
-  // جلب كتاب محدد
-  Future<BookModel> getBookById(int id) => _service.fetchBookById(id);
+    // حفظ IDs المشتريات محليًا
+    await PrefsHelper.setDownloadedBookIds(books.map((b) => b.id).toList());
 
-  // شراء كتاب
-  Future<PurchaseModel> purchaseBook(int id) => _service.purchaseBook(id);
+    return books;
+  }
 
-  // إنشاء عملية شراء
-  Future<PurchaseModel> createPurchase(int bookId, String method) =>
-      _service.createPurchase(bookId: bookId, paymentMethod: method);
+  // جلب جميع الكتب
+  Future<List<BookModel>> getAllBooks() async {
+    final response = await api.get(ApiEndpoints.allBooks);
+    final data = response.data as List;
+    return data.map((json) => BookModel.fromJson(json)).toList();
+  }
+
+  // جلب كتاب واحد
+  Future<BookModel> getBookById(int id) async {
+    final response = await api.get(ApiEndpoints.bookDetails(id));
+    return BookModel.fromJson(response.data);
+  }
 
   // جلب الكتب حسب القسم
-  Future<List<BookModel>> getBooksByCategory(int categoryId) =>
-      _service.fetchBooksByCategory(categoryId);
+  Future<List<BookModel>> getBooksByCategory(int categoryId) async {
+    final response = await api.get(ApiEndpoints.booksByCategory(categoryId));
+    final data = response.data as List;
+    return data.map((json) => BookModel.fromJson(json)).toList();
+  }
 
-  //  إرجاع رابط التحميل
-  Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
+  // شراء كتاب
+  Future<PurchaseModel> purchaseBook(int bookId) async {
+    final response = await api.post(ApiEndpoints.purchaseBook(bookId));
+    return PurchaseModel.fromJson(response.data);
+  }
+
+  // تحميل كتاب + تسجيله محليًا
+  Future<String?> downloadAndRegisterBook(BookModel book) async {
     try {
-      // محاولة الحصول على التوكن إن لم يُمرر
-      String? token = userToken;
-      if (token == null) {
-        final prefs = await SharedPreferences.getInstance();
-        token = prefs.getString('token');
-      }
+      // استخدام POST لأن السيرفر لا يدعم GET
+      final response = await api.post(ApiEndpoints.downloadBook(book.id));
+      final downloadUrl = response.data['download_url'] as String?;
 
-      if (token == null) {
-        print(" لا يمكن جلب رابط التحميل → المستخدم غير مسجل الدخول");
-        return null;
-      }
+      if (downloadUrl != null) {
+        // تحميل الكتاب فعليًا وحفظه محليًا
+        final bytes = await _downloadFile(downloadUrl);
+        await PrefsHelper.saveBookContent(book.id, bytes);
 
-      // وضع التوكن في الـ ApiService
-      _api.setAuthToken(token);
+        // تحديث SharedPreferences للكتب المحملة
+        final ids = await PrefsHelper.getDownloadedBookIds();
+        if (!ids.contains(book.id)) {
+          ids.add(book.id);
+          await PrefsHelper.setDownloadedBookIds(ids);
+        }
 
-      final res = await _api.post('/books/${book.id}/download');
-
-      if (res.statusCode == 200 && res.data['success'] == true) {
-        final url = res.data['download_url'];
-        book.downloadUrl = url;
-        notifyListeners();
-        return url;
+        return downloadUrl;
       }
 
       return null;
     } catch (e) {
-      print("Error generating download link: $e");
-      return null;
+      throw Exception("فشل تحميل الكتاب: $e");
     }
   }
 
-  //  الدالة الناقصة التي سببت الخطأ: تحميل الكتاب + تسجيل العملية داخلياً
-  Future<String?> downloadAndRegisterBook(BookModel book) async {
-    try {
-      final link = await getDownloadLink(book);
-
-      if (link != null) {
-        print(" تم الحصول على رابط التحميل: $link");
-        return link;
-      } else {
-        print(" فشل في إنشاء رابط التحميل");
-        return null;
-      }
-    } catch (e) {
-      print("Error in downloadAndRegisterBook: $e");
-      return null;
-    }
+  // تحميل الملف من الرابط
+  Future<List<int>> _downloadFile(String url) async {
+    final response = await Dio().get<List<int>>(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return response.data!;
   }
 }

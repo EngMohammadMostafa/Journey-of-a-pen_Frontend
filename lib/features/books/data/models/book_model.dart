@@ -17,9 +17,9 @@ class BookModel {
   final String? fileType;
   final int? fileSize;
   String? downloadUrl;
-
-  //  حالة الإعجاب من قبل المستخدم الحالي
   bool isLikedByUser;
+  bool isOwned;
+  bool isDownloaded;
 
   BookModel({
     required this.id,
@@ -37,6 +37,8 @@ class BookModel {
     this.fileSize,
     this.downloadUrl,
     this.isLikedByUser = false,
+    this.isOwned = false,
+    this.isDownloaded = false,
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -44,18 +46,36 @@ class BookModel {
       id: json['id'],
       title: json['title'],
       author: json['author'],
+
       imageUrl: json['image_url'],
+
       isPaid: (json['book_type'] ?? 'free') == 'paid',
-      categoryName: json['category'] ?? "غير محدد",
-      description: json['description'] ?? 'لا يوجد وصف متاح.',
-      price: (json['price'] ?? 0).toDouble(),
-      discountRate: (json['discount_rate'] ?? 0).toDouble(),
-      numberOfLikes: json['likes_count'] ?? 0,
+
+      categoryName: json['category'] is String
+          ? json['category']
+          : (json['category']?['name'] ?? "غير محدد"),
+
+      description: json['description'],
+
+      price: (json['price'] is num)
+          ? (json['price'] as num).toDouble()
+          : 0,
+
+      discountRate: (json['discount_rate'] is num)
+          ? (json['discount_rate'] as num).toDouble()
+          : 0,
+
+      numberOfLikes: json['likes_count']
+          ?? json['number_of_likes']
+          ?? 0,
+
       filePath: json['file_path'],
       fileType: json['file_type'],
       fileSize: json['file_size'],
       downloadUrl: json['download_url'],
       isLikedByUser: json['is_liked_by_user'] ?? false,
+      isOwned: json['owned'] ?? false,
+      isDownloaded: json['downloaded_at'] != null,
     );
   }
 
@@ -76,10 +96,12 @@ class BookModel {
       'file_size': fileSize,
       'download_url': downloadUrl,
       'is_liked_by_user': isLikedByUser,
+      'owned': isOwned,
+      'downloaded': isDownloaded,
     };
   }
 
-  // تحديث حالة الإعجاب وعدد الإعجابات بعد نقر المستخدم
+  // تحديث حالة الإعجاب
   void toggleLike() {
     if (isLikedByUser) {
       numberOfLikes = (numberOfLikes > 0) ? numberOfLikes - 1 : 0;

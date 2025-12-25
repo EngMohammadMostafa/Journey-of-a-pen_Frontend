@@ -50,4 +50,8 @@ class ApiEndpoints {
 // ---------- REQUEST BOOKS ----------
   static const String requestBooks = "/request-books"; // POST طلب كتاب جديد
   static const String myRequests = "/request-books/my-requests"; // GET جميع طلبات المستخدم
+  // ---------- PURCHASE ----------
+  static String purchaseBook(int bookId) => "/books/$bookId/purchase"; // POST شراء كتاب
+  static const String purchasedBooks = "/me/purchased-books"; // GET الكتب التي تم شراؤها
+
 }

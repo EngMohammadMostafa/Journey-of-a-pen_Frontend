@@ -1,5 +1,5 @@
 import 'package:book_worm_haven/features/quotes/presentation/pages/quote.dart';
-import 'package:book_worm_haven/features/shopping_cart/presentation/pages/shopping_cart.dart';
+import 'package:book_worm_haven/features/books/presentation/pages/shopping_cart.dart';
 import 'package:book_worm_haven/features/competitions/presentation/page/writing_competitions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';

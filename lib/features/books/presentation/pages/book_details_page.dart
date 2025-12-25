@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/book_model.dart';
-import '../../repository/books_repository.dart';
+import '../../provider/books_provider.dart';
 import 'payment_page.dart';
 import 'book_reader_page.dart';
 
@@ -14,49 +14,35 @@ class BookDetailsPage extends StatefulWidget {
 }
 
 class _BookDetailsPageState extends State<BookDetailsPage> {
-  double _rating = 0;
+  // =========================
+  // زر الشراء أو القراءة
+  // =========================
+  void _onActionPressed() async {
+    final booksProvider = context.read<BooksProvider>();
+    final book = widget.book;
 
-  void _onBuyPressed() async {
-    final booksRepo = context.read<BooksRepository>();
-
-    final file = await booksRepo.downloadAndRegisterBook(widget.book);
-
-    if (file == null) {
-      // المستخدم غير مسجل أو لم يشتر الكتاب
+    // إذا الكتاب مدفوع ولم يتم شراؤه
+    if (book.isPaid && !book.isOwned) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => PaymentPage(book: widget.book),
-        ),
+        MaterialPageRoute(builder: (_) => PaymentPage(book: book)),
       );
-    } else {
-      // تم تحميله أو يمتلكه مسبقاً → افتح مباشرة
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BookReaderPage(book: widget.book),
-        ),
-      );
+      return;
     }
-  }
 
+    // تحميل الكتاب أو فتحه إذا كان مجاني أو مشتري مسبقاً
+    final downloadLink = await booksProvider.downloadBook(book);
 
-  void _onReadPressed() async {
-    final booksRepo = context.read<BooksRepository>();
-
-    // تحميل أو فتح الكتاب
-    final file = await booksRepo.downloadAndRegisterBook(widget.book);
-
-    if (file != null) {
+    if (downloadLink != null) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => BookReaderPage(book: widget.book),
-        ),
+        MaterialPageRoute(builder: (_) => BookReaderPage(book: book)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الرجاء تسجيل الدخول أو شراء الكتاب أولاً")),
+        const SnackBar(
+          content: Text("الرجاء تسجيل الدخول أو شراء الكتاب أولاً"),
+        ),
       );
     }
   }
@@ -73,7 +59,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
           style: const TextStyle(fontFamily: 'Papyrus', fontSize: 20),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF1C597B), // AppBar شبه شفاف
+        backgroundColor: const Color(0xFF1C597B),
         elevation: 0,
       ),
       body: SafeArea(
@@ -96,9 +82,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: kToolbarHeight + 16), // مساحة فارغة أعلى المحتوى
+                  SizedBox(height: kToolbarHeight + 16),
 
-                  //  البطاقة المعلوماتية
+                  // بطاقة معلومات الكتاب
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -116,7 +102,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        //  العنوان
                         Text(
                           book.title,
                           style: const TextStyle(
@@ -127,7 +112,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        //  المؤلف
                         Text(
                           "by ${book.author}",
                           style: const TextStyle(
@@ -137,7 +121,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        //  الوصف
                         Text(
                           book.description ?? "No description available.",
                           textAlign: TextAlign.justify,
@@ -149,7 +132,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        //  السعر
                         if (book.isPaid)
                           Text(
                             "Price: \$${book.price.toStringAsFixed(2)}",
@@ -160,21 +142,20 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                               fontFamily: 'Papyrus',
                             ),
                           ),
-
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 30),
 
-                  //  زر الشراء أو القراءة
+                  // زر الشراء / القراءة
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                       book.isPaid ? Colors.redAccent : const Color(0xFF1C597B),
                       foregroundColor: Colors.white,
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 45, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 45, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -191,7 +172,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                         fontSize: 18,
                       ),
                     ),
-                    onPressed: book.isPaid ? _onBuyPressed : _onReadPressed,
+                    onPressed: _onActionPressed,
                   ),
 
                   const SizedBox(height: 35),

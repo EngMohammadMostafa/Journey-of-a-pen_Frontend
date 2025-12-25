@@ -198,6 +198,7 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessDialog(
             'تم إرسال الكتاب للمراجعة بانتظار موافقة الإدارة.\n'
+            'ستجد طلبك في قسم طلبات للتتبع حالته.\n'
                 'سيتم عرض الكتاب على الصفحة بمجرد الموافقة.'
         );
       } else {

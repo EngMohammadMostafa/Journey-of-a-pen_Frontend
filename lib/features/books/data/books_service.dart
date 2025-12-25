@@ -40,23 +40,6 @@ class BooksService {
     return PurchaseModel.fromJson(data);
   }
 
-  // ==========================
-  // إنشاء عملية شراء
-  // ==========================
-  Future<PurchaseModel> createPurchase({
-    required int bookId,
-    required String paymentMethod,
-  }) async {
-    final response = await _api.post(
-      '/purchases',
-      data: {
-        'book_id': bookId,
-        'payment_method': paymentMethod,
-      },
-    );
-    final data = response.data as Map<String, dynamic>;
-    return PurchaseModel.fromJson(data);
-  }
 
   // ==========================
   // جلب الكتب حسب القسم
@@ -89,12 +72,16 @@ class BooksService {
       // طلب التحميل من السيرفر (يتحقق من الملكية على السيرفر)
       final response = await _api.post('/books/${book.id}/download');
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
+      if (response.statusCode == 200 &&
+          response.data is Map &&
+          response.data['download_url'] != null) {
         book.downloadUrl = response.data['download_url'];
 
         // مجلد التطبيق لحفظ الملف محليًا
         final dir = await getApplicationDocumentsDirectory();
-        final filePath = '${dir.path}/${book.title.replaceAll(" ", "_")}.${book.fileType ?? "pdf"}';
+        final safeTitle = book.title.replaceAll(RegExp(r'[^\w\s-]'), '');
+        final filePath =
+            '${dir.path}/${safeTitle.replaceAll(" ", "_")}.${book.fileType ?? "pdf"}';
         final file = File(filePath);
 
         // إذا الملف موجود مسبقًا
