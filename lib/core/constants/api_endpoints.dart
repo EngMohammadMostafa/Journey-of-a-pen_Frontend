@@ -30,6 +30,8 @@ class ApiEndpoints {
   static String bookWithLikes(int bookId) => "/books/$bookId/with-likes"; // تفاصيل كتاب + عدد likes
   static String serveDownload(int bookId, int userId) => "/books/$bookId/serve-download/$userId"; // رابط تحميل مؤقت
 
+  static String toggleLike(int bookId) => "/books/$bookId/toggle-like";
+
   //  Questions & Answers
   static String bookQuestions(int bookId) => "/books/$bookId/questions"; // GET أسئلة الكتاب
   static String startBookSession(int bookId) => "/books/$bookId/session/start"; // POST بدء جلسة إجابة

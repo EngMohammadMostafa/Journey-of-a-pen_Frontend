@@ -12,6 +12,6 @@ class CategoryRepository extends ChangeNotifier {
 
   Future<void> fetchCategories() async {
     _categories = await service.getCategories();
-    notifyListeners(); // يخطر UI عند التغيير
+    notifyListeners();
   }
 }

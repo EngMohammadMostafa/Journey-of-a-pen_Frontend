@@ -139,13 +139,14 @@ class _HomeContentState extends State<HomeContent> {
   bool _isLoading = true;
   bool _isLoadingCategories = true;
   CategoryModel? selectedCategory;
+
   String _getCategoryImage(String categoryName) {
     switch (categoryName.toLowerCase()) {
       case 'kids':
         return "assets/images/kids.png";
       case 'crime':
         return "assets/images/crime.png";
-        case 'romance':
+      case 'romance':
         return "assets/images/romantic.png";
       default:
         return "assets/images/default.png"; // صورة افتراضية لأي قسم آخر
@@ -177,10 +178,7 @@ class _HomeContentState extends State<HomeContent> {
     setState(() => _isLoading = true);
     try {
       final booksFromApi = await booksService.fetchBooks();
-
-      //  Debug print للتأكد من البيانات
       print("Books fetched: ${booksFromApi.map((b) => b.title).toList()}");
-
       setState(() => _books = booksFromApi);
     } catch (e) {
       print("Error loading books: $e");
@@ -213,14 +211,12 @@ class _HomeContentState extends State<HomeContent> {
   List<BookModel> getFilteredBooks() {
     List<BookModel> list = _books;
 
-    // فلترة حسب التصنيف (نستخدم الاسم لتوافق JSON الحالي)
     if (selectedCategory != null) {
       list = list
           .where((book) => book.categoryName == selectedCategory!.name)
           .toList();
     }
 
-    // فلترة حسب البحث
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
       list = list.where((book) {
@@ -367,7 +363,6 @@ class _HomeContentState extends State<HomeContent> {
                             fit: BoxFit.cover,
                           ),
                         ),
-
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -396,45 +391,69 @@ class _HomeContentState extends State<HomeContent> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                // حالة الكتاب (مجاني / مدفوع)
+
+                                // حالة الكتاب (مجاني / مدفوع) + الإعجاب
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
+                                  padding:
+                                  const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6),
                                   decoration: BoxDecoration(
                                     color: book.isPaid
                                         ? Colors.red.withOpacity(0.1)
-                                        : Colors.green.withOpacity(0.1),
+                                        : Colors.green
+                                        .withOpacity(0.1),
                                     borderRadius:
                                     BorderRadius.circular(12),
                                   ),
-                                  child:// حالة الكتاب (مجاني / مدفوع) + الإعجاب
-                                  // حالة الكتاب (مجاني / مدفوع) + الإعجاب
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment
+                                        .spaceBetween,
                                     children: [
                                       // حالة الكتاب
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        padding: const EdgeInsets
+                                            .symmetric(
+                                            horizontal: 10,
+                                            vertical: 6),
                                         decoration: BoxDecoration(
                                           color: book.isPaid
-                                              ? Colors.red.withOpacity(0.1)
-                                              : Colors.green.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(12),
+                                              ? Colors.red
+                                              .withOpacity(0.1)
+                                              : Colors.green
+                                              .withOpacity(
+                                              0.1),
+                                          borderRadius:
+                                          BorderRadius.circular(
+                                              12),
                                         ),
                                         child: Row(
-                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisSize:
+                                          MainAxisSize.min,
                                           children: [
                                             Icon(
-                                              book.isPaid ? Icons.lock : Icons.check_circle,
-                                              color: book.isPaid ? Colors.red : Colors.green,
+                                              book.isPaid
+                                                  ? Icons.lock
+                                                  : Icons
+                                                  .check_circle,
+                                              color: book.isPaid
+                                                  ? Colors.red
+                                                  : Colors.green,
                                               size: 18,
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              book.isPaid ? "مدفوع" : "مجاني",
+                                              book.isPaid
+                                                  ? "مدفوع"
+                                                  : "مجاني",
                                               style: TextStyle(
-                                                color: book.isPaid ? Colors.red : Colors.green,
-                                                fontWeight: FontWeight.bold,
+                                                color: book.isPaid
+                                                    ? Colors.red
+                                                    : Colors
+                                                    .green,
+                                                fontWeight:
+                                                FontWeight.bold,
                                               ),
                                             ),
                                           ],
@@ -443,36 +462,67 @@ class _HomeContentState extends State<HomeContent> {
 
                                       // أيقونة الإعجاب التفاعلية
                                       GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            book.toggleLike(); // استخدم دالة toggleLike من BookModel
-                                          });
+                                        onTap: () async {
+                                          if (book.isLiking) return;
 
-                                          //  هنا يمكن استدعاء API لتحديث الإعجاب في الباك
-                                          // booksService.toggleLike(book.id, book.isLikedByUser);
+                                          setState(() =>
+                                          book.isLiking = true);
+
+                                          try {
+                                            final result = await booksService
+                                                .toggleLike(book.id);
+                                            setState(() {
+                                              book.isLikedByUser =
+                                              result['liked'] as bool;
+                                              book.numberOfLikes =
+                                              result['likes_count']
+                                              as int;
+                                            });
+                                          } catch (e) {
+                                            print(
+                                                "Error toggling like: $e");
+                                          } finally {
+                                            setState(() =>
+                                            book.isLiking = false);
+                                          }
                                         },
                                         child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          padding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 6),
                                           decoration: BoxDecoration(
                                             color: book.isLikedByUser
-                                                ? Colors.orange.withOpacity(0.2)
-                                                : Colors.orange.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12),
+                                                ? Colors.blueGrey
+                                                .withOpacity(0.2)
+                                                : Colors.blueGrey
+                                                .withOpacity(0.1),
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                                12),
                                           ),
                                           child: Row(
-                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisSize:
+                                            MainAxisSize.min,
                                             children: [
                                               Icon(
                                                 Icons.thumb_up,
-                                                color: book.isLikedByUser ? Color(0xFF1C597B) : Colors.blueGrey,
+                                                color: book.isLikedByUser
+                                                    ? const Color(
+                                                    0xFF1C597B)
+                                                    : Colors.blueGrey,
                                                 size: 18,
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
                                                 "${book.numberOfLikes}",
                                                 style: TextStyle(
-                                                  color: book.isLikedByUser ? Color(0xFF1C597B) : Colors.blueGrey,
-                                                  fontWeight: FontWeight.bold,
+                                                  color: book.isLikedByUser
+                                                      ? const Color(
+                                                      0xFF1C597B)
+                                                      : Colors.blueGrey,
+                                                  fontWeight:
+                                                  FontWeight.bold,
                                                 ),
                                               ),
                                             ],

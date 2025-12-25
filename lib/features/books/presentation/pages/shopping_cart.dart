@@ -135,8 +135,7 @@ class ShoppingCartPage extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 10),
                                             Text(
-                                              "يمكنك قراءة الكتاب من خلال صفحة البروفايل.\n"
-                                                  "تاريخ الشراء: $formattedDate",
+                                              "يمكنك قراءة الكتاب من خلال صفحة البروفايل.",
                                               textAlign: TextAlign.center,
                                               style: const TextStyle(
                                                 fontSize: 16,

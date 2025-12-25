@@ -40,7 +40,6 @@ class BooksService {
     return PurchaseModel.fromJson(data);
   }
 
-
   // ==========================
   // جلب الكتب حسب القسم
   // ==========================
@@ -120,6 +119,37 @@ class BooksService {
     }
     if (book.filePath != null) {
       await OpenFile.open(book.filePath);
+    }
+  }
+
+  // ==========================
+  // Toggle Like / Unlike
+  // ==========================
+  Future<Map<String, dynamic>> toggleLike(int bookId, {String? userToken}) async {
+    try {
+      String? token = userToken;
+      if (token == null) {
+        final prefs = await SharedPreferences.getInstance();
+        token = prefs.getString('token');
+      }
+
+      if (token == null || token.isEmpty) {
+        throw Exception("المستخدم غير مسجل الدخول");
+      }
+
+      _api.setAuthToken(token);
+
+      final response = await _api.post('/books/$bookId/toggle-like');
+
+      if (response.statusCode == 200 && response.data is Map) {
+        // يحتوي على {success, liked, likes_count}
+        return response.data;
+      } else {
+        throw Exception(response.data['message'] ?? 'فشل تغيير حالة الإعجاب');
+      }
+    } catch (e) {
+      print("Error toggling like: $e");
+      rethrow;
     }
   }
 }

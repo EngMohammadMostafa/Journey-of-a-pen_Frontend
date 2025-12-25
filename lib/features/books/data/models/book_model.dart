@@ -21,6 +21,9 @@ class BookModel {
   bool isOwned;
   bool isDownloaded;
 
+  // حالة الإعجاب أثناء انتظار API (UI only)
+  bool isLiking; // ← تمت الإضافة
+
   BookModel({
     required this.id,
     required this.title,
@@ -39,6 +42,7 @@ class BookModel {
     this.isLikedByUser = false,
     this.isOwned = false,
     this.isDownloaded = false,
+    this.isLiking = false, // ← القيمة الافتراضية
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -46,29 +50,17 @@ class BookModel {
       id: json['id'],
       title: json['title'],
       author: json['author'],
-
       imageUrl: json['image_url'],
-
       isPaid: (json['book_type'] ?? 'free') == 'paid',
-
       categoryName: json['category'] is String
           ? json['category']
           : (json['category']?['name'] ?? "غير محدد"),
-
       description: json['description'],
-
-      price: (json['price'] is num)
-          ? (json['price'] as num).toDouble()
-          : 0,
-
+      price: (json['price'] is num) ? (json['price'] as num).toDouble() : 0,
       discountRate: (json['discount_rate'] is num)
           ? (json['discount_rate'] as num).toDouble()
           : 0,
-
-      numberOfLikes: json['likes_count']
-          ?? json['number_of_likes']
-          ?? 0,
-
+      numberOfLikes: json['likes_count'] ?? json['number_of_likes'] ?? 0,
       filePath: json['file_path'],
       fileType: json['file_type'],
       fileSize: json['file_size'],
@@ -76,6 +68,7 @@ class BookModel {
       isLikedByUser: json['is_liked_by_user'] ?? false,
       isOwned: json['owned'] ?? false,
       isDownloaded: json['downloaded_at'] != null,
+      isLiking: false, // ← القيمة الافتراضية
     );
   }
 
