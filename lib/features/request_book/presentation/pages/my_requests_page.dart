@@ -1,17 +1,48 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/api/api_service.dart';
+import '../../../../core/constants/api_endpoints.dart';
 
-class MyRequestsPage extends StatelessWidget {
+class MyRequestsPage extends StatefulWidget {
   const MyRequestsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final requests = [
-      {'title': 'رحلة في عالم Flutter', 'status': 'pending'},
-      {'title': 'أساسيات البرمجة', 'status': 'accepted'},
-      {'title': 'الذكاء الاصطناعي للمبتدئين', 'status': 'rejected'},
-    ];
+  State<MyRequestsPage> createState() => _MyRequestsPageState();
+}
 
+class _MyRequestsPageState extends State<MyRequestsPage> {
+  final ApiService api = ApiService();
+  bool _loading = true;
+  List<Map<String, dynamic>> requests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRequests();
+  }
+
+  Future<void> _loadRequests() async {
+    setState(() => _loading = true);
+    try {
+      final response = await api.get(ApiEndpoints.myRequests);
+      if (response.statusCode == 200) {
+        final data = List<Map<String, dynamic>>.from(response.data);
+        setState(() => requests = data);
+      } else {
+        setState(() => requests = []);
+      }
+    } catch (e) {
+      debugPrint("Error loading requests: $e");
+      setState(() => requests = []);
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -37,7 +68,6 @@ class MyRequestsPage extends StatelessWidget {
             // محتوى الصفحة
             Column(
               children: [
-                // AppBar مع blur
                 ClipRect(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -50,19 +80,30 @@ class MyRequestsPage extends StatelessWidget {
                   ),
                 ),
 
-                // قائمة الطلبات
                 Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: requests.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 14),
-                    itemBuilder: (context, index) {
-                      final request = requests[index];
-                      return _RequestCard(
-                        title: request['title']!,
-                        status: request['status']!,
-                      );
-                    },
+                  child: _loading
+                      ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                      : requests.isEmpty
+                      ? const Center(
+                    child: Text(
+                      "لا توجد طلبات حتى الآن",
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                    ),
+                  )
+                      : RefreshIndicator(
+                    onRefresh: _loadRequests,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: requests.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (context, index) {
+                        final request = requests[index];
+                        return _RequestCard(
+                          title: request['title'] ?? 'بدون عنوان',
+                          status: request['status'] ?? 'pending',
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -74,9 +115,6 @@ class MyRequestsPage extends StatelessWidget {
   }
 }
 
-/// ============================
-///  كرت الطلب
-/// ============================
 class _RequestCard extends StatelessWidget {
   final String title;
   final String status;
@@ -94,7 +132,7 @@ class _RequestCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF35677A), // أغمق من السابق
+            Color(0xFF35677A),
             Color(0xFF4C869F),
             Color(0xFF7199AA),
           ],
@@ -104,12 +142,12 @@ class _RequestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15), // ظل أكثر وضوحًا
+            color: Colors.black.withOpacity(0.15),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: Colors.white.withOpacity(0.05), // توهج خفيف
+            color: Colors.white.withOpacity(0.05),
             blurRadius: 6,
             offset: const Offset(-2, -2),
           ),
@@ -147,30 +185,15 @@ class _RequestCard extends StatelessWidget {
   Map<String, dynamic> _statusInfo(String status) {
     switch (status) {
       case 'accepted':
-        return {
-          'text': 'مقبول',
-          'color': Colors.greenAccent,
-          'icon': Icons.check_circle,
-        };
+        return {'text': 'مقبول', 'color': Colors.greenAccent, 'icon': Icons.check_circle};
       case 'rejected':
-        return {
-          'text': 'مرفوض',
-          'color': Colors.redAccent,
-          'icon': Icons.cancel,
-        };
+        return {'text': 'مرفوض', 'color': Colors.redAccent, 'icon': Icons.cancel};
       default:
-        return {
-          'text': 'قيد المراجعة',
-          'color': Colors.orangeAccent,
-          'icon': Icons.hourglass_bottom,
-        };
+        return {'text': 'قيد المراجعة', 'color': Colors.orangeAccent, 'icon': Icons.hourglass_bottom};
     }
   }
 }
 
-/// ============================
-///  شارة الحالة
-/// ============================
 class _StatusBadge extends StatelessWidget {
   final String text;
   final Color color;
@@ -197,11 +220,7 @@ class _StatusBadge extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             text,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
           ),
         ],
       ),

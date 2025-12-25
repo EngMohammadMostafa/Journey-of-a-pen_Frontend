@@ -202,7 +202,7 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Text('تم إرسال الطلب'),
             content: Text(
-              'تم إرسال طلب رفع الكتاب بنجاح\n'
+              'تم إرسال طلب رفع الكتاب بنجاح ستجد طلبك في قسم طلبات النشر\n'
                   'العنوان: $title\n'
                   'الحالة: قيد المراجعة',
             ),
