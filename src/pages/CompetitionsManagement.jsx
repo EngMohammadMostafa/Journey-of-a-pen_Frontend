@@ -44,6 +44,18 @@ const [filteredLikes, setFilteredLikes] = useState([]);
 const [likesSearchTerm, setLikesSearchTerm] = useState('');
 const [likesLoading, setLikesLoading] = useState(false);
 
+const [categories, setCategories] = useState([]);
+const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+const [addToPlatformModalOpen, setAddToPlatformModalOpen] = useState(false);
+const [selectedCompetitionBook, setSelectedCompetitionBook] = useState(null);
+const [platformFormData, setPlatformFormData] = useState({
+  category_id: '',
+  price: 0,
+  book_type: 'free',
+  description: ''
+});
+
 // أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
@@ -132,6 +144,16 @@ const [likesLoading, setLikesLoading] = useState(false);
           >
             Delete Book
           </button>
+   {/* ✅ زر إضافة للمنصة فقط للكتب المقبولة */}
+    {book.status === 'accepted' && (
+        <button
+          className="btn-primary"
+          onClick={() => openAddToPlatformModal(book)}
+        >
+          Add to Platform
+        </button>
+      )}
+
         </>
       )
     }
@@ -189,6 +211,7 @@ const fetchBookLikes = async (bookId) => {
     setLikesLoading(false);
   }
 };
+
 
 
 
@@ -340,7 +363,11 @@ const fetchBookLikes = async (bookId) => {
   const handleDownloadBook = async (competition_book_id, title) => {
     try {
       const blob = await competitionsService.downloadCompetitionBook(competition_book_id);
-  
+   // فحص نوع الملف
+   if (!blob || blob.type === 'application/json') {
+    alert('الكتاب غير متاح للتحميل أو حدث خطأ');
+    return;
+  }
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
@@ -354,6 +381,63 @@ const fetchBookLikes = async (bookId) => {
       alert('حدث خطأ أثناء تحميل الكتاب');
     }
   };
+  const openAddToPlatformModal = async (book) => {
+    setSelectedCompetitionBook(book);
+    setCategoriesLoading(true);
+  
+    try {
+      const categoriesData = await competitionsService.getAllCategories(); // ← بيانات جاهزة
+      setCategories(categoriesData);  // حفظ الأقسام
+      setAddToPlatformModalOpen(true); // فتح المودال بعد التحميل
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      alert('حدث خطأ في جلب الأقسام');
+    } finally {
+      setCategoriesLoading(false);
+    }
+  
+    setPlatformFormData({
+      category_id: '',
+      price: 0,
+      book_type: 'free',
+      description: ''
+    });
+  };
+  
+  
+  
+  const handleAddToPlatform = async () => {
+    try {
+      if (!selectedCompetitionBook) return;
+  
+      const token = localStorage.getItem("token");
+  
+      const response = await competitionsService.addCompetitionBookToPlatform(
+        selectedCompetitionBook.competition_book_id,
+        platformFormData,
+        token
+      );
+  
+      console.log("Added to platform:", response);
+  
+      // تحديث جدول المسابقة: إزالة الكتاب من قائمة الكتب
+      setCompetitionDetails(prev => ({
+        ...prev,
+        books: prev.books.filter(
+          book => book.competition_book_id !== selectedCompetitionBook.competition_book_id
+        )
+      }));
+  
+      setAddToPlatformModalOpen(false);
+      alert("تم إضافة الكتاب إلى المنصة بنجاح ✅");
+    } catch (error) {
+      console.error(error);
+      alert("حدث خطأ أثناء إضافة الكتاب");
+    }
+  };
+  
+  
+  
   
   useEffect(() => {
     if (showCompetitionsTable || showParticipantsTable) {
@@ -401,265 +485,345 @@ useEffect(() => {
 
 
 
-  return (
-
-    <div className="competitions-management">
 
 
-      <div className="page-header">
-  <h1>Competitions Management</h1>
+return (
+  <div className="competitions-management">
 
-  {/* زر إضافة مسابقة يظهر فقط في حالة عرض قسم المسابقات */}
-  {showCompetitionsTable && (
-    <button
-      className="btn-primary add-book-btn"
-      onClick={handleAddCompetition}
-    >
-      + Add New Competitions
-    </button>
-  )}
-</div>
-
-<div className="buttons-container">
-  {/* زر عرض جدول المسابقات */}
-  <button
-    className={`btn ${showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
-    onClick={() => {
-      setShowCompetitionsTable(true);      // عرض جدول المسابقات
-      setShowParticipantsTable(false);     // إخفاء جدول المشاركين إذا كان ظاهر
-    }}
-  >
-    Competitions Management
-  </button>
-
-  {/* زر عرض جدول المشاركين والكتب */}
-  <button
-    className={`btn ${showParticipantsTable ? 'btn-primary' : 'btn-outline'}`}
-    onClick={() => {
-      setShowCompetitionsTable(false);     // إخفاء جدول المسابقات
-      setShowParticipantsTable(true);      // عرض جدول المشاركين/الكتب
-      setSelectedCompetitionId(null);      // إعادة تعيين المسابقة المختارة
-      setCompetitionDetails(null);         // مسح البيانات السابقة
-    }}
-  >
-    Participant & Book Management
-  </button>
-</div>
-
-{showParticipantsTable && (
- <div className="participants-section">
-
- {/* شريط البحث والفلترة في بوكس أبيض */}
- <div className="users-filters">
-
-   {/* اختيار المسابقة */}
-   <div className="filter-section">
-     <select
-       value={selectedCompetitionId || ''}
-       onChange={(e) => {
-         const compId = e.target.value;
-         setSelectedCompetitionId(compId);
-         fetchCompetitionDetails(compId);
-       }}
-       className="filter-select"
-     >
-       <option value="" disabled>Select Competition</option>
-       {competitions.map(c => (
-         <option key={c.id} value={c.id}>{c.name}</option>
-       ))}
-     </select>
-   </div>
-
-   {/* اختيار الكتاب */}
-   {competitionDetails?.books?.length > 0 && (
-     <div className="filter-section">
-       <select
-         value={selectedBookId || ''}
-         onChange={(e) => {
-           const bookId = e.target.value;
-           setSelectedBookId(bookId);
-           fetchBookLikes(bookId);
-         }}
-         className="filter-select"
-       >
-         <option value="" disabled>-- Select Book --</option>
-         {competitionDetails.books.map(book => (
-           <option key={book.competition_book_id} value={book.competition_book_id}>
-             {book.title}
-           </option>
-         ))}
-       </select>
-     </div>
-   )}
-
-   {/* بحث المستخدمين الذين أعجبوا بالكتاب */}
-   {bookLikes && (
-     <div className="search-section">
-       <input
-         type="text"
-         placeholder="Search liked users..."
-         value={likesSearchTerm}
-         onChange={(e) => setLikesSearchTerm(e.target.value)}
-         className="search-input"
-       />
-       <div className="results-count">
-         Showing {filteredLikes.length} users
-       </div>
-     </div>
-   )}
-
- </div> {/* نهاية users-filters */}
-
- {/* تفاصيل اللايكات وقائمة المستخدمين */}
- {bookLikes && (
-   <div className="book-details-section">
-     <h3>Likes for: {bookLikes.title} (Total: {bookLikes.likes_count})</h3>
-
-     <ul>
-       {filteredLikes.map(user => (
-         <li key={user.id}>
-           {user.username} (Liked at: {new Date(user.pivot.created_at).toLocaleString()})
-         </li>
-       ))}
-     </ul>
-
-     {likesLoading && <p>Loading likes...</p>}
-   </div>
- )}
-
- {/* جدول المشاركين/الكتب */}
- {selectedCompetitionId && competitionDetails && (
-   <DataTable
-     columns={participantColumns}
-     data={competitionDetails.books}
-     loading={participantsLoading}
-   />
- )}
-
-</div>
-
-
-
-
-
-)}
+    <div className="page-header">
+      <h1>Competitions Management</h1>
 
       {showCompetitionsTable && (
-        <>
-          <div className="user-stats">
-  <div className="stat-card">
-    <h3>Total Number Of Competitions</h3>
-    <span className="stat-number">{competitionStats.total}</span>
-  </div>
-</div>
-
-
-{/* شريط البحث */}
-<div className="competitions-filters">
-  <div className="competition-search-section">
-    <input
-      type="text"
-      placeholder="Search For A Competition..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="competition-search-input"
-    />
-  </div>
-</div>
-
-
-
-          {/* جدول المسابقات */}
-          <DataTable
-            columns={columns}
-            data={filteredCompetitions}
-
-            loading={loading}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            actions={['edit', 'delete']}
-          />
-
-          {/* مودال إضافة/تعديل مسابقة */}
-          <Modal
-            isOpen={isModalOpen}
-            onClose={() => {
-              setIsModalOpen(false)
-              setEditingCompetition(null)
-            }}
-            title={modalTitle}
-          >
-            <div className="competition-form">
-              <div className="form-group">
-                <label> :Competition Name *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Statu:</label>
-                <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                >
-                    <option value="active">نشطة</option>
-                    <option value="inactive">غير نشطة</option>
-                    <option value="finished">منتهية</option>
-                </select>
-
-              </div>
-
-              <div className="form-group">
-                <label>Start Date:</label>
-                <input
-                  type="date"
-                  value={formData.startdate}
-                  onChange={(e) => setFormData({ ...formData, startdate: e.target.value })}
-                  
-                />
-              </div>
-
-              <div className="form-group">
-                <label>End Date :</label>
-                <input
-                  type="date"
-                  value={formData.enddate}
-                  onChange={(e) => setFormData({ ...formData, enddate: e.target.value })}                  
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Maximum Number Of Usres :</label>
-                <input
-                  type="number"
-                  value={formData.max_user}
-                    min="1"
-                  onChange={(e) =>
-                    setFormData({ ...formData, max_user: Number(e.target.value) })
-                  }
-                  
-                
-                />
-              </div>
-
-              <div className="form-actions">
-                <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
-                  Cancel
-                </button>
-                <button className="btn-primary" onClick={handleSave}>
-                  {editingCompetition ? 'حفظ التغييرات' : 'Add Competation'}
-                </button>
-              </div>
-            </div>
-          </Modal>
-        </>
+        <button
+          className="btn-primary add-book-btn"
+          onClick={handleAddCompetition}
+        >
+          + Add New Competitions
+        </button>
       )}
     </div>
-  )
+
+    <div className="buttons-container">
+      <button
+        className={`btn ${showCompetitionsTable ? 'btn-primary' : 'btn-outline'}`}
+        onClick={() => {
+          setShowCompetitionsTable(true)
+          setShowParticipantsTable(false)
+        }}
+      >
+        Competitions Management
+      </button>
+
+      <button
+        className={`btn ${showParticipantsTable ? 'btn-primary' : 'btn-outline'}`}
+        onClick={() => {
+          setShowCompetitionsTable(false)
+          setShowParticipantsTable(true)
+          setSelectedCompetitionId(null)
+          setCompetitionDetails(null)
+        }}
+      >
+        Participant & Book Management
+      </button>
+    </div>
+
+    {/* ================= PARTICIPANTS SECTION ================= */}
+    {showParticipantsTable && (
+      <div className="participants-section">
+
+        <div className="users-filters">
+          <div className="filter-section">
+            <select
+              value={selectedCompetitionId || ''}
+              onChange={(e) => {
+                const compId = e.target.value
+                setSelectedCompetitionId(compId)
+                fetchCompetitionDetails(compId)
+              }}
+              className="filter-select"
+            >
+              <option value="" disabled>Select Competition</option>
+              {competitions.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {competitionDetails?.books?.length > 0 && (
+            <div className="filter-section">
+              <select
+                value={selectedBookId || ''}
+                onChange={(e) => {
+                  const bookId = e.target.value
+                  setSelectedBookId(bookId)
+                  fetchBookLikes(bookId)
+                }}
+                className="filter-select"
+              >
+                <option value="" disabled>-- Select Book --</option>
+                {competitionDetails.books.map(book => (
+                  <option key={book.competition_book_id} value={book.competition_book_id}>
+                    {book.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {bookLikes && (
+            <div className="search-section">
+              <input
+                type="text"
+                placeholder="Search liked users..."
+                value={likesSearchTerm}
+                onChange={(e) => setLikesSearchTerm(e.target.value)}
+                className="search-input"
+              />
+              <div className="results-count">
+                Showing {filteredLikes.length} users
+              </div>
+            </div>
+          )}
+        </div>
+
+        {bookLikes && (
+          <div className="book-details-section">
+            <h3>Likes for: {bookLikes.title} (Total: {bookLikes.likes_count})</h3>
+            <ul>
+              {filteredLikes.map(user => (
+                <li key={user.id}>
+                  {user.username} (Liked at: {new Date(user.pivot.created_at).toLocaleString()})
+                </li>
+              ))}
+            </ul>
+            {likesLoading && <p>Loading likes...</p>}
+          </div>
+        )}
+
+        {selectedCompetitionId && competitionDetails && (
+          <DataTable
+            columns={participantColumns}
+            data={competitionDetails.books}
+            loading={participantsLoading}
+          />
+        )}
+      </div>
+    )}
+
+    {/* ================= COMPETITIONS TABLE ================= */}
+    {showCompetitionsTable && (
+      <>
+        <div className="user-stats">
+          <div className="stat-card">
+            <h3>Total Number Of Competitions</h3>
+            <span className="stat-number">{competitionStats.total}</span>
+          </div>
+        </div>
+
+        <div className="competitions-filters">
+          <div className="competition-search-section">
+            <input
+              type="text"
+              placeholder="Search For A Competition..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="competition-search-input"
+            />
+          </div>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={filteredCompetitions}
+          loading={loading}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          actions={['edit', 'delete']}
+        />
+
+        {/* MODAL ADD / EDIT COMPETITION */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setEditingCompetition(null)
+          }}
+          title={modalTitle}
+        >
+          <div className="competition-form">
+
+            <div className="form-group">
+              <label>Competition Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
+              >
+                <option value="active">نشطة</option>
+                <option value="inactive">غير نشطة</option>
+                <option value="finished">منتهية</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Start Date</label>
+              <input
+                type="date"
+                value={formData.startdate}
+                onChange={(e) =>
+                  setFormData({ ...formData, startdate: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label>End Date</label>
+              <input
+                type="date"
+                value={formData.enddate}
+                onChange={(e) =>
+                  setFormData({ ...formData, enddate: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Max Users</label>
+              <input
+                type="number"
+                min="1"
+                value={formData.max_user}
+                onChange={(e) =>
+                  setFormData({ ...formData, max_user: Number(e.target.value) })
+                }
+              />
+            </div>
+
+            <div className="form-actions">
+              <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="btn-primary" onClick={handleSave}>
+                {editingCompetition ? 'حفظ التغييرات' : 'Add Competition'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      </>
+    )}
+
+    {/* ================= ADD TO PLATFORM MODAL ================= */}
+    {addToPlatformModalOpen && (
+      <Modal
+        isOpen={addToPlatformModalOpen}
+        onClose={() => setAddToPlatformModalOpen(false)}
+        title="Add Competition Book to Platform"
+      >
+        <div className="platform-form">
+
+          <div className="form-group">
+            <label>Category</label>
+            <select
+  value={platformFormData.category_id}
+  onChange={(e) =>
+    setPlatformFormData({ ...platformFormData, category_id: e.target.value })
+  }
+  disabled={categoriesLoading}
+>
+  <option value="">-- Select Category --</option>
+  {categories.map(cat => (
+    <option key={cat.id} value={cat.id}>{cat.name}</option>
+  ))}
+</select>
+
+{categoriesLoading && <p>Loading categories...</p>}
+
+
+{categoriesLoading && <p>Loading categories...</p>}
+
+
+
+
+          </div>
+
+          <div className="form-group">
+            <label>Price</label>
+            <input
+              type="number"
+              min="0"
+              value={platformFormData.price}
+              onChange={(e) =>
+                setPlatformFormData({
+                  ...platformFormData,
+                  price: Number(e.target.value)
+                })
+              }
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Book Type</label>
+            <select
+              value={platformFormData.book_type}
+              onChange={(e) =>
+                setPlatformFormData({
+                  ...platformFormData,
+                  book_type: e.target.value
+                })
+              }
+            >
+              <option value="free">Free</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Description</label>
+            <textarea
+              value={platformFormData.description}
+              onChange={(e) =>
+                setPlatformFormData({
+                  ...platformFormData,
+                  description: e.target.value
+                })
+              }
+            />
+          </div>
+
+          <div className="form-actions">
+            <button
+              className="btn-secondary"
+              onClick={() => setAddToPlatformModalOpen(false)}
+            >
+              Cancel
+            </button>
+
+            <button
+              className="btn-primary"
+              onClick={handleAddToPlatform}
+            >
+              Add to Platform
+            </button>
+          </div>
+        </div>
+      </Modal>
+    )}
+
+  </div>
+)
+
 }
 
 export default CompetitionsManagement

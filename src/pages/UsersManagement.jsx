@@ -138,18 +138,12 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
   const fetchRequests = async () => {
     setRequestsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/admin/request-books', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
+      const data = await usersService.getAllRequests(); // ✅ استدعاء الدالة من service
       setRequests(data.requests || []);
-      setCategories(data.categories || []); // ← هنا
+      setCategories(data.categories || []);
     } catch (error) {
       console.error('Error fetching requests:', error);
       setRequestsError('حدث خطأ أثناء جلب طلبات الكتب');
-      setTimeout(() => setRequestsError(''), 5000);
     } finally {
       setRequestsLoading(false);
     }
@@ -464,8 +458,6 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
             title={editingUser ? 'Edit User Data' : 'Add New User'}
           >
             <div className="user-form">
-              {/* نفس الفورم بدون تغيير */}
-              {/* تركته كما هو لأنك طلبت عدم حذف أي شيء */}
             </div>
           </Modal>
         </>

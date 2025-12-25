@@ -126,6 +126,34 @@ getBookLikes: async (bookId, token) => {
   }
 },
 
+// إضافة كتاب من مسابقة إلى المنصة (Admin)
+addCompetitionBookToPlatform: async (competitionBookId, data, token) => {
+  try {
+    const response = await api.post(
+      `/admin/competition-books/${competitionBookId}/add-to-platform`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+},
+getAllCategories: async () => {
+  try {
+    const response = await api.get('/categories');
+    // Backend returns: { success: true, data: [...] }
+    return response.data.data || [];
+  } catch (error) {
+    throw error;
+  }
+},
+
+
 
 
 };
