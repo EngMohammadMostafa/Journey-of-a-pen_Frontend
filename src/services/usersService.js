@@ -43,8 +43,38 @@ export const usersService = {
     } catch (error) {
       throw error;
     }
+  },
+  // --- طلبات الكتب (عرض فقط) ---
+getAllRequests: async () => {
+  try {
+    const response = await api.get('/admin/request-books'); // ✅ جلب جميع طلبات الكتب مع التصنيفات
+    return response.data; // يحتوي على { requests: [...], categories: [...] }
+  } catch (error) {
+    throw error;
   }
+},
 
+// قبول طلب كتاب
+acceptRequest: async (requestId, category_id) => {
+  try {
+    const response = await api.post(`/admin/request-books/${requestId}/accept`, {
+      category_id
+    });
+    return response.data; // { message: "...", book: { ... } }
+  } catch (error) {
+    throw error;
+  }
+},
+
+// رفض طلب كتاب
+rejectRequest: async (requestId) => {
+  try {
+    const response = await api.post(`/admin/request-books/${requestId}/reject`);
+    return response.data; // { message: "تم رفض الطلب." }
+  } catch (error) {
+    throw error;
+  }
+},
 
   // TODO: إضافة مستخدم - سيتم إضافتها لاحقاً بعد الاتفاق على API
   // addUser: async (userData) => {
