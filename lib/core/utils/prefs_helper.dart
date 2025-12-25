@@ -7,6 +7,7 @@ class PrefsHelper {
   static const String _keyAuthToken = 'auth_token';
   static const String _keyUserId = 'user_id';
   static const String _keyDownloadedBooks = 'downloaded_books';
+  static const String _keyPurchasedBooks = 'purchased_books';
 
   /// 🔹 حفظ أن المستخدم اختار اهتماماته
   static Future<void> setHasChosenInterests(bool value) async {
@@ -57,6 +58,7 @@ class PrefsHelper {
     await prefs.remove(_keyUserId);
     await prefs.remove(_keyHasChosenInterests);
     await prefs.remove(_keyDownloadedBooks);
+    await prefs.remove(_keyPurchasedBooks);
   }
 
   // =====================================
@@ -73,6 +75,19 @@ class PrefsHelper {
   static Future<List<int>> getDownloadedBookIds() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_keyDownloadedBooks) ?? [];
+    return list.map(int.parse).toList();
+  }
+
+  /// حفظ قائمة IDs الكتب المشتراة
+  static Future<void> setPurchasedBookIds(List<int> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyPurchasedBooks, ids.map((e) => e.toString()).toList());
+  }
+
+  /// جلب قائمة IDs الكتب المشتراة
+  static Future<List<int>> getPurchasedBookIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_keyPurchasedBooks) ?? [];
     return list.map(int.parse).toList();
   }
 

@@ -14,36 +14,76 @@ class BookDetailsPage extends StatefulWidget {
 }
 
 class _BookDetailsPageState extends State<BookDetailsPage> {
+  bool _loadingAction = false;
+
   // =========================
-  // زر الشراء أو القراءة
+  // زر الشراء أو القراءة أو التحميل
   // =========================
   void _onActionPressed() async {
     final booksProvider = context.read<BooksProvider>();
     final book = widget.book;
 
-    // إذا الكتاب مدفوع ولم يتم شراؤه
-    if (book.isPaid && !book.isOwned) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => PaymentPage(book: book)),
-      );
-      return;
-    }
+    setState(() {
+      _loadingAction = true;
+    });
 
-    // تحميل الكتاب أو فتحه إذا كان مجاني أو مشتري مسبقاً
-    final downloadLink = await booksProvider.downloadBook(book);
+    try {
+      // إذا الكتاب مملوك بالفعل
+      if (book.isOwned) {
+        // تحميل الكتاب إذا لم يكن محمّل
+        if (!book.isDownloaded) {
+          final downloadLink = await booksProvider.downloadBook(book);
+          if (downloadLink != null) {
+            setState(() {}); // تحديث الزر بعد التحميل
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("تم تحميل الكتاب بنجاح!")),
+            );
+          }
+        }
 
-    if (downloadLink != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => BookReaderPage(book: book)),
-      );
-    } else {
+        // فتح الكتاب إذا تم تحميله
+        if (book.isDownloaded) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => BookReaderPage(book: book)),
+          );
+        }
+        return;
+      }
+
+      // إذا الكتاب مدفوع ولم يتم شراؤه
+      if (book.isPaid && !book.isOwned) {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => PaymentPage(book: book)),
+        );
+
+        // إذا تم الشراء بنجاح، تحديث حالة الكتاب مباشرة
+        if (result == true) {
+          setState(() {
+            book.isOwned = true;
+          });
+        }
+        return;
+      }
+
+      // إذا الكتاب مجاني ولم يتم تحميله بعد
+      final downloadLink = await booksProvider.downloadBook(book);
+      if (downloadLink != null) {
+        setState(() {}); // تحديث الزر بعد التحميل
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => BookReaderPage(book: book)),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("الرجاء تسجيل الدخول أو شراء الكتاب أولاً"),
-        ),
+        SnackBar(content: Text("حدث خطأ: $e")),
       );
+    } finally {
+      setState(() {
+        _loadingAction = false;
+      });
     }
   }
 
@@ -148,31 +188,43 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
 
                   const SizedBox(height: 30),
 
-                  // زر الشراء / القراءة
+                  // زر الشراء / القراءة / التحميل
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                      book.isPaid ? Colors.redAccent : const Color(0xFF1C597B),
+                      backgroundColor: book.isOwned
+                          ? Colors.green
+                          : (book.isPaid ? Colors.redAccent : const Color(0xFF1C597B)),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 45, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 5,
                     ),
-                    icon: Icon(
-                      book.isPaid ? Icons.shopping_cart : Icons.menu_book,
+                    icon: _loadingAction
+                        ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                        : Icon(
+                      book.isOwned
+                          ? (book.isDownloaded ? Icons.menu_book : Icons.download)
+                          : (book.isPaid ? Icons.shopping_cart : Icons.menu_book),
                       size: 24,
                     ),
                     label: Text(
-                      book.isPaid ? "Buy Now" : "Read Now",
+                      _loadingAction
+                          ? "Loading..."
+                          : book.isOwned
+                          ? (book.isDownloaded ? "Open Book" : "Download Book")
+                          : (book.isPaid ? "Buy Now" : "Read Now"),
                       style: const TextStyle(
                         fontFamily: 'Papyrus',
                         fontSize: 18,
                       ),
                     ),
-                    onPressed: _onActionPressed,
+                    onPressed: _loadingAction ? null : _onActionPressed,
                   ),
 
                   const SizedBox(height: 35),
