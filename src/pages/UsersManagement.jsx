@@ -82,11 +82,22 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
     { key: 'description', title: 'Description' },
     { key: 'price', title: 'Price' },
     { key: 'book_type', title: 'Book Type' },
-    { 
-      key: 'file_path', 
+    {
+      key: 'file_path',
       title: 'File',
-      render: (value) => value ? <a href={`http://localhost:8000/${value}`} target="_blank" rel="noopener noreferrer">Download</a> : 'No file'
+      render: (_, request) =>
+        request.file_path ? (
+          <button
+            className="btn-secondary"
+            onClick={() => handleDownloadRequest(request.request_id)}
+          >
+            Download
+          </button>
+        ) : (
+          'No file'
+        )
     },
+    
     //{ key: 'file_type', title: 'File Type' },
     //{ key: 'file_size', title: 'File Size', render: (value) => `${(value / 1024).toFixed(2)} KB` },
     { key: 'status', title: 'Status' },
@@ -302,7 +313,24 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
     }
   };
   
-
+  const handleDownloadRequest = async (requestId) => {
+    try {
+      const response = await usersService.downloadRequestFile(requestId);
+  
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+  
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `request_${requestId}.pdf`;
+      link.click();
+  
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert("فشل تحميل الملف");
+    }
+  };
+  
   const openAcceptModal = (requestId) => {
     setSelectedRequestId(requestId);  // نخزن ID الطلب
     setSelectedCategory('');           // نعيد تهيئة القسم المختار

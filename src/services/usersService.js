@@ -76,23 +76,16 @@ rejectRequest: async (requestId) => {
   }
 },
 
-  // TODO: إضافة مستخدم - سيتم إضافتها لاحقاً بعد الاتفاق على API
-  // addUser: async (userData) => {
-  //   try {
-  //     const response = await api.post('/api/admin/users', userData);
-  //     return response.data;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // },
 
-  // TODO: الحصول على مستخدم معين - سيتم إضافتها لاحقاً بعد الاتفاق على API
-  // getUserById: async (id) => {
-  //   try {
-  //     const response = await api.get(`/api/admin/users/${id}`);
-  //     return response.data;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+ // ✅ تحميل ملف الطلب (للأدمن)
+downloadRequestFile: async (requestId) => {
+  const response = await api.get(
+    `/admin/request-books/${requestId}/download`,
+    {
+      responseType: 'blob', // مهم جداً
+    }
+  );
+  return response;
+},
+
 };
