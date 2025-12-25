@@ -43,6 +43,9 @@ dependencies:
   open_file: ^3.2.1     # لم تعد ضرورية مع PDFView
   advance_pdf_viewer2: ^2.0.5
   file_picker: ^5.2.10
+  dependencies:
+  audioplayers: ^1.0.1
+
 
 
 
@@ -79,6 +82,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/books/
+    - assets/sounds/
 
 
 

@@ -40,15 +40,28 @@ class NotificationProvider extends ChangeNotifier {
     try {
       final list = await _repository.fetchNotifications();
 
-      /// 🔔 اكتشاف إشعار جديد
-      if (list.length > _lastNotificationsCount) {
+      /// 🧠 خريطة بالإشعارات القديمة
+      final Map<int, NotificationModel> oldMap = {
+        for (var n in _notifications) n.notificationId: n
+      };
+
+      /// 🔄 دمج الحالة القديمة مع الجديدة
+      _notifications = list.map((n) {
+        final old = oldMap[n.notificationId];
+        if (old != null) {
+          n.isNew = old.isNew; // نحافظ على حالته
+        } else {
+          n.isNew = true; // إشعار جديد فعليًا
+        }
+        return n;
+      }).toList();
+
+      /// 🔔 اكتشاف إشعار جديد (اختياري)
+      if (_notifications.length > _lastNotificationsCount) {
         debugPrint("🔔 New notification arrived");
-        // هنا يمكن لاحقًا إضافة Sound / SnackBar
       }
 
-      _lastNotificationsCount = list.length;
-
-      _notifications = list;
+      _lastNotificationsCount = _notifications.length;
 
     } catch (e) {
       _notifications = [];
@@ -59,6 +72,7 @@ class NotificationProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   // ==========================
   // تحديث يدوي
