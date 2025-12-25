@@ -18,16 +18,16 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   Set<String> readIds = {}; // IDs المقروءة
   final player = AudioPlayer();  // مشغل الصوت لمرة واحدة فقط
-  bool _autoRefreshStarted = false;
+  int _lastNotificationsCount = 0; // لتتبع عدد الإشعارات
 
   @override
   void initState() {
     super.initState();
     _loadReadIds();
 
-    // بدء التحديث التلقائي بعد تحميل الصفحة
+    // تحديث الإشعارات مرة واحدة عند فتح الصفحة
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startAutoRefresh();
+      _fetchNotificationsWithSound();
     });
   }
 
@@ -36,6 +36,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
     setState(() {
       readIds = prefs.getStringList('read_notifications')?.toSet() ?? {};
     });
+  }
+
+  /// جلب الإشعارات وتشغيل الصوت إذا وصل إشعار جديد
+  Future<void> _fetchNotificationsWithSound() async {
+    final provider = context.read<NotificationProvider>();
+    await provider.fetchNotifications();
+
+    if (provider.notifications.length > _lastNotificationsCount) {
+      // إشعار جديد وصل → تشغيل الصوت
+      _playNotificationSound();
+    }
+
+    _lastNotificationsCount = provider.notifications.length;
   }
 
   Future<void> _markAsRead(NotificationModel notification) async {
@@ -73,20 +86,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  /// 🔄 بدء التحديث التلقائي
-  void _startAutoRefresh() {
-    if (_autoRefreshStarted) return;
-    _autoRefreshStarted = true;
-
-    final provider = context.read<NotificationProvider>();
-
-    Future.doWhile(() async {
-      await provider.fetchNotifications();
-      await Future.delayed(const Duration(seconds: 5));
-      return true; // استمرار الحلقة
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final notificationProvider = context.watch<NotificationProvider>();
@@ -94,300 +93,301 @@ class _NotificationsPageState extends State<NotificationsPage> {
         notificationProvider.notifications;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1C597B),
-              Color(0xFF4C869F),
-              Color(0xFF7199AA),
-              Color(0xFFE3F2FD),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _fetchNotificationsWithSound();
+        },
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF1C597B),
+                Color(0xFF4C869F),
+                Color(0xFF7199AA),
+                Color(0xFFE3F2FD),
+              ],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                /// ===== Header + Badge =====
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "الإشعارات",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    if (notifications.any((n) => _isNew(n)))
-                      Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(20),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  /// ===== Header + Badge =====
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "الإشعارات",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        child: Text(
-                          notifications.where((n) => _isNew(n)).length
-                              .toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                      ),
+                      if (notifications.any((n) => _isNew(n)))
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            notifications.where((n) => _isNew(n)).length
+                                .toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                /// 🔄 Loading
-                if (notificationProvider.isLoading)
-                  const Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                  )
-
-                /// ❌ Error
-                else if (notificationProvider.errorMessage != null)
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        notificationProvider.errorMessage!,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  )
-
-                /// 📭 Empty
-                else if (notifications.isEmpty)
+                  /// 🔄 Loading
+                  if (notificationProvider.isLoading)
                     const Expanded(
                       child: Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    )
+
+                  /// ❌ Error
+                  else if (notificationProvider.errorMessage != null)
+                    Expanded(
+                      child: Center(
                         child: Text(
-                          "لا توجد إشعارات حالياً",
-                          style: TextStyle(color: Colors.white),
+                          notificationProvider.errorMessage!,
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     )
 
-                  /// ✅ Data
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: notifications.length,
-                        itemBuilder: (context, index) {
-                          final notification = notifications[index];
-                          final bool isNew = _isNew(notification);
-                          final formattedDate = DateFormat('yyyy/MM/dd')
-                              .format(notification.createdAt);
+                  /// 📭 Empty
+                  else if (notifications.isEmpty)
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            "لا توجد إشعارات حالياً",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      )
 
-                          return TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 500),
-                            tween: Tween(begin: 0, end: 1),
-                            curve: Curves.easeOut,
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.translate(
-                                  offset: Offset(0, (1 - value) * 20),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: GestureDetector(
-                              onTap: () async {
-                                // تعليم الإشعار كمقروء وتحديث الواجهة
-                                await _markAsRead(notification);
+                    /// ✅ Data
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: notifications.length,
+                          itemBuilder: (context, index) {
+                            final notification = notifications[index];
+                            final bool isNew = _isNew(notification);
+                            final formattedDate = DateFormat('yyyy/MM/dd')
+                                .format(notification.createdAt);
 
-                                // تشغيل الصوت
-                                _playNotificationSound();
+                            return TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 500),
+                              tween: Tween(begin: 0, end: 1),
+                              curve: Curves.easeOut,
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, (1 - value) * 20),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await _markAsRead(notification);
+                                  _playNotificationSound();
+                                  _showSnackBar(
+                                      "تم قراءة الإشعار: ${notification.title}");
 
-                                // عرض رسالة قصيرة
-                                _showSnackBar(
-                                    "تم قراءة الإشعار: ${notification.title}");
-
-                                // عرض حوار التفاصيل
-                                showGeneralDialog(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  barrierLabel: "Dialog",
-                                  transitionDuration:
-                                  const Duration(milliseconds: 350),
-                                  pageBuilder: (_, animation, __) {
-                                    return BackdropFilter(
-                                      filter: ImageFilter.blur(
-                                          sigmaX: 4, sigmaY: 4),
-                                      child: Center(
-                                        child: Dialog(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius.circular(20),
-                                          ),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(20),
-                                            decoration: BoxDecoration(
+                                  // عرض الحوار كما في السابق
+                                  showGeneralDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    barrierLabel: "Dialog",
+                                    transitionDuration:
+                                    const Duration(milliseconds: 350),
+                                    pageBuilder: (_, animation, __) {
+                                      return BackdropFilter(
+                                        filter:
+                                        ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                                        child: Center(
+                                          child: Dialog(
+                                            shape: RoundedRectangleBorder(
                                               borderRadius:
                                               BorderRadius.circular(20),
-                                              gradient: const LinearGradient(
-                                                colors: [
-                                                  Color(0xFF1C597B),
-                                                  Color(0xFF4C869F),
-                                                  Color(0xFF77A9C4),
+                                            ),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(20),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                BorderRadius.circular(20),
+                                                gradient: const LinearGradient(
+                                                  colors: [
+                                                    Color(0xFF1C597B),
+                                                    Color(0xFF4C869F),
+                                                    Color(0xFF77A9C4),
+                                                  ],
+                                                ),
+                                              ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.notifications,
+                                                    size: 50,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(height: 15),
+                                                  Text(
+                                                    notification.title,
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontSize: 22,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  Text(
+                                                    notification.content,
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      height: 1.5,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                  SizedBox(
+                                                    width: double.infinity,
+                                                    child: ElevatedButton(
+                                                      style:
+                                                      ElevatedButton.styleFrom(
+                                                        backgroundColor: Colors.white,
+                                                        foregroundColor:
+                                                        const Color(0xFF1C597B),
+                                                        elevation: 3,
+                                                        padding:
+                                                        const EdgeInsets.symmetric(
+                                                            vertical: 12),
+                                                        shape:
+                                                        RoundedRectangleBorder(
+                                                          borderRadius:
+                                                          BorderRadius.circular(12),
+                                                        ),
+                                                      ),
+                                                      onPressed: () =>
+                                                          Navigator.pop(context),
+                                                      child: const Text(
+                                                        "حسناً",
+                                                        style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Icon(
-                                                  Icons.notifications,
-                                                  size: 50,
-                                                  color: Colors.white,
-                                                ),
-                                                const SizedBox(height: 15),
-                                                Text(
-                                                  notification.title,
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                    fontSize: 22,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 10),
-                                                Text(
-                                                  notification.content,
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    height: 1.5,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 20),
-                                                SizedBox(
-                                                  width: double.infinity,
-                                                  child: ElevatedButton(
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: Colors.white,
-                                                      foregroundColor:
-                                                      const Color(0xFF1C597B),
-                                                      elevation: 3,
-                                                      padding:
-                                                      const EdgeInsets.symmetric(
-                                                          vertical: 12),
-                                                      shape:
-                                                      RoundedRectangleBorder(
-                                                        borderRadius:
-                                                        BorderRadius.circular(12),
-                                                      ),
-                                                    ),
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                    child: const Text(
-                                                      "حسناً",
-                                                      style: TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
                                           ),
                                         ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: isNew
+                                        ? Border.all(
+                                      color: Colors.green,
+                                      width: 1.5,
+                                    )
+                                        : null,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 4),
                                       ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: isNew
-                                      ? Border.all(
-                                    color: Colors.green,
-                                    width: 1.5,
-                                  )
-                                      : null,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: ListTile(
-                                  leading: const CircleAvatar(
-                                    backgroundColor: Color(0xFF1C597B),
-                                    child: Icon(Icons.notifications,
-                                        color: Colors.white),
-                                  ),
-                                  title: Text(
-                                    notification.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1C597B),
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    notification.content,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  trailing: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        formattedDate,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-                                      if (isNew)
-                                        Container(
-                                          margin:
-                                          const EdgeInsets.only(top: 4),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color:
-                                            Colors.green.withOpacity(0.15),
-                                            borderRadius:
-                                            BorderRadius.circular(12),
-                                          ),
-                                          child: const Text(
-                                            "جديد",
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.green,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
                                     ],
+                                  ),
+                                  child: ListTile(
+                                    leading: const CircleAvatar(
+                                      backgroundColor: Color(0xFF1C597B),
+                                      child: Icon(Icons.notifications,
+                                          color: Colors.white),
+                                    ),
+                                    title: Text(
+                                      notification.title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1C597B),
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      notification.content,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    trailing: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          formattedDate,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                        if (isNew)
+                                          Container(
+                                            margin:
+                                            const EdgeInsets.only(top: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green
+                                                  .withOpacity(0.15),
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                            ),
+                                            child: const Text(
+                                              "جديد",
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

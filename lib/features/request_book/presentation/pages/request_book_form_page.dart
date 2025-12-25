@@ -1,6 +1,13 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart' as path;
+
+import '../../../../core/api/api_service.dart';
+import '../../../../core/constants/api_endpoints.dart';
 
 class RequestBookFormPage extends StatefulWidget {
   const RequestBookFormPage({super.key});
@@ -13,11 +20,11 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
   final _formKey = GlobalKey<FormState>();
 
   String title = '';
-  String author = '';
   String description = '';
   String bookType = 'free';
   String price = '';
   File? file;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +39,6 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
         ),
         body: Stack(
           children: [
-            // الخلفية المتدرجة
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -47,7 +53,6 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
                 ),
               ),
             ),
-            // محتوى الصفحة
             SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Form(
@@ -58,10 +63,6 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
 
                     _buildCardField(
                       child: _buildInput('عنوان الكتاب', onSaved: (v) => title = v!),
-                    ),
-
-                    _buildCardField(
-                      child: _buildInput('اسم المؤلف', onSaved: (v) => author = v!),
                     ),
 
                     _buildCardField(
@@ -85,7 +86,6 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
                       ],
                     ),
 
-                    // حقل السعر مع Animation عند الاختيار
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       transitionBuilder: (child, anim) {
@@ -117,7 +117,9 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
                     _buildCardField(
                       child: _interactiveButton(
                         icon: Icons.attach_file,
-                        text: 'إرفاق ملف الكتاب (PDF فقط)',
+                        text: file != null
+                            ? "تم اختيار: ${path.basename(file!.path)}"
+                            : 'إرفاق ملف الكتاب (PDF فقط)',
                         onPressed: () async {
                           final result = await FilePicker.platform.pickFiles(
                             type: FileType.custom,
@@ -135,61 +137,14 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
                       ),
                     ),
 
-                    if (file != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: _buildCardField(
-                          child: Row(
-                            children: [
-                              const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  file!.path.split('/').last,
-                                  style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
                     const SizedBox(height: 30),
 
                     Center(
                       child: _interactiveButton(
-                        text: 'إرسال الطلب',
+                        text: isLoading ? 'جاري الإرسال...' : 'إرسال الطلب',
                         icon: Icons.send,
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            if (file == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('يرجى إرفاق ملف PDF')),
-                              );
-                              return;
-                            }
-                            _formKey.currentState!.save();
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                title: const Text('تم إرسال الطلب'),
-                                content: Text(
-                                  'تم إرسال طلب رفع الكتاب بنجاح\n'
-                                      'العنوان: $title\n'
-                                      'المؤلف: $author\n'
-                                      'الحالة: قيد المراجعة',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('حسناً'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
+                        onPressed: isLoading ? null : () async {
+                          await _submitForm();
                         },
                       ),
                     ),
@@ -203,7 +158,76 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
     );
   }
 
-  /// كارت بحواف دائرية، ظل، وإطار خفيف
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (file == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إرفاق ملف PDF')),
+      );
+      return;
+    }
+
+    _formKey.currentState!.save();
+    setState(() => isLoading = true);
+
+    try {
+      final formData = FormData.fromMap({
+        'title': title,
+        'description': description,
+        'book_type': bookType,
+        if (bookType == 'paid') 'price': price,
+        'file': await MultipartFile.fromFile(
+          file!.path,
+          filename: path.basename(file!.path),
+          contentType: MediaType('application', 'pdf'),
+        ),
+      });
+
+      final response = await ApiService().dio.post(
+        ApiEndpoints.requestBooks,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      setState(() => isLoading = false);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('تم إرسال الطلب'),
+            content: Text(
+              'تم إرسال طلب رفع الكتاب بنجاح\n'
+                  'العنوان: $title\n'
+                  'الحالة: قيد المراجعة',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('حسناً'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('حدث خطأ أثناء إرسال الطلب')),
+        );
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e')),
+      );
+    }
+  }
+
+
   Widget _buildCardField({required Widget child, Key? key}) {
     return GestureDetector(
       onTapDown: (_) => setState(() {}),
@@ -224,7 +248,7 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.4), // الإطار الخارجي
+            color: Colors.white.withOpacity(0.4),
             width: 1.5,
           ),
           boxShadow: [
@@ -275,7 +299,7 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
 
   Widget _interactiveButton({
     required String text,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     IconData? icon,
   }) {
     return InkWell(
