@@ -73,12 +73,19 @@ class NotificationProvider extends ChangeNotifier {
     }
   }
 
-
   // ==========================
-  // تحديث يدوي
+  // تحديث يدوي أو دوري
   // ==========================
   Future<void> refresh() async {
     await fetchNotifications();
+  }
+
+  /// 🔄 تحديث تلقائي (يمكن استدعاؤها من UI)
+  void startAutoRefresh({Duration interval = const Duration(seconds: 5)}) {
+    Future.delayed(interval, () async {
+      await fetchNotifications();
+      startAutoRefresh(interval: interval); // استدعاء متكرر
+    });
   }
 
   // ==========================

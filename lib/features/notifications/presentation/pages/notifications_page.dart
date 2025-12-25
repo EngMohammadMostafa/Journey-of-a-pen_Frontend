@@ -18,11 +18,17 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   Set<String> readIds = {}; // IDs المقروءة
   final player = AudioPlayer();  // مشغل الصوت لمرة واحدة فقط
+  bool _autoRefreshStarted = false;
 
   @override
   void initState() {
     super.initState();
     _loadReadIds();
+
+    // بدء التحديث التلقائي بعد تحميل الصفحة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startAutoRefresh();
+    });
   }
 
   Future<void> _loadReadIds() async {
@@ -37,6 +43,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
       readIds.add(notification.notificationId.toString());
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('read_notifications', readIds.toList());
+
+      // تعليم الإشعار كمقروء في البروفايدر
+      final provider = context.read<NotificationProvider>();
+      provider.markAsRead(notification);
+
       setState(() {}); // تحديث الواجهة فورًا لإلغاء "جديد"
     }
   }
@@ -60,6 +71,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  /// 🔄 بدء التحديث التلقائي
+  void _startAutoRefresh() {
+    if (_autoRefreshStarted) return;
+    _autoRefreshStarted = true;
+
+    final provider = context.read<NotificationProvider>();
+
+    Future.doWhile(() async {
+      await provider.fetchNotifications();
+      await Future.delayed(const Duration(seconds: 5));
+      return true; // استمرار الحلقة
+    });
   }
 
   @override

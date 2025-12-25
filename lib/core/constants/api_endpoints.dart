@@ -46,4 +46,8 @@ class ApiEndpoints {
 
   // ---------- NOTIFICATIONS ----------
   static const String notifications = "/notifications"; // GET جميع الإشعارات
+
+// ---------- REQUEST BOOKS ----------
+  static const String requestBooks = "/request-books"; // POST طلب كتاب جديد
+  static const String myRequests = "/request-books/my-requests"; // GET جميع طلبات المستخدم
 }

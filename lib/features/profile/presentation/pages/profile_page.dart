@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../books/presentation/pages/book_reader_page.dart';
+import '../../../request_book/presentation/pages/my_requests_page.dart';
+import '../../../request_book/presentation/pages/request_book_form_page.dart';
 import '../../provider/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_section.dart';
@@ -60,6 +62,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   actions: [
                     {'icon': 'assets/icons/star_filled.png', 'onTap': () => showPointsPopup(context, p.userPoints)},
                     {'icon': 'assets/icons/edit.png', 'onTap': () => _openEditProfileSheet(context)},
+                    {'icon': 'assets/icons/writing_a_book.png', 'onTap': () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const RequestBookFormPage()),
+                      );
+                    }},
+
                     {'icon': 'assets/icons/book_open.png', 'onTap': () => _showDownloadedBooks(context)},
                     {'icon': 'assets/icons/book.png', 'onTap': () => _showPurchasedBooks(context)},
                     {'icon': 'assets/icons/logout.png', 'onTap': () => provider.logout(context)},
@@ -83,6 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 // الأقسام الأخرى
                 _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () => _showDownloadedBooks(context)),
                 _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () => _showPurchasedBooks(context)),
+                _buildSectionTile('طلباتي', 'عرض طلبات النشر', () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MyRequestsPage()),);},),
 
                 const SizedBox(height: 30),
               ],

@@ -34,6 +34,8 @@ import 'features/books/data/books_service.dart';
 
 import 'features/home/repository/category_repository.dart';
 import 'features/home/data/category_service.dart';
+import 'features/request_book/provider/request_book_provider.dart';
+import 'features/request_book/repository/request_book_repository.dart';
 
 void main() {
   runApp(const MyApp());
@@ -90,13 +92,18 @@ class MyApp extends StatelessWidget {
         ),
 
         // Notification Provider
-        // Notification Provider
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(
             NotificationRepository(apiService),
           )..fetchNotifications(),
         ),
 
+        // Request Book Provider
+        ChangeNotifierProvider(
+          create: (_) => RequestBookProvider(
+            repository: RequestBookRepository(apiService),
+          ),
+        ),
 
       ],
       child: MaterialApp(
