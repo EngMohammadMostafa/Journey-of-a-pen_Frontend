@@ -159,11 +159,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-
-
   void _showPurchasedBooks(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
-    final purchasedBooks = provider.downloadedBooks; // أو أي قائمة كتب مدفوعة عندك
+    final purchasedBooks = provider.purchasedBooks;
 
     if (purchasedBooks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -177,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => PurchasedBooksSection(
-        books: purchasedBooks, //  تمرير List<BookModel مباشرة
+        books: purchasedBooks,
       ),
     );
   }

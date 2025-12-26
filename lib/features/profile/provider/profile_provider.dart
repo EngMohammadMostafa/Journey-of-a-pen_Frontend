@@ -9,16 +9,24 @@ import 'dart:io';
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _repository;
 
-  ProfileProvider({required ProfileRepository repository}) : _repository = repository;
+  ProfileProvider({required ProfileRepository repository})
+      : _repository = repository;
 
   UserModel? user;
   bool loading = false;
   String? error;
 
+  /// الكتب المحملة
   List<BookModel> downloadedBooks = [];
+
+  /// الكتب المدفوعة
+  List<BookModel> purchasedBooks = [];
+
   int userPoints = 0;
 
-  /// تحميل بيانات المستخدم من الباك اند
+  // =============================
+  // تحميل بيانات المستخدم
+  // =============================
   Future<void> loadUser() async {
     try {
       loading = true;
@@ -40,13 +48,15 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// تحديث بيانات المستخدم
+  // =============================
+  // تحديث بيانات المستخدم
+  // =============================
   Future<String?> updateUser(Map<String, dynamic> body) async {
     if (user == null) return "المستخدم غير موجود";
 
     if ((body['username'] as String?)?.trim().isEmpty ?? true ||
-        (body['age'] == null) ||
-        (body['gender'] == null)) {
+        body['age'] == null ||
+        body['gender'] == null) {
       return "يرجى ملء جميع الحقول المطلوبة";
     }
 
@@ -74,18 +84,20 @@ class ProfileProvider extends ChangeNotifier {
       loading = false;
       error = e.toString();
       notifyListeners();
-      if (kDebugMode) print("Error updating user: $e");
-      return "فشل تحديث البيانات، حاول مرة أخرى";
+      return "فشل تحديث البيانات";
     }
   }
 
-  /// تحميل نقاط المستخدم من الباك
+  // =============================
+  // تحميل النقاط من الباك
+  // =============================
   Future<void> loadUserPoints() async {
     try {
       loading = true;
       notifyListeners();
 
       userPoints = await _repository.getUserTotalPoints();
+
       loading = false;
       notifyListeners();
     } catch (e) {
@@ -95,7 +107,9 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  ///  تحديث النقاط بطريقة آمنة
+  // =============================
+  // تحديث النقاط (مستخدم في quiz_page)
+  // =============================
   void updateUserPoints(int newPoints) {
     userPoints = newPoints;
     if (user != null) {
@@ -104,16 +118,35 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// إضافة كتاب محليًا
+  // =============================
+  // إضافة كتاب محمّل (مستخدم في BookReaderPage)
+  // =============================
   void addDownloadedBook(BookModel book) {
     if (!downloadedBooks.any((b) => b.id == book.id)) {
+      book.isDownloaded = true;
       downloadedBooks.add(book);
-      PrefsHelper.setDownloadedBookIds(downloadedBooks.map((b) => b.id).toList());
-      notifyListeners();
     }
+
+    if (book.isPaid && book.isOwned) {
+      if (!purchasedBooks.any((b) => b.id == book.id)) {
+        purchasedBooks.add(book);
+      }
+    }
+
+    PrefsHelper.setDownloadedBookIds(
+      downloadedBooks.map((b) => b.id).toList(),
+    );
+
+    PrefsHelper.setPurchasedBookIds(
+      purchasedBooks.map((b) => b.id).toList(),
+    );
+
+    notifyListeners();
   }
 
-  /// تحميل قائمة الكتب من الباك
+  // =============================
+  // تحميل الكتب من الباك (مرة واحدة)
+  // =============================
   Future<void> loadDownloadedBooks() async {
     if (user == null) return;
 
@@ -122,8 +155,18 @@ class ProfileProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      downloadedBooks = await _repository.getUserBooks();
-      await PrefsHelper.setDownloadedBookIds(downloadedBooks.map((b) => b.id).toList());
+      final allBooks = await _repository.getUserBooks();
+
+      downloadedBooks = allBooks.where((b) => b.isDownloaded).toList();
+      purchasedBooks = allBooks.where((b) => b.isPaid && b.isOwned).toList();
+
+      await PrefsHelper.setDownloadedBookIds(
+        downloadedBooks.map((b) => b.id).toList(),
+      );
+
+      await PrefsHelper.setPurchasedBookIds(
+        purchasedBooks.map((b) => b.id).toList(),
+      );
 
       loading = false;
       notifyListeners();
@@ -134,7 +177,9 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// تنزيل محتوى كتاب وحفظه محليًا
+  // =============================
+  // تنزيل كتاب
+  // =============================
   Future<void> downloadBook(BookModel book) async {
     try {
       loading = true;
@@ -144,6 +189,7 @@ class ProfileProvider extends ChangeNotifier {
       await PrefsHelper.saveBookContent(book.id, bytes as List<int>);
 
       addDownloadedBook(book);
+
       loading = false;
       notifyListeners();
     } catch (e) {
@@ -153,19 +199,16 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// فتح الكتاب محليًا
+  // =============================
+  // فتح كتاب محلي
+  // =============================
   Future<File?> openBook(int bookId) async {
     return PrefsHelper.getBookFile(bookId);
   }
 
-  /// تحميل الكتب من النسخة المحلية فقط
-  Future<void> loadBooksFromLocal() async {
-    final bookIds = await PrefsHelper.getDownloadedBookIds();
-    downloadedBooks = await _repository.getBooksByIds(bookIds);
-    notifyListeners();
-  }
-
-  /// تسجيل الخروج
+  // =============================
+  // تسجيل الخروج
+  // =============================
   Future<void> logout(BuildContext context) async {
     try {
       loading = true;
@@ -177,17 +220,8 @@ class ProfileProvider extends ChangeNotifier {
       loading = false;
       notifyListeners();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم تسجيل الخروج بنجاح'),
-          backgroundColor: Colors.grey,
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      await Future.delayed(const Duration(milliseconds: 400));
-      Navigator.of(context).pushNamedAndRemoveUntil('/auth_choice', (route) => false);
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/auth_choice', (route) => false);
     } catch (e) {
       loading = false;
       error = e.toString();

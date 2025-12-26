@@ -16,9 +16,6 @@ class _PaymentPageState extends State<PaymentPage> {
   bool isLoading = false;
   String? errorMessage;
 
-  // ===========================
-  // معالجة الدفع وفتح الكتاب
-  // ===========================
   void _processPayment() async {
     setState(() {
       isLoading = true;
@@ -29,17 +26,14 @@ class _PaymentPageState extends State<PaymentPage> {
     final book = widget.book;
 
     try {
-      // محاولة شراء الكتاب إذا كان مدفوعًا ولم يشترِ بعد
       if (book.isPaid && !book.isOwned) {
         bool purchased = await booksProvider.purchaseBook(book);
         if (!purchased) throw Exception("فشل شراء الكتاب");
       }
 
-      // تحميل الكتاب أو الحصول على رابط التحميل
       final downloadLink = await booksProvider.downloadBook(book);
       if (downloadLink == null) throw Exception("فشل تحميل الكتاب");
 
-      // بعد الدفع والتحقق/تحميل الكتاب، افتح الكتاب
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -59,71 +53,199 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget build(BuildContext context) {
     final book = widget.book;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("إتمام عملية الدفع"),
-        backgroundColor: const Color(0xFF1C597B),
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "الكتاب: ${book.title}",
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "السعر: \$${book.price.toStringAsFixed(2)}",
-                  style: const TextStyle(fontSize: 16, color: Colors.red),
-                ),
-                const SizedBox(height: 30),
-                Center(
-                  child: ElevatedButton.icon(
-                    onPressed: isLoading ? null : _processPayment,
-                    icon: const Icon(Icons.payment),
-                    label: const Text("دفع وفتح الكتاب"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-                if (errorMessage != null) ...[
-                  const SizedBox(height: 20),
-                  Text(
-                    errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ]
-              ],
-            ),
-          ),
-          if (isLoading)
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: const Text("إتمام عملية الدفع"),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Stack(
+          children: [
+            // ===== خلفية التدرج =====
             Container(
-              color: Colors.black.withOpacity(0.5),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
-                    Text(
-                      "جارٍ معالجة الدفع وتحميل الكتاب...",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF1C597B),
+                    Color(0xFF4C869F),
+                    Color(0xFF7199AA),
+                    Color(0xFFE3F2FD),
                   ],
                 ),
               ),
             ),
-        ],
+
+            // ===== المحتوى =====
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ===== بطاقة الكتاب (Glass Effect) =====
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    book.title,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1C597B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "المؤلف: ${book.author}",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: book.isPaid
+                                          ? Colors.redAccent.withOpacity(0.1)
+                                          : Colors.green.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      book.isPaid
+                                          ? "السعر: \$${book.price.toStringAsFixed(2)}"
+                                          : "كتاب مجاني",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: book.isPaid
+                                            ? Colors.redAccent
+                                            : Colors.green,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            if (book.imageUrl != null)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: Image.network(
+                                  book.imageUrl!,
+                                  width: 85,
+                                  height: 125,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 50),
+
+                    // ===== زر الدفع بتدرج =====
+                    Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF1C597B),
+                            Color(0xFF4C869F),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _processPayment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          "دفع وفتح الكتاب",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // ===== رسالة الخطأ =====
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        errorMessage!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            // ===== شاشة التحميل =====
+            if (isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(color: Colors.white),
+                      SizedBox(height: 16),
+                      Text(
+                        "جارٍ معالجة الدفع وتحميل الكتاب...",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
