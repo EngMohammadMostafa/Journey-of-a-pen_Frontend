@@ -63,7 +63,7 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
                 controller: scrollController,
                 itemCount: widget.books.length,
                 itemBuilder: (context, index) {
-                  final book = widget.books[index]; // تعريف book هنا داخل itemBuilder
+                  final book = widget.books[index];
 
                   return Card(
                     color: Colors.white.withOpacity(0.15),
@@ -83,7 +83,7 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
                       ),
                       onTap: () {
                         if (widget.onBookTap != null) {
-                          widget.onBookTap!(book); // عند النقر على الكتاب
+                          widget.onBookTap!(book);
                         }
                       },
                       trailing: quizCompleted[index] == true
@@ -91,7 +91,7 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
                           : ElevatedButton(
                         onPressed: () {
                           if (quizCompleted[index] == true) return;
-                          _openQuiz(context, index); // index موجود داخل itemBuilder
+                          _openQuiz(context, index);
                         },
                         child: const Text('Quiz'),
                       ),
@@ -114,7 +114,7 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
       context,
       MaterialPageRoute(
         builder: (_) => QuizPage(
-          bookId: widget.books[bookIndex].id, // ← نمرّر معرف الكتاب هنا
+          bookId: widget.books[bookIndex].id,
           onCompleted: () {
             setState(() => quizCompleted[bookIndex] = true);
           },

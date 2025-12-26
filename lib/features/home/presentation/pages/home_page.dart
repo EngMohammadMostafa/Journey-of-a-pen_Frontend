@@ -224,19 +224,21 @@ class _HomeContentState extends State<HomeContent> {
   List<BookModel> getFilteredBooks() {
     List<BookModel> list = _books;
 
-    if (selectedCategory != null) {
-      list = list
-          .where((book) => book.categoryName == selectedCategory!.name)
-          .toList();
-    }
-
+    // 🔹 إذا كان هناك بحث → تجاهل القسم وابحث في كل الكتب
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
-      list = list.where((book) {
+      return list.where((book) {
         return book.title.toLowerCase().contains(query) ||
             book.author.toLowerCase().contains(query) ||
             (book.description?.toLowerCase().contains(query) ?? false);
       }).toList();
+    }
+
+    // 🔹 إذا لا يوجد بحث → فلترة حسب القسم فقط
+    if (selectedCategory != null) {
+      list = list
+          .where((book) => book.categoryName == selectedCategory!.name)
+          .toList();
     }
 
     return list;
