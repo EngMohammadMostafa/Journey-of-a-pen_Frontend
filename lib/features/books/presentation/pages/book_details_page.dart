@@ -4,6 +4,8 @@ import '../../data/models/book_model.dart';
 import '../../provider/books_provider.dart';
 import 'payment_page.dart';
 import 'book_reader_page.dart';
+import '../../../../core/utils/prefs_helper.dart';
+
 
 class BookDetailsPage extends StatefulWidget {
   final BookModel book;
@@ -15,6 +17,11 @@ class BookDetailsPage extends StatefulWidget {
 
 class _BookDetailsPageState extends State<BookDetailsPage> {
   bool _loadingAction = false;
+  @override
+  void initState() {
+    super.initState();
+    _syncLocalBookState();
+  }
 
   // =========================
   // زر الشراء أو القراءة أو التحميل
@@ -85,6 +92,23 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         _loadingAction = false;
       });
     }
+  }
+
+  Future<void> _syncLocalBookState() async {
+    final purchasedIds = await PrefsHelper.getPurchasedBookIds();
+    final downloadedIds = await PrefsHelper.getDownloadedBookIds();
+
+    if (!mounted) return;
+
+    setState(() {
+      if (purchasedIds.contains(widget.book.id)) {
+        widget.book.isOwned = true;
+      }
+
+      if (downloadedIds.contains(widget.book.id)) {
+        widget.book.isDownloaded = true;
+      }
+    });
   }
 
   @override

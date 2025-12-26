@@ -12,6 +12,7 @@ class ShoppingCartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final booksProvider = context.watch<BooksProvider>();
+    final purchases = booksProvider.purchasedBooks;
     final List<PurchaseModel> userPurchases = booksProvider.purchasedBooks;
 
     return Scaffold(

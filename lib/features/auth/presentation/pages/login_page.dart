@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/utils/validators.dart';
 import 'package:book_worm_haven/core/utils/prefs_helper.dart';
+import '../../../books/provider/books_provider.dart';
 import '../../repository/auth_repository.dart';
 
 class LoginPage extends StatefulWidget {
@@ -39,6 +40,14 @@ class _LoginPageState extends State<LoginPage> {
 
     if (success) {
       if (!mounted) return;
+
+      // 🔹⬇⬇⬇ التعديل المهم هنا ⬇⬇⬇
+      final booksProvider =
+      Provider.of<BooksProvider>(context, listen: false);
+
+      await booksProvider.initializeUserData();
+      // 🔹⬆⬆⬆ نهاية التعديل ⬆⬆⬆
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login successful!')),
       );
@@ -51,17 +60,12 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         Navigator.pushReplacementNamed(context, '/choose-interests');
       }
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Try again.')),
-      );
     }
   }
 
 
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 

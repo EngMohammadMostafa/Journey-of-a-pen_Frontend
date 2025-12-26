@@ -9,6 +9,7 @@ import '../../../../core/api/api_service.dart';
 import '../../../books/data/books_service.dart';
 import '../../../books/data/models/book_model.dart';
 import '../../../books/presentation/pages/book_details_page.dart';
+import '../../../books/provider/books_provider.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../data/category_service.dart';
 import '../../data/models/category_model.dart';
@@ -111,9 +112,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
-        onItemTapped: (index) {
+        onItemTapped: (index) async {
+          // إذا كانت أيقونة سلة المشتريات
+          if (index == 1) {
+            final booksProvider = context.read<BooksProvider>();
+
+            // 🔹 جلب جميع المشتريات من الباك
+            await booksProvider.initializeUserData();
+          }
+
           setState(() => _selectedIndex = index);
         },
+
       ),
     );
   }

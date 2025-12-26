@@ -68,7 +68,10 @@ class PrefsHelper {
   /// حفظ قائمة IDs الكتب المحملة
   static Future<void> setDownloadedBookIds(List<int> ids) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(_keyDownloadedBooks, ids.map((e) => e.toString()).toList());
+    await prefs.setStringList(
+      _keyDownloadedBooks,
+      ids.map((e) => e.toString()).toList(),
+    );
   }
 
   /// جلب قائمة IDs الكتب المحملة
@@ -81,7 +84,10 @@ class PrefsHelper {
   /// حفظ قائمة IDs الكتب المشتراة
   static Future<void> setPurchasedBookIds(List<int> ids) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_keyPurchasedBooks, ids.map((e) => e.toString()).toList());
+    await prefs.setStringList(
+      _keyPurchasedBooks,
+      ids.map((e) => e.toString()).toList(),
+    );
   }
 
   /// جلب قائمة IDs الكتب المشتراة
@@ -90,6 +96,48 @@ class PrefsHelper {
     final list = prefs.getStringList(_keyPurchasedBooks) ?? [];
     return list.map(int.parse).toList();
   }
+
+  // =====================================
+  // ✅ إضافات آمنة (بدون كسر أي شيء)
+  // =====================================
+
+  /// 🔐 هل الكتاب مشتَرى؟
+  static Future<bool> isBookPurchased(int bookId) async {
+    final ids = await getPurchasedBookIds();
+    return ids.contains(bookId);
+  }
+
+  /// 📥 هل الكتاب محمَّل؟
+  static Future<bool> isBookDownloaded(int bookId) async {
+    final ids = await getDownloadedBookIds();
+    return ids.contains(bookId);
+  }
+
+  /// ➕ إضافة كتاب مشتَرى (بدون تكرار)
+  static Future<void> addPurchasedBook(int bookId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_keyPurchasedBooks) ?? [];
+
+    if (!list.contains(bookId.toString())) {
+      list.add(bookId.toString());
+      await prefs.setStringList(_keyPurchasedBooks, list);
+    }
+  }
+
+  /// ➕ إضافة كتاب محمَّل (بدون تكرار)
+  static Future<void> addDownloadedBook(int bookId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_keyDownloadedBooks) ?? [];
+
+    if (!list.contains(bookId.toString())) {
+      list.add(bookId.toString());
+      await prefs.setStringList(_keyDownloadedBooks, list);
+    }
+  }
+
+  // =====================================
+  // 📁 ملفات الكتب
+  // =====================================
 
   /// مسار تخزين ملفات الكتب
   static Future<String> getBooksDirectory() async {
@@ -104,7 +152,7 @@ class PrefsHelper {
   /// حفظ محتوى الكتاب محليًا
   static Future<File> saveBookContent(int bookId, List<int> bytes) async {
     final path = await getBooksDirectory();
-    final file = File('$path/book_$bookId.pdf'); // عدل الامتداد حسب نوع الملف
+    final file = File('$path/book_$bookId.pdf');
     return file.writeAsBytes(bytes);
   }
 

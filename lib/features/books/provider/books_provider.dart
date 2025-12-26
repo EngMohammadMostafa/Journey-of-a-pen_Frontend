@@ -170,6 +170,47 @@ class BooksProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  // =========================
+// جلب جميع المشتريات من الباك (لسلة المشتريات)
+// =========================
+  Future<void> loadPurchasedBooksFromServer() async {
+    try {
+      loading = true;
+      error = null;
+      notifyListeners();
+
+      final serverPurchases =
+      (await _repository.getPurchasedBooks()).cast<PurchaseModel>();
+
+      purchasedBooks = serverPurchases;
+
+      // تحديث الملكية في الكتب
+      for (var purchase in purchasedBooks) {
+        if (purchase.book != null) {
+          final bookIndex =
+          books.indexWhere((b) => b.id == purchase.book!.id);
+          if (bookIndex != -1) {
+            books[bookIndex].isOwned = true;
+          }
+        }
+      }
+
+      // حفظ IDs محليًا
+      final purchasedIds = purchasedBooks
+          .where((p) => p.book != null)
+          .map((p) => p.book!.id)
+          .toList();
+
+      await PrefsHelper.setPurchasedBookIds(purchasedIds);
+
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
 
   // =========================
   // باقي الدوال كما هي

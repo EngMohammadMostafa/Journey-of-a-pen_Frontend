@@ -68,8 +68,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         MaterialPageRoute(builder: (_) => const RequestBookFormPage()),
                       );
                     }},
-
-                    {'icon': 'assets/icons/book_open.png', 'onTap': () => _showDownloadedBooks(context)},
                     {'icon': 'assets/icons/book.png', 'onTap': () => _showPurchasedBooks(context)},
                     {'icon': 'assets/icons/logout.png', 'onTap': () => provider.logout(context)},
                   ],
@@ -91,7 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 // الأقسام الأخرى
                 _buildSectionTile('الكتب المحملة', 'عرض الكتب التي حملتها', () => _showDownloadedBooks(context)),
-                _buildSectionTile('الكتب المدفوعة', 'عرض الكتب المدفوعة', () => _showPurchasedBooks(context)),
                 _buildSectionTile('طلباتي', 'عرض طلبات النشر', () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MyRequestsPage()),);},),
 
                 const SizedBox(height: 30),
@@ -159,9 +156,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+
+
   void _showPurchasedBooks(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
-    final purchasedBooks = provider.purchasedBooks;
+    final purchasedBooks = provider.downloadedBooks; // أو أي قائمة كتب مدفوعة عندك
 
     if (purchasedBooks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => PurchasedBooksSection(
-        books: purchasedBooks,
+        books: purchasedBooks, //  تمرير List<BookModel مباشرة
       ),
     );
   }
