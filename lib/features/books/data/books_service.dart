@@ -152,4 +152,25 @@ class BooksService {
       rethrow;
     }
   }
+  // ==========================
+// جلب جميع الكتب التي اشتراها المستخدم
+// ==========================
+  Future<List<PurchaseModel>> getPurchasedBooks() async {
+    final response = await _api.get('/me/purchased-books');
+
+    if (response.statusCode == 200 && response.data['success'] == true) {
+      final booksList = response.data['books'] as List<dynamic>;
+
+      return booksList
+          .map((json) => PurchaseModel(
+        book: BookModel.fromJson(json),
+        message: "تمت إضافته من السيرفر",
+        purchasedAt: DateTime.now(), // إذا أردت استخدام created_at من API ضع: DateTime.parse(json['created_at'])
+      ))
+          .toList();
+    } else {
+      throw Exception('Failed to fetch purchased books');
+    }
+  }
+
 }

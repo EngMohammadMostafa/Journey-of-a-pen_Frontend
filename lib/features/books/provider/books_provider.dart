@@ -7,8 +7,7 @@ import '../repository/books_repository.dart';
 class BooksProvider extends ChangeNotifier {
   final BooksRepository _repository;
 
-  BooksProvider({required BooksRepository repository})
-      : _repository = repository;
+  BooksProvider({required BooksRepository repository}) : _repository = repository;
 
   bool loading = false;
   String? error;
@@ -27,19 +26,12 @@ class BooksProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. جلب جميع الكتب
       books = await _repository.getAllBooks();
-
-      // 1.5 تحميل المشتريات المحفوظة محليًا
       await loadPurchasesFromLocal();
-
-      // 2. تحميل الكتب المحملة محليًا
       await _loadDownloadedBooksLocally();
 
-      // 3. جلب المشتريات من الباك
-      final serverPurchases = (await _repository.getPurchasedBooks()).cast<PurchaseModel>();
+      final List<PurchaseModel> serverPurchases = await _repository.getPurchasedBooks();
 
-      // دمج المشتريات الجديدة من السيرفر مع المشتريات المحفوظة محليًا
       for (var purchase in serverPurchases) {
         if (purchase.book != null &&
             !purchasedBooks.any((p) => p.book?.id == purchase.book!.id)) {
@@ -47,14 +39,9 @@ class BooksProvider extends ChangeNotifier {
         }
       }
 
-      // 4. تحديث الملكية حسب المشتريات
       await _updateBooksOwnership();
 
-      // 5. حفظ IDs المشتريات محليًا
-      final purchasedIds = purchasedBooks
-          .where((p) => p.book != null)
-          .map((p) => p.book!.id)
-          .toList();
+      final purchasedIds = purchasedBooks.map((p) => p.book!.id).toList();
       await PrefsHelper.setPurchasedBookIds(purchasedIds);
 
     } catch (e) {
@@ -65,20 +52,15 @@ class BooksProvider extends ChangeNotifier {
     }
   }
 
-  // =========================
-  // تحميل المشتريات المحفوظة محليًا
-  // =========================
   Future<void> loadPurchasesFromLocal() async {
     final purchasedIds = await PrefsHelper.getPurchasedBookIds();
 
-    // تحديث حالة الملكية في الكتب
     for (var book in books) {
       if (purchasedIds.contains(book.id)) {
         book.isOwned = true;
       }
     }
 
-    // إنشاء قائمة purchasedBooks مؤقتًا بدون بيانات الباك
     purchasedBooks = books
         .where((b) => purchasedIds.contains(b.id))
         .map((b) => PurchaseModel(
@@ -91,9 +73,6 @@ class BooksProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // =========================
-  // تحميل الكتب المحملة محليًا عند فتح التطبيق
-  // =========================
   Future<void> _loadDownloadedBooksLocally() async {
     final ids = await PrefsHelper.getDownloadedBookIds();
     for (var book in books) {
@@ -101,7 +80,6 @@ class BooksProvider extends ChangeNotifier {
         book.isOwned = true;
         book.isDownloaded = true;
 
-        // قراءة الملف المحلي
         final file = await PrefsHelper.getBookFile(book.id);
         if (file != null) {
           book.downloadUrl = file.path;
@@ -110,16 +88,8 @@ class BooksProvider extends ChangeNotifier {
     }
   }
 
-  // =========================
-  // تحديث حالة الملكية حسب المشتريات
-  // =========================
   Future<void> _updateBooksOwnership() async {
-    Set<int> purchasedIds = purchasedBooks
-        .where((p) => p.book != null)
-        .map((p) => p.book!.id)
-        .toSet();
-
-    // إضافة IDs المشتريات المحفوظة محليًا
+    Set<int> purchasedIds = purchasedBooks.map((p) => p.book!.id).toSet();
     final localPurchasedIds = await PrefsHelper.getPurchasedBookIds();
     purchasedIds.addAll(localPurchasedIds);
 
@@ -131,9 +101,6 @@ class BooksProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // =========================
-  // تحميل كتاب
-  // =========================
   Future<String?> downloadBook(BookModel book) async {
     try {
       loading = true;
@@ -147,12 +114,10 @@ class BooksProvider extends ChangeNotifier {
         book.isOwned = true;
         book.isDownloaded = true;
 
-        // تحديث قائمة الكتب المحملة محليًا
         final downloadedIds = await PrefsHelper.getDownloadedBookIds();
         if (!downloadedIds.contains(book.id)) downloadedIds.add(book.id);
         await PrefsHelper.setDownloadedBookIds(downloadedIds);
 
-        // تحديث قائمة المشتريات محليًا
         final purchasedIds = await PrefsHelper.getPurchasedBookIds();
         if (!purchasedIds.contains(book.id)) purchasedIds.add(book.id);
         await PrefsHelper.setPurchasedBookIds(purchasedIds);
@@ -170,37 +135,24 @@ class BooksProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  // =========================
-// جلب جميع المشتريات من الباك (لسلة المشتريات)
-// =========================
+
   Future<void> loadPurchasedBooksFromServer() async {
     try {
       loading = true;
       error = null;
       notifyListeners();
 
-      final serverPurchases =
-      (await _repository.getPurchasedBooks()).cast<PurchaseModel>();
-
+      final List<PurchaseModel> serverPurchases = await _repository.getPurchasedBooks();
       purchasedBooks = serverPurchases;
 
-      // تحديث الملكية في الكتب
       for (var purchase in purchasedBooks) {
         if (purchase.book != null) {
-          final bookIndex =
-          books.indexWhere((b) => b.id == purchase.book!.id);
-          if (bookIndex != -1) {
-            books[bookIndex].isOwned = true;
-          }
+          final index = books.indexWhere((b) => b.id == purchase.book!.id);
+          if (index != -1) books[index].isOwned = true;
         }
       }
 
-      // حفظ IDs محليًا
-      final purchasedIds = purchasedBooks
-          .where((p) => p.book != null)
-          .map((p) => p.book!.id)
-          .toList();
-
+      final purchasedIds = purchasedBooks.map((p) => p.book!.id).toList();
       await PrefsHelper.setPurchasedBookIds(purchasedIds);
 
     } catch (e) {
@@ -210,10 +162,8 @@ class BooksProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-
   // =========================
-  // باقي الدوال كما هي
+  // باقي الدوال
   // =========================
   Future<void> loadBookById(int id) async {
     try {
@@ -249,10 +199,7 @@ class BooksProvider extends ChangeNotifier {
   }
 
   Future<bool> purchaseBook(BookModel book) async {
-    if (book.isOwned) {
-      // الكتاب مملوك مسبقًا، لا حاجة لإعادة الشراء
-      return true;
-    }
+    if (book.isOwned) return true;
 
     try {
       loading = true;
@@ -267,7 +214,6 @@ class BooksProvider extends ChangeNotifier {
         purchasedBooks.add(result);
         await _updateBooksOwnership();
 
-        // حفظ المشتريات محليًا
         final purchasedIds = purchasedBooks
             .where((p) => p.book != null)
             .map((p) => p.book!.id)

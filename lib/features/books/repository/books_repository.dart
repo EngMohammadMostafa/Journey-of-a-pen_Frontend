@@ -12,34 +12,46 @@ class BooksRepository {
   BooksRepository(this.api);
 
   // جلب الكتب المشتراة من الباك
-  Future<List<BookModel>> getPurchasedBooks() async {
+  Future<List<PurchaseModel>> getPurchasedBooks() async {
     final response = await api.get(ApiEndpoints.purchasedBooks);
-    final data = response.data as List;
-    final books = data.map((json) => BookModel.fromJson(json)).toList();
 
-    // حفظ IDs المشتريات محليًا
-    await PrefsHelper.setDownloadedBookIds(books.map((b) => b.id).toList());
+    // الوصول لمفتاح 'books' داخل JSON
+    final data = response.data['books'] as List<dynamic>;
 
-    return books;
+    // تحويل كل عنصر إلى PurchaseModel
+    final purchases = data.map((json) {
+      final book = BookModel.fromJson(json);
+      return PurchaseModel(
+          book: book,
+          purchasedAt: DateTime.now(), // يمكن التعديل إذا الباك يعيد تاريخ الشراء
+          message: "تم شراؤه"
+      );
+    }).toList();
+
+    // حفظ IDs الكتب المشتراة محليًا
+    final purchasedIds = purchases.map((p) => p.book!.id).toList();
+    await PrefsHelper.setPurchasedBookIds(purchasedIds);
+
+    return purchases;
   }
 
   // جلب جميع الكتب
   Future<List<BookModel>> getAllBooks() async {
     final response = await api.get(ApiEndpoints.allBooks);
-    final data = response.data as List;
+    final data = response.data['books'] as List<dynamic>;
     return data.map((json) => BookModel.fromJson(json)).toList();
   }
 
   // جلب كتاب واحد
   Future<BookModel> getBookById(int id) async {
     final response = await api.get(ApiEndpoints.bookDetails(id));
-    return BookModel.fromJson(response.data);
+    return BookModel.fromJson(response.data['book']);
   }
 
   // جلب الكتب حسب القسم
   Future<List<BookModel>> getBooksByCategory(int categoryId) async {
     final response = await api.get(ApiEndpoints.booksByCategory(categoryId));
-    final data = response.data as List;
+    final data = response.data['books'] as List<dynamic>;
     return data.map((json) => BookModel.fromJson(json)).toList();
   }
 
@@ -52,16 +64,13 @@ class BooksRepository {
   // تحميل كتاب + تسجيله محليًا
   Future<String?> downloadAndRegisterBook(BookModel book) async {
     try {
-      // استخدام POST لأن السيرفر لا يدعم GET
       final response = await api.post(ApiEndpoints.downloadBook(book.id));
       final downloadUrl = response.data['download_url'] as String?;
 
       if (downloadUrl != null) {
-        // تحميل الكتاب فعليًا وحفظه محليًا
         final bytes = await _downloadFile(downloadUrl);
         await PrefsHelper.saveBookContent(book.id, bytes);
 
-        // تحديث SharedPreferences للكتب المحملة
         final ids = await PrefsHelper.getDownloadedBookIds();
         if (!ids.contains(book.id)) {
           ids.add(book.id);
@@ -77,7 +86,6 @@ class BooksRepository {
     }
   }
 
-  // تحميل الملف من الرابط
   Future<List<int>> _downloadFile(String url) async {
     final response = await Dio().get<List<int>>(
       url,

@@ -113,12 +113,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: (index) async {
-          // إذا كانت أيقونة سلة المشتريات
           if (index == 1) {
             final booksProvider = context.read<BooksProvider>();
 
-            // 🔹 جلب جميع المشتريات من الباك
-            await booksProvider.initializeUserData();
+            // 🔹 تحديث المشتريات من السيرفر فقط إذا لم يتم تحميلها مسبقًا
+            if (booksProvider.purchasedBooks.isEmpty) {
+              await booksProvider.initializeUserData();
+            } else {
+              await booksProvider.loadPurchasedBooksFromServer();
+            }
           }
 
           setState(() => _selectedIndex = index);
