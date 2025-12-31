@@ -98,19 +98,17 @@ approveOrRejectBook: async (competition_book_id, data, token) => {
   }
 },
 // تحميل كتاب مسابقة (Admin أو حسب الصلاحية)
-downloadCompetitionBook: async (competition_book_id) => {
-  try {
-    const response = await api.get(
-      `/admin/competition-books/${competition_book_id}/download`,
-      {
-        responseType: 'blob', // مهم لتحويل البيانات إلى ملف قابل للتحميل
-      }
-    );
-    return response.data; // سترجع بيانات الملف كـ blob
-  } catch (error) {
-    throw error;
-  }
+downloadCompetitionBook: async (competitionbookid, token) => {
+  const response = await api.get(
+    `/competition-books/${competitionbookid}/download`, // هنا {id} = competitionBookId
+    {
+      responseType: 'blob',
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
 },
+
 
 // جلب عدد اللايكات ومعلومات المستخدمين الذين أعجبوا بالكتاب (Admin)
 getBookLikes: async (bookId, token) => {

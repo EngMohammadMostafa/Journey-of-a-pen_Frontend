@@ -8,7 +8,6 @@ import '../styles/global.css'
 
 const UsersManagement = () => {
   const { token } = useAuth();
-
   // --- حالات المستخدمين ---
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -18,29 +17,24 @@ const UsersManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [userTypeFilter, setUserTypeFilter] = useState('all');
   const [errorMessage, setErrorMessage] = useState('');
-
   const [requests, setRequests] = useState([]);
 const [requestsLoading, setRequestsLoading] = useState(false);
 const [requestsError, setRequestsError] = useState('');
 const [categories, setCategories] = useState([]);
-
-
 const [acceptModalOpen, setAcceptModalOpen] = useState(false);
 const [selectedRequestId, setSelectedRequestId] = useState(null);
 const [selectedCategory, setSelectedCategory] = useState('');
   // --- NEW: التبديل بين Tabs ---
 const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
-
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    age: '',
-    gender: 'male'
-  });
-
-  
+const [formData, setFormData] = useState({
+  username: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+  age: '',
+  gender: 'male',
+  points: ''
+});
   // --- أعمدة جدول المستخدمين ---
   const userColumns = [
     { key: 'id', title: 'ID' },
@@ -97,7 +91,6 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
           'No file'
         )
     },
-    
     //{ key: 'file_type', title: 'File Type' },
     //{ key: 'file_size', title: 'File Size', render: (value) => `${(value / 1024).toFixed(2)} KB` },
     { key: 'status', title: 'Status' },
@@ -138,17 +131,16 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
   const fetchRequests = async () => {
     setRequestsLoading(true);
     try {
-      const data = await usersService.getAllRequests(); // ✅ استدعاء الدالة من service
+      const data = await usersService.getAllRequests(); 
       setRequests(data.requests || []);
       setCategories(data.categories || []);
     } catch (error) {
       console.error('Error fetching requests:', error);
-      setRequestsError('حدث خطأ أثناء جلب طلبات الكتب');
+      setRequestsError('An Error Occuerred While Retrieving Book Orders ');
     } finally {
       setRequestsLoading(false);
     }
   };
-  
   
   const handleAddUser = () => {
     setEditingUser(null);
@@ -164,10 +156,12 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
       password: '',
       password_confirmation: '',
       age: user.age || '',
-      gender: user.gender || 'male'
+      gender: user.gender || 'male',
+      points: user.points || 0
     });
     setIsModalOpen(true);
   };
+  
   const handleSaveNewUser = async () => {
     // تحقق واجهة بسيطة قبل الإرسال
     if (!formData.username || !formData.email || !formData.password || !formData.password_confirmation || !formData.age || !formData.gender) {
@@ -189,7 +183,7 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
     // (اختياري) تحقق وجود حرف كبير، حرف صغير، رقم، ورمز
     const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
     if (!pwdRegex.test(formData.password)) {
-      alert('  The Password Must Contain A Capital Letter, A Lowercase Letter And A Symbol');
+      alert('  The Password Must Contain a Capital Letter, a Lowercase Letter And a Symbol');
       return;
     }
   
@@ -206,7 +200,9 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
       password: formData.password,
       password_confirmation: formData.password_confirmation,
       age: ageInt,
-      gender: formData.gender
+      gender: formData.gender,
+        points: parseInt(formData.points || 0)
+
     };
   
     try {
@@ -241,7 +237,7 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
         }
         const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
         if (!pwdRegex.test(userData.password)) {
-          alert('The Password Must Contain A Capital Letter, A Lowercase Letter And A Symbol');
+          alert('The Password Must Contain a Capital Letter, a Lowercase Letter And a Symbol');
           return;
         }
       } else {
@@ -261,7 +257,8 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
         alert('Age Field Required');
         return;
       }
-  
+      userData.points = parseInt(formData.points || 0);
+
       // إرسال البيانات للباكند مع التوكن
       await usersService.updateUser(editingUser.id, userData, token);
   
@@ -292,9 +289,8 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
   };
 
   const handleFormSubmit = editingUser ? handleSaveUser : handleSaveNewUser;
-
   const handleRejectRequest = async (requestId) => {
-    if (!window.confirm("هل أنت متأكد من رفض هذا الطلب؟")) return;
+    if (!window.confirm("Are You Sure This Request Will Be Rejected ?")) return;
   
     try {
       const data = await usersService.rejectRequest(requestId);
@@ -303,7 +299,7 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
       setRequests(prev => prev.map(r => r.request_id === requestId ? { ...r, status: 'rejected' } : r));
     } catch (error) {
       console.error(error);
-      alert("حدث خطأ أثناء رفض الطلب");
+      alert("An Error Occurred While Rejecting The Request  ");
     }
   };
   
@@ -321,7 +317,7 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
   
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      alert("فشل تحميل الملف");
+      alert("File Upload Failed");
     }
   };
   
@@ -345,11 +341,9 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
       setAcceptModalOpen(false);
     } catch (error) {
       console.error(error);
-      alert("حدث خطأ أثناء الاتصال بالسيرفر");
+      alert("An Error Occeurred While Connecting To The Server");
     }
   };
-  
-  
   
   // --- useEffect ---
   useEffect(() => {
@@ -398,14 +392,14 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
           className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-outline'}`}
           onClick={() => setActiveTab('users')}
         >
-          إدارة المستخدمين
+         Users Management
         </button>
   
         <button
           className={`btn ${activeTab === 'requests' ? 'btn-primary' : 'btn-outline'}`}
           onClick={() => setActiveTab('requests')}
         >
-          إدارة طلبات المستخدمين
+          Users Requests Management
         </button>
       </div>
   
@@ -450,16 +444,120 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
           <DataTable columns={userColumns} data={filteredUsers} loading={loading} />
   
           <Modal
-            isOpen={isModalOpen}
-            onClose={() => {
-              setIsModalOpen(false);
-              setEditingUser(null);
-            }}
-            title={editingUser ? 'Edit User Data' : 'Add New User'}
-          >
-            <div className="user-form">
-            </div>
-          </Modal>
+  isOpen={isModalOpen}
+  onClose={() => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+  }}
+  title={editingUser ? 'Edit User Data' : 'Add New User'}
+>
+  <div className="user-form">
+
+    <div className="form-group">
+      <label>Username</label>
+      <input
+        type="text"
+        value={formData.username}
+        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+      />
+    </div>
+
+    <div className="form-group">
+      <label>Email</label>
+      <input
+        type="email"
+        value={formData.email}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+      />
+    </div>
+
+    <div className="form-group">
+      <label>
+        {editingUser
+          ? 'Password (Leave empty if unchanged)'
+          : 'Password'}
+      </label>
+      <input
+        type="password"
+        value={formData.password}
+        onChange={(e) =>
+          setFormData({ ...formData, password: e.target.value })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>Confirm Password</label>
+      <input
+        type="password"
+        value={formData.password_confirmation}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            password_confirmation: e.target.value
+          })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>Age</label>
+      <input
+        type="number"
+        value={formData.age}
+        onChange={(e) =>
+          setFormData({ ...formData, age: e.target.value })
+        }
+      />
+    </div>
+    <div className="form-group">
+  <label>Points</label>
+  <input
+    type="number"
+    min="0"
+    value={formData.points}
+    onChange={(e) =>
+      setFormData({ ...formData, points: e.target.value })
+    }
+  />
+</div>
+
+
+    <div className="form-group">
+      <label>Gender</label>
+      <select
+        value={formData.gender}
+        onChange={(e) =>
+          setFormData({ ...formData, gender: e.target.value })
+        }
+      >
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </div>
+
+    <div className="form-actions">
+      <button
+        className="btn-secondary"
+        onClick={() => {
+          setIsModalOpen(false);
+          setEditingUser(null);
+        }}
+      >
+        Cancel
+      </button>
+
+      <button
+        className="btn-primary"
+        onClick={handleFormSubmit}
+      >
+        {editingUser ? 'Update User' : 'Add User'}
+      </button>
+    </div>
+
+  </div>
+</Modal>
+
         </>
       )}
   
@@ -478,16 +576,16 @@ const [activeTab, setActiveTab] = useState('users'); // 'users' | 'requests'
           <Modal
             isOpen={acceptModalOpen}
             onClose={() => setAcceptModalOpen(false)}
-            title="اختر قسم الكتاب"
+            title="  Select A Book Category"
           >
             <div className="accept-modal">
-              <label>اختر القسم:</label>
+              <label>Select A Category:</label>
   
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                <option value="">-- اختر القسم --</option>
+                <option value="">-- Select A  Category --</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}

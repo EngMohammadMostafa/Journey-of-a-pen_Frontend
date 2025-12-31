@@ -6,19 +6,17 @@ import { useAuth } from '../context/AuthContext'
 import '../styles/global.css'
 import '../styles/CompetitionsManagement.css'
 
-const CompetitionsManagement = () => {
+  const CompetitionsManagement = () => {
   const [competitions, setCompetitions] = useState([])
   const [loading, setLoading] = useState(false)
-
   //عن مسابقه معينه البحث
-const [searchTerm, setSearchTerm] = useState('');
-const [filteredCompetitions, setFilteredCompetitions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredCompetitions, setFilteredCompetitions] = useState([]);
  //تكمله م قبل البحث
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCompetition, setEditingCompetition] = useState(null)
   const [showCompetitionsTable, setShowCompetitionsTable] = useState(false) // لإظهار جدول المسابقات
   const { token } = useAuth()
-
   const [formData, setFormData] = useState({
     name: '',
     status: 'active',
@@ -26,27 +24,21 @@ const [filteredCompetitions, setFilteredCompetitions] = useState([]);
     enddate: '',
     max_user: 1
   })
-  
 // للمشاركة وعرض الكتب
 const [showParticipantsTable, setShowParticipantsTable] = useState(false);
 const [competitionDetails, setCompetitionDetails] = useState(null); // لتخزين البيانات من API
 const [participantsLoading, setParticipantsLoading] = useState(false);
 const [selectedCompetitionId, setSelectedCompetitionId] = useState(null);
-
-
 //احصاء عدد مسابقات من الباكند 
 const [competitionStats, setCompetitionStats] = useState({ total: 0 });
-
 // لحفظ بيانات اللايكات للكتاب المختار
 const [selectedBookId, setSelectedBookId] = useState(null);
 const [bookLikes, setBookLikes] = useState(null);
 const [filteredLikes, setFilteredLikes] = useState([]);
 const [likesSearchTerm, setLikesSearchTerm] = useState('');
 const [likesLoading, setLikesLoading] = useState(false);
-
 const [categories, setCategories] = useState([]);
 const [categoriesLoading, setCategoriesLoading] = useState(false);
-
 const [addToPlatformModalOpen, setAddToPlatformModalOpen] = useState(false);
 const [selectedCompetitionBook, setSelectedCompetitionBook] = useState(null);
 const [platformFormData, setPlatformFormData] = useState({
@@ -55,7 +47,6 @@ const [platformFormData, setPlatformFormData] = useState({
   book_type: 'free',
   description: ''
 });
-
 // أعمدة الجدول
   const columns = [
     { key: 'id', title: 'ID' },
@@ -74,10 +65,7 @@ const [platformFormData, setPlatformFormData] = useState({
         </div>
       )
     }
-  
-  
   ];
-  // أعمدة جدول المشاركين والكتب (مطابقة للـ API)
   const participantColumns = [
     { key: 'competition_book_id', title: 'ID' },
     { key: 'title', title: 'Book Title' },
@@ -102,65 +90,42 @@ const [platformFormData, setPlatformFormData] = useState({
         </span>
       )
     },
-    
     {
       key: 'actions',
       title: 'Actions',
       render: (_, book) => (
         <>
-       
-         {/* أزرار القبول والرفض فقط للحالة pending */}
       {book.status === 'pending' && (
         <>
-          <button
-            className="btn-success"
-            onClick={() =>
-              handleApproveOrReject(book.competition_book_id, 'accepted')
-            }
-          >
+          <button className="btn-success" onClick={() =>
+              handleApproveOrReject(book.competition_book_id, 'accepted')}>
             Accept
           </button>
-
-          <button
-            className="btn-warning"
-            onClick={() =>
-              handleApproveOrReject(book.competition_book_id, 'rejected')
-            }
-          >
+        
+          <button className="btn-warning" onClick={() =>
+              handleApproveOrReject(book.competition_book_id, 'rejected')}  >
             Reject
           </button>
         </>
       )}
       <button
   className="btn-info"
-  onClick={() => handleDownloadBook(book.competition_book_id, book.title)}
->
+  onClick={() => handleDownloadBook(book.competition_book_id, book.title)}>
   Download
 </button>
 
-          <button
-            className="btn-danger"
-            onClick={() => handleDeleteCompetitionBook(book.competition_book_id)}
-          >
+    <button className="btn-danger"onClick={() => handleDeleteCompetitionBook(book.competition_book_id)}>
             Delete Book
           </button>
-   {/* ✅ زر إضافة للمنصة فقط للكتب المقبولة */}
     {book.status === 'accepted' && (
-        <button
-          className="btn-primary"
-          onClick={() => openAddToPlatformModal(book)}
-        >
+        <button className="btn-primary" onClick={() => openAddToPlatformModal(book)} >
           Add to Platform
         </button>
       )}
-
         </>
       )
     }
   ];
-  
-
-
   // جلب المسابقات
   const fetchCompetitions = async () => {
     setLoading(true)
@@ -211,10 +176,6 @@ const fetchBookLikes = async (bookId) => {
     setLikesLoading(false);
   }
 };
-
-
-
-
   // فتح مودال الإضافة
   const handleAddCompetition = () => {
     setEditingCompetition(null)
@@ -228,7 +189,6 @@ const fetchBookLikes = async (bookId) => {
     
     setIsModalOpen(true)
   }
-
   // فتح مودال التعديل
   const handleEdit = (competition) => {
     setEditingCompetition(competition)
@@ -239,15 +199,12 @@ const fetchBookLikes = async (bookId) => {
       enddate: competition.enddate || '',
       max_user: competition.max_user || 1
     })
-    
     setIsModalOpen(true)
   }
-
   // حفظ الإضافة أو التعديل
   const handleSave = async () => {
     try {
       if (editingCompetition) {
-
         await competitionsService.updateCompetition(
           editingCompetition.id,
           {
@@ -258,7 +215,6 @@ const fetchBookLikes = async (bookId) => {
             max_user: formData.max_user
           }
         )
-        
           alert('تم تعديل المسابقة بنجاح')
       } else {
         await competitionsService.addCompetition(formData, token)
@@ -280,8 +236,7 @@ const fetchBookLikes = async (bookId) => {
       alert('حدث خطأ في حفظ البيانات')
     }
   }
-
-  // حذف مسابقة
+ // حذف مسابقة
   const handleDelete = async (competition) => {
     if (window.confirm(`هل أنت متأكد من حذف المسابقة "${competition.name}"؟`)) {
       try {
@@ -294,8 +249,6 @@ const fetchBookLikes = async (bookId) => {
       }
     }
   }
-  
-
   const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'Add New Competation  '
 
 //حذف مشترك اي كتابه من المشابقه وجميع تفاصيله بعد
@@ -317,7 +270,6 @@ const fetchBookLikes = async (bookId) => {
     }
   };
   
-
   const handleApproveOrReject = async (competition_book_id, status) => {
     const confirmMessage =
       status === 'accepted'
@@ -360,24 +312,20 @@ const fetchBookLikes = async (bookId) => {
     }
   };
   
-  const handleDownloadBook = async (competition_book_id, title) => {
+  const handleDownloadBook = async (competitionbookid, title) => {
     try {
-      const blob = await competitionsService.downloadCompetitionBook(competition_book_id);
-   // فحص نوع الملف
-   if (!blob || blob.type === 'application/json') {
-    alert('الكتاب غير متاح للتحميل أو حدث خطأ');
-    return;
-  }
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      console.log("Downloading book ID:", competitionbookid, "Token:", token); // للتأكد
+      const blob = await competitionsService.downloadCompetitionBook(competitionbookid, token);
+  
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${title}.pdf`);
-      document.body.appendChild(link);
+      link.download = title + '.pdf';
       link.click();
-      link.remove();
       window.URL.revokeObjectURL(url);
+  
     } catch (error) {
-      console.error(error);
+      console.error('Error downloading book:', error);
       alert('حدث خطأ أثناء تحميل الكتاب');
     }
   };
@@ -403,9 +351,6 @@ const fetchBookLikes = async (bookId) => {
       description: ''
     });
   };
-  
-  
-  
   const handleAddToPlatform = async () => {
     try {
       if (!selectedCompetitionBook) return;
@@ -429,24 +374,19 @@ const fetchBookLikes = async (bookId) => {
       }));
   
       setAddToPlatformModalOpen(false);
-      alert("تم إضافة الكتاب إلى المنصة بنجاح ✅");
+      alert("تم إضافة الكتاب إلى المنصة بنجاح ");
     } catch (error) {
       console.error(error);
       alert("حدث خطأ أثناء إضافة الكتاب");
     }
   };
   
-  
-  
-  
   useEffect(() => {
     if (showCompetitionsTable || showParticipantsTable) {
       fetchCompetitions();
     }
   }, [showCompetitionsTable, showParticipantsTable]);
-  
-
-  // فلترة حسب اسم المسابقة
+   // فلترة حسب اسم المسابقة
 useEffect(() => {
   let filtered = competitions;
 
@@ -455,7 +395,6 @@ useEffect(() => {
       c.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }
-
   setFilteredCompetitions(filtered);
 }, [searchTerm, competitions]);
 
@@ -465,7 +404,6 @@ useEffect(() => {
     fetchCompetitionStats(); // ← هنا نجيب الإحصاء من الباكند
   }
 }, [showCompetitionsTable]);
-
 
 useEffect(() => {
   if (bookLikes?.liked_users) {
@@ -482,10 +420,6 @@ useEffect(() => {
     setFilteredLikes([]);
   }
 }, [bookLikes, likesSearchTerm]);
-
-
-
-
 
 return (
   <div className="competitions-management">
@@ -509,8 +443,7 @@ return (
         onClick={() => {
           setShowCompetitionsTable(true)
           setShowParticipantsTable(false)
-        }}
-      >
+        }}>
         Competitions Management
       </button>
 
@@ -521,17 +454,14 @@ return (
           setShowParticipantsTable(true)
           setSelectedCompetitionId(null)
           setCompetitionDetails(null)
-        }}
-      >
+        }}>
         Participant & Book Management
       </button>
     </div>
 
     {/* ================= PARTICIPANTS SECTION ================= */}
-    {showParticipantsTable && (
-      <div className="participants-section">
-
-        <div className="users-filters">
+    {showParticipantsTable && ( <div className="participants-section">
+          <div className="users-filters">
           <div className="filter-section">
             <select
               value={selectedCompetitionId || ''}
@@ -570,8 +500,7 @@ return (
             </div>
           )}
 
-          {bookLikes && (
-            <div className="search-section">
+          {bookLikes && (<div className="search-section">
               <input
                 type="text"
                 placeholder="Search liked users..."
@@ -586,8 +515,7 @@ return (
           )}
         </div>
 
-        {bookLikes && (
-          <div className="book-details-section">
+        {bookLikes && ( <div className="book-details-section">
             <h3>Likes for: {bookLikes.title} (Total: {bookLikes.likes_count})</h3>
             <ul>
               {filteredLikes.map(user => (
@@ -640,7 +568,6 @@ return (
           onDelete={handleDelete}
           actions={['edit', 'delete']}
         />
-
         {/* MODAL ADD / EDIT COMPETITION */}
         <Modal
           isOpen={isModalOpen}
@@ -657,20 +584,14 @@ return (
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
+                onChange={(e) =>setFormData({ ...formData, name: e.target.value })}/>
             </div>
 
             <div className="form-group">
               <label>Status</label>
               <select
                 value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
-                }
-              >
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })} >
                 <option value="active">نشطة</option>
                 <option value="inactive">غير نشطة</option>
                 <option value="finished">منتهية</option>
@@ -723,7 +644,6 @@ return (
         </Modal>
       </>
     )}
-
     {/* ================= ADD TO PLATFORM MODAL ================= */}
     {addToPlatformModalOpen && (
       <Modal
@@ -732,13 +652,11 @@ return (
         title="Add Competition Book to Platform"
       >
         <div className="platform-form">
-
           <div className="form-group">
             <label>Category</label>
             <select
   value={platformFormData.category_id}
-  onChange={(e) =>
-    setPlatformFormData({ ...platformFormData, category_id: e.target.value })
+  onChange={(e) =>setPlatformFormData({ ...platformFormData, category_id: e.target.value })
   }
   disabled={categoriesLoading}
 >
@@ -749,23 +667,15 @@ return (
 </select>
 
 {categoriesLoading && <p>Loading categories...</p>}
-
-
 {categoriesLoading && <p>Loading categories...</p>}
-
-
-
-
           </div>
-
           <div className="form-group">
             <label>Price</label>
             <input
               type="number"
               min="0"
               value={platformFormData.price}
-              onChange={(e) =>
-                setPlatformFormData({
+              onChange={(e) =>setPlatformFormData({
                   ...platformFormData,
                   price: Number(e.target.value)
                 })
@@ -777,8 +687,7 @@ return (
             <label>Book Type</label>
             <select
               value={platformFormData.book_type}
-              onChange={(e) =>
-                setPlatformFormData({
+              onChange={(e) => setPlatformFormData({
                   ...platformFormData,
                   book_type: e.target.value
                 })
@@ -793,8 +702,7 @@ return (
             <label>Description</label>
             <textarea
               value={platformFormData.description}
-              onChange={(e) =>
-                setPlatformFormData({
+              onChange={(e) =>setPlatformFormData({
                   ...platformFormData,
                   description: e.target.value
                 })
@@ -803,27 +711,16 @@ return (
           </div>
 
           <div className="form-actions">
-            <button
-              className="btn-secondary"
-              onClick={() => setAddToPlatformModalOpen(false)}
-            >
+            <button className="btn-secondary" onClick={() => setAddToPlatformModalOpen(false)} >
               Cancel
             </button>
-
-            <button
-              className="btn-primary"
-              onClick={handleAddToPlatform}
-            >
+            <button className="btn-primary"  onClick={handleAddToPlatform} >
               Add to Platform
             </button>
           </div>
         </div>
       </Modal>
     )}
-
   </div>
-)
-
-}
-
+  )}
 export default CompetitionsManagement

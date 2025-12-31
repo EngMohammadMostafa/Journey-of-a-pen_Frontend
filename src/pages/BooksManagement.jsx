@@ -31,13 +31,12 @@ const BooksManagement = () => {
 
   const [totalBooks, setTotalBooks] = useState(0); // ← عدد الكتب الكلي من API
 
-  
-
   // --- حالات الأقسام ---
   const [categories, setCategories] = useState([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formCategoryData, setFormCategoryData] = useState({ name: '' });
+  const [refreshCategories, setRefreshCategories] = useState(0);
 
   // --- حالات الأسئلة ---
   const [questions, setQuestions] = useState([]);
@@ -159,7 +158,6 @@ const bookColumns = [
     }
   ];
 
-  
   const answerColumns = [
     { key: 'id', title: 'ID' },
     { key: 'answer_text', title: 'Answer Text' },
@@ -180,11 +178,6 @@ const bookColumns = [
       )
     }
   ];
-  
-
-
-
-
   // --- التبديل بين الأقسام ---
   const handleBooks = () => setActiveSection('books');
   const handleQuestions = () => setActiveSection('questions');
@@ -221,7 +214,7 @@ const bookColumns = [
 
   const handleDeleteBook = async (book) => {
     const confirmDelete = window.confirm(
-      `هل أنت متأكد من حذف الكتاب "${book.title}"؟`
+      `Are you Sure This Book Has Been Deleted?   "${book.title}"؟`
     );
     if (!confirmDelete) return;
   
@@ -234,10 +227,10 @@ const bookColumns = [
     await fetchTotalBooks();
 
 
-      alert("تم حذف الكتاب بنجاح");
+      alert("The Book Was Successfully Deleted ");
     } catch (error) {
-      console.error("خطأ أثناء حذف الكتاب:", error);
-      alert("حدث خطأ أثناء حذف الكتاب");
+      console.error("  Error While Deleting The Book :", error);
+      alert("An Error Occurred While Deleting The Book ");
     }
   };
   
@@ -245,7 +238,7 @@ const bookColumns = [
     const { author, title, description, price, book_type, category_id } = formData;
   
     if (!author || !title || !description || !price || !category_id) {
-      alert('يرجى ملء جميع الحقول المطلوبة');
+      alert(' Please Fill In, All Field');
       return;
     }
   
@@ -261,12 +254,12 @@ const bookColumns = [
           category_id
         });
   
-        alert('تم تعديل الكتاب بنجاح');
+        alert('The Book Has Been Successfully Edited');
   
       } else {
         // 🔹 إضافة كتاب جديد (FormData)
         if (!selectedFile) {
-          alert('يرجى اختيار ملف الكتاب');
+          alert('Please Select The Book File ');
           return;
         }
   
@@ -279,7 +272,7 @@ const bookColumns = [
         fd.append('file', selectedFile);
   
         await booksService.addBookToCategory(category_id, fd);
-        alert('تم إضافة الكتاب بنجاح');
+        alert('The Book Has Been Successfully Added ');
       }
   
       const updatedBooks = await booksService.getAllBooks();
@@ -294,8 +287,8 @@ const bookColumns = [
       setSelectedFile(null);
   
     } catch (error) {
-      console.error('خطأ في حفظ الكتاب:', error);
-      alert('حدث خطأ أثناء حفظ الكتاب');
+      console.error('Error In Saving The Book :', error);
+      alert(' Error In Saving The Book ');
     }
   };
   
@@ -308,29 +301,32 @@ const bookColumns = [
   };
   const handleSaveCategory = async () => {
     if (!formCategoryData.name) {
-      alert('يرجى كتابة اسم القسم');
+      alert('Please Write The Category Name ');
       return;
     }
     try {
       await booksService.addCategory({ name: formCategoryData.name });
-  
+      await fetchCategories();
+      setRefreshCategories(prev => prev + 1);
+
       // بعد عملية الإضافة يجب جلب الأقسام من جديد
       const updated = await booksService.getAllCategories();
+      
       setCategories(updated.categories || []);
   
-      alert('تم إضافة القسم الجديد بنجاح');
+      alert('The New Category Has Been Successfully Added ');
       setIsCategoryModalOpen(false);
       setFormCategoryData({ name: '' });
     } catch (error) {
-      console.error('Error adding category:', error);
-      alert('حدث خطأ أثناء إضافة القسم');
+      console.error('Error  In adding  The category', error);
+      alert(' Error  In adding  The category ');
     }
   };
   
 
   const handleDeleteCategory = async (category) => {
     const confirmDelete = window.confirm(
-      ` تحذير!\nسيتم حذف القسم "${category.name}" وكل الكتب والأسئلة والأجوبة التابعة له.\nهل أنت متأكد؟`
+      ` تحذير!\nThe Category Will Be Deleted "${category.name}" And All The Books ,Questions ,And Answers Related.\nAre You Sure? `
     );
   
     if (!confirmDelete) return;
@@ -338,7 +334,9 @@ const bookColumns = [
     try {
       // استدعاء API الحقيقي
       await booksService.deleteCategory(category.id);
-  
+      await fetchCategories();
+      setRefreshCategories(prev => prev + 1);
+
       // تحديث الأقسام في الواجهة
       setCategories(prev => prev.filter(c => c.id !== category.id));
   
@@ -348,11 +346,11 @@ const bookColumns = [
         setBooks(booksData.books || booksData);
       }
   
-      alert(' تم حذف القسم وكل ما بداخله بنجاح');
+      alert(' The Category and everything inside it have been successfully deleted.  ');
   
     } catch (error) {
-      console.error('Error deleting category:', error);
-      alert(' حدث خطأ أثناء حذف القسم');
+      console.error('Error In deleting The Category:', error);
+      alert(' Error In deleting The Category ');
     }
   };
   
@@ -360,7 +358,7 @@ const bookColumns = [
   // --- دوال إدارة الأسئلة ---
   const handleAddQuestion = async () => {
     if (!newQuestionText || !selectedBookId) {
-      alert('يرجى كتابة السؤال واختيار الكتاب');
+      alert('Please write the question and choose the book');
       return;
     }
   
@@ -377,7 +375,7 @@ const bookColumns = [
       const formatted = list.map(q => ({
         id: q.id,
         text: q.question_text,
-        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_title: books.find(b => b.id === q.book_id)?.title || "Unknown",
         book_id: q.book_id,
       }));
   
@@ -388,14 +386,14 @@ const bookColumns = [
       await fetchTotalQuestions();
 
 
-      alert('تم إضافة السؤال بنجاح');
+      alert('The question has been added successfully  ');
       setNewQuestionText('');
       setSelectedBookId('');
       setIsQuestionModalOpen(false);
   
     } catch (error) {
       console.error(error);
-      alert('حدث خطأ أثناء إضافة السؤال');
+      alert(' An error occurred while adding the question');
     }
   };
 
@@ -407,7 +405,7 @@ const bookColumns = [
   };
   const handleSaveEditQuestion = async () => {
     if (!editingQuestionText) {
-      alert('يرجى كتابة السؤال');
+      alert('Please write the question');
       return;
     }
   
@@ -422,7 +420,7 @@ const bookColumns = [
       const formatted = list.map(q => ({
         id: q.id,
         text: q.question_text,
-        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_title: books.find(b => b.id === q.book_id)?.title || "Unknown ",
         book_id: q.book_id,
       }));
   
@@ -435,31 +433,31 @@ setFilteredQuestions(formatted);
 await fetchTotalQuestions();
 
 
-      alert('تم تعديل السؤال بنجاح');
+      alert('The question has been successfully modified ');
       setIsEditQuestionModalOpen(false);
       setEditingQuestion(null);
       setEditingQuestionText('');
   
     } catch (error) {
       console.error(error);
-      alert('حدث خطأ أثناء تعديل السؤال');
+      alert('  An error occurred while editing the question');
     }
   };
   const handleDeleteQuestion = async (question) => {
-    if (!window.confirm(`هل أنت متأكد من حذف السؤال "${question.text}"؟`)) return;
+    if (!window.confirm(`Are you sure you want to delete the question "${question.text}"؟`)) return;
   
     try {
       await booksService.deleteQuestion(question.id);
   
       const res = await booksService.getPaginatedQuestions(currentPage, perPage);
   
-      const list = res.list;        // ← التغيير هنا
-     setLastPage(res.last_page);   // ← التغيير هنا
+      const list = res.list;        
+     setLastPage(res.last_page);   
   
       const formatted = list.map(q => ({
         id: q.id,
         text: q.question_text,
-        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_title: books.find(b => b.id === q.book_id)?.title || "Unknown ",
         book_id: q.book_id,
       }));
   
@@ -471,11 +469,11 @@ setFilteredQuestions(formatted);
 // ← **تحديث الإحصاء بعد الحذف**
 await fetchTotalQuestions();
 
-      alert('تم حذف السؤال بنجاح');
+      alert('  The question was deleted successfully');
   
     } catch (error) {
       console.error(error);
-      alert('حدث خطأ أثناء حذف السؤال');
+      alert('An error occurred while deleting the question ');
     }
   };
 
@@ -490,7 +488,7 @@ const fetchQuestionsByBook = async (bookId) => {
     const formatted = list.map(q => ({
       id: q.id,
       text: q.question_text,
-      book_title: res.book?.title || books.find(b => b.id === q.book_id)?.title || "غير معروف",
+      book_title: res.book?.title || books.find(b => b.id === q.book_id)?.title || "Unknown",
       book_id: q.book_id,
     }));
     setQuestions(formatted);
@@ -521,7 +519,15 @@ const fetchTotalQuestions = async () => {
     console.error("Error fetching total questions:", error);
   }
 };
-
+const fetchCategories = async () => {
+  try {
+    const categoriesData = await booksService.getAllCategories();
+  
+    setCategories(categoriesData);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+};
 
 // دالة ذكية لإعادة جلب الأسئلة حسب وضع الفلتر (إما paginated أو by-book)
 const refetchQuestions = async (pageToFetch = 1) => {
@@ -537,7 +543,7 @@ const refetchQuestions = async (pageToFetch = 1) => {
       const formatted = list.map(q => ({
         id: q.id,
         text: q.question_text,
-        book_title: books.find(b => b.id === q.book_id)?.title || "غير معروف",
+        book_title: books.find(b => b.id === q.book_id)?.title || "Unknown ",
         book_id: q.book_id,
         answers: q.answers || [], // حفظ الإجابات
       }));
@@ -569,15 +575,13 @@ const fetchQuestionWithAnswers = async (questionId) => {
       id: question.id,
       text: question.question_text,
       book_id: question.book_id,
-      book_title: question.book?.title || books.find(b => b.id === question.book_id)?.title || "غير معروف"
+      book_title: question.book?.title || books.find(b => b.id === question.book_id)?.title || "Unknown"
     });
     setAnswersForSelectedQuestion(question.answers || []);
   } catch (error) {
     console.error("Error fetching question with answers:", error);
   }
 };
-
-
   //دوال ادارة الاجوبة 
   const openAddAnswer = (questionId = null) => {
     setSelectedQuestionId(questionId);
@@ -589,32 +593,29 @@ const fetchQuestionWithAnswers = async (questionId) => {
   
   const handleAddAnswer = async () => {
 
-     // تحقق من اختيار السؤال
   if (!selectedQuestionId) {
-    alert("يرجى اختيار السؤال أولاً");
+    alert(" Please select the question first");
     return;
   }
-
+  if (!answerText.trim()) {
+    alert("Please fill in the answer text and if it Correct or not");
+    return;
+  }
     try {
       const payload = {
         answer_text: answerText,
         is_correct: isCorrect,
       };
 
-  // إرسال السؤال المختار مع الجواب
       await booksService.addAnswer(selectedQuestionId, payload);
-  
       setShowAddAnswerModal(false);
-
-      fetchAnswers(); // إعادة تحميل الإجابات
+      fetchAnswers(); 
     } catch (error) {
       console.error("Error adding answer:", error);
+      alert("An error occurred while adding the answer.");
     }
   };
   
-  
-
-
   const openEditAnswer = (answer) => {
     setSelectedAnswer(answer);
     setAnswerText(answer.answer_text);
@@ -638,10 +639,8 @@ const fetchQuestionWithAnswers = async (questionId) => {
     }
   };
   
-
-
   const handleDeleteAnswer = async (answerId) => {
-    if (!window.confirm("هل أنت متأكد من حذف الإجابة؟")) return;
+    if (!window.confirm("Are you sure you want to delete the answer? ")) return;
   
     try {
       await booksService.deleteAnswer(answerId);
@@ -678,15 +677,14 @@ const fetchQuestionWithAnswers = async (questionId) => {
   // ====== دالة تغيير صفحة الإجابات ======
   const goToAnswersPage = (page) => {
     if (page >= 1 && page <= answersLastPage) {
-      setAnswersPage(page); // ← هذا سيستدعي fetchAnswers تلقائيًا بسبب useEffect
+      setAnswersPage(page); 
     }
   };
   
 
   // --- useEffect ---
 
-
-  useEffect(() => {
+  /*useEffect(() => {
     const fetchCategories = async () => {
       try {
         const categoriesData = await booksService.getAllCategories();
@@ -697,7 +695,15 @@ const fetchQuestionWithAnswers = async (questionId) => {
     };
   
     fetchCategories();
-  }, []);
+  }, []);*/
+ 
+ 
+  useEffect(() => {
+    if (activeSection === 'books') {
+      fetchCategories();
+    }
+  }, [activeSection, refreshCategories]);
+  
   
   // --- جلب الكتب عند فتح قسم Book Management ---
   useEffect(() => {
@@ -730,7 +736,7 @@ const fetchQuestionWithAnswers = async (questionId) => {
           const formatted = list.map(q => ({
             id: q.id,
             text: q.question_text,
-            book_title: res.book?.title || books.find(b => b.id === q.book_id)?.title || "غير معروف",
+            book_title: res.book?.title || books.find(b => b.id === q.book_id)?.title || "Unknown",
             book_id: q.book_id,
             answers: q.answers || [],
           }));
@@ -976,10 +982,6 @@ useEffect(() => {
         
       </div>
     </div>
-
-  
-         
-  
           <div className="books-filters">
             <div className="search-section">
               <input
@@ -1020,6 +1022,7 @@ useEffect(() => {
           </div>
 
           <DataTable
+            key={categories.length}
             columns={categoryColumns}
             data={categories}
             loading={false}
@@ -1150,16 +1153,11 @@ useEffect(() => {
 
   </div>
 )}
-
-
-      
-      
-  
       {/* مودال إضافة / تعديل كتاب */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingBook(null); }}
-        title={editingBook ? "تعديل كتاب" : "Add New Book"}
+        title={editingBook ? "Book Editing" : "Add New Book"}
       >
         <div className="book-form">
           <div className="form-group">
@@ -1221,7 +1219,7 @@ useEffect(() => {
           </div>
           <div className="form-actions">
             <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-            <button className="btn-primary" onClick={handleSaveBook}>{editingBook ? "حفظ التعديل" : "Add Book"}</button>
+            <button className="btn-primary" onClick={handleSaveBook}>{editingBook ? "Book Editing" : "Add Book"}</button>
           </div>
         </div>
       </Modal>
@@ -1273,21 +1271,19 @@ useEffect(() => {
       <Modal
         isOpen={isEditQuestionModalOpen}
         onClose={() => setIsEditQuestionModalOpen(false)}
-        title="تعديل السؤال"
+        title="Edit question"
       >
         <div className="question-form">
           <div className="form-group">
-            <label>السؤال *</label>
+            <label>The Question *</label>
             <textarea value={editingQuestionText} onChange={(e) => setEditingQuestionText(e.target.value)} required></textarea>
           </div>
           <div className="form-actions">
-            <button className="btn-secondary" onClick={() => setIsEditQuestionModalOpen(false)}>إلغاء</button>
-            <button className="btn-primary" onClick={handleSaveEditQuestion}>حفظ</button>
+            <button className="btn-secondary" onClick={() => setIsEditQuestionModalOpen(false)}>Cancel</button>
+            <button className="btn-primary" onClick={handleSaveEditQuestion}>Edit question</button>
           </div>
         </div>
       </Modal>
-
-
       {/* مودال إضافة / تعديل جواب */}
 <Modal
   isOpen={showAddAnswerModal || showEditAnswerModal}
@@ -1298,7 +1294,7 @@ useEffect(() => {
     setAnswerText("");
     setIsCorrect(false);
   }}
-  title={selectedAnswer ? "تعديل جواب" : " Add New Answer "}
+  title={selectedAnswer ? "Edit answer" : " Add New Answer "}
 ><div className="answer-form">
   {/* اختيار السؤال أولاً */}
   <div className="form-group">
@@ -1339,9 +1335,6 @@ useEffect(() => {
   <label htmlFor="isCorrect">Correct</label>
 </div>
 
-
-
-
   {/* أزرار حفظ / إلغاء */}
   <div className="form-actions">
     <button className="btn-secondary" onClick={() => {
@@ -1353,7 +1346,7 @@ useEffect(() => {
     }}>Cancel</button>
 
     <button className="btn-primary" onClick={selectedAnswer ? handleEditAnswer : handleAddAnswer}>
-      {selectedAnswer ? "تعديل" : "Add Answer"}
+      {selectedAnswer ? "Save" : "Add Answer"}
     </button>
   </div>
 </div>

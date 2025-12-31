@@ -1,4 +1,4 @@
-/* src/styles/global.css - الحل النهائي */
+/* src/styles/global.css -  */
 * {
   margin: 0;
   padding: 0;
@@ -54,12 +54,15 @@ body {
 }
 
 
-
 .content-area {
   flex: 1;
-  margin-left: 40%;
+  /*  margin-left: 40%;
+    width: calc(94% - 20%);
+
+*/
+margin-left: 280px;
+  width: calc(100% - 280px);
   margin-top: 25%;
-  width: calc(94% - 20%);
   
   
 }
@@ -135,87 +138,139 @@ flex-grow: 1;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
 }
-
 .sidebar {
-  width: 23%;
-  background: linear-gradient(180deg, #000000 0%, #7199AA 6%, #4C869F 40%, #1C597B 76%);
+  width: 280px;                
+  min-width: 220px;             
+  background: linear-gradient( #000000 0px, #7199AA 75px, #4C869F 40%, #1C597B 76%);
   color: white;
   position: fixed;
-  top:14%;
-  left: 0%;
-  height: calc(100vh - 7%);
+  top: 14%;                       
+  left: 0;
+  height: 100vh;               
   display: flex;
-  flex-direction: column;
+  flex-direction: column;      
+  align-items: center;         /* يجعل كل العناصر أفقياً في المنتصف */
+  padding-top: 40px;           
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 999;
-  border-top-right-radius: 40% 20%;
   overflow-y: auto;
-  scrollbar-width: thin;
-  row-gap: 6px; 
+  row-gap: 16px;
 }
+
+/* البوكس الأبيض داخل السايدبار */
+.sidebar-header-horizontal {
+  width: 85%;                  
+  max-width: 250px;            
+  min-width: 200px;            
+  
+  height: 70px;
+  padding: 12px 17px;
+  background-color: #ffffff;
+  border-radius: 60px;
+  border: 1px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* هذه السطر مهم جدًا لمركزية البوكس الأبيض */
+  margin: 7% auto;              
+}
+/* الصورة داخل البوكس الأبيض */
+.sidebar-image-small {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+/* نصوص البوكس الأبيض */
+.sidebar-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: right; /* لأن الاتجاه RTL */
+}
+
+.sidebar-info h2 {
+  font-size: 0.95rem;
+  margin: 0;
+  color: #4C869F;
+}
+
+.sidebar-info p {
+  font-size: 0.75rem;
+  margin: 2px 0 0;
+  color: #333;
+}
+
+/* responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    padding-top: 30px;
+  }
+  
+  .sidebar-header-horizontal {
+    width: 80%;
+    max-width: 200px;
+    min-width: 180px;
+    height: 60px;
+  }
+}
+
 
 
 .sidebar {
   clip-path: polygon(0 0, 100% , 100% 100%, 0% 100%);
-  border-top-right-radius: 40% 20%;
+  border-top-right-radius: 100px 90px;
 }
-
-.sidebar-header-horizontal {
+/*.sidebar-header-horizontal {
   display: flex;
-  align-items:flex-end;
-  justify-content: flex-end;
-  padding:  10px 10px;
-  border: 1px solid #ffffff;
-  border-radius: 40px;
-  gap: 20%;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 85%;          
+  max-width: 260px;    
+  height: 90px;       
+
+  padding: 10px 10px;
+  margin: 50px auto 19px auto;
+
   background-color: #ffffff;
-  width: 15vw; /* يناسب عرض السايدبار */
-  height: 15vh;
-  margin: 10% auto 2.1% auto; 
+  border-radius: 70px;
+  border: 1px solid #ffffff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
+}*/
 
-/* الصورة على اليسار */
-.sidebar-image-small {
 
-  width: 40px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 19%;
-}
-
-/* النصوص على اليمين */
-.sidebar-info {
-  display: flex;
-  flex-direction:column;
-  justify-content: center;
- margin: 1.3vh;
-}
-
-.sidebar-info h2 {
-  font-size: 1rem;
-  color: #4C869F;
-  margin: 0%;
-  
-  
-}
-
-.sidebar-info p {
-  font-size: 0.7rem;
-  color: #0a0a0a;
-  margin: 2% 0 0 0;
-}
 .nav-link::after {
   content: '•'; /* النقطة */
   color: #e8f0fe;
   font-size: 1.9rem; /* كان 2rem */
   margin-right: 6px; /* تقليل المسافة بين النقطة والنص */
+    flex-shrink: 0;   /* تمنع تقلص النقطة */
+
+    flex-shrink: 0; /* النقطة لا تتقلص */
 
 }
 
+/* Sidebar - توزيع العناصر ديناميكي */
+.sidebar-nav ul {
+  display: flex;
+  flex-direction: column;       /* ترتيب عمودي */
+  justify-content: space-between; /* المسافة بين العناصر ديناميكية */
+  height: calc(100% - 200px);   /* اطرح مساحة البوكس الأبيض + الفوتر */
+  padding: 0;
+  gap:13px ;
+  margin: 0;
+  list-style: none;
+}
 
-.nav-link {
+/*.nav-link {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -227,11 +282,30 @@ flex-grow: 1;
   transition: all 0.3s ease;
   border-left: 3px solid transparent;
   border-right: none;
-  white-space: nowrap; /* يمنع الكلمة من الانكسار تحت الأخرى */
+  white-space: nowrap; 
   overflow: hidden;
   text-overflow: ellipsis;
   
 }
+*/
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* حتى تكون النقطة على البداية والنص بعدها */
+  gap: 8px;                    /* المسافة بين النقطة والنص فقط */
+
+  color: #e8f0fe;
+  padding: 9px 12px;
+  font-size: 1.1rem;
+
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  border-left: 3px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 
 .nav-link:hover {
   background-color: #2a5298;
@@ -293,11 +367,15 @@ flex-grow: 1;
   pointer-events: none;
 }
 
+
 .hero-image {
   width: 500%;
   height: 160%;
   object-fit: scale-down;
 }
+
+
+
 
 .hero-text {
   width: 300%; /* مساحة مناسبة للنص */
@@ -460,6 +538,28 @@ flex-grow: 1;
 
 
 /* تصميم متجاوب */
+@media (max-width: 768px) {
+  .sidebar-header-horizontal {
+    height: 70px;
+    max-width: 200px;
+    min-width: 200px;
+
+  }
+}
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px;        /* أصغر من الديسكتوب */
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-area {
+    margin-left: 220px;
+    width: calc(100% - 220px);
+  }
+}
+
 @media (max-width: 768px) {
   .navbar {
     right: 70px;

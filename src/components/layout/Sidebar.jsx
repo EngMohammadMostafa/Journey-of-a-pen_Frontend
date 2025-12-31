@@ -11,8 +11,7 @@ const Sidebar = () => {
     { path: '/competitions', icon: '', label: 'Competitions Management' },
     { path: '/quotes', icon: '', label: 'Quotes Management' },
     { path: '/notifications', icon: '', label: 'Notifications Management' },
-    { path: '/payments', icon: '', label: 'Payments Management' },
-    { path: '/points', icon: '', label: 'Points Management' }
+    
   ]
 
   return (
@@ -44,17 +43,10 @@ const Sidebar = () => {
             </li>
           ))}
         </ul>
+        
       </nav>
       
-      <div className="sidebar-footer">
-        <div className="user-info">
-          <div className="user-avatar">👤</div>
-          <div className="user-details">
-            <span className="user-name">الأدمن</span>
-            <span className="user-role">مدير النظام</span>
-          </div>
-        </div>
-      </div>
+     
     </div>
   )
 }

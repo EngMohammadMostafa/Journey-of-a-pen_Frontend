@@ -10,7 +10,7 @@ const DataTable = ({
   
 }) => {
   if (loading) {
-    return <div className="loading">جاري التحميل...</div>;
+    return <div className="loading"> Loading...</div>;
   }
 
   return (
@@ -39,7 +39,7 @@ const DataTable = ({
           ) : (
             <tr>
               <td colSpan={columns.length + 1} className="no-data">
-                لا توجد بيانات
+              No data available 
               </td>
             </tr>
           )}

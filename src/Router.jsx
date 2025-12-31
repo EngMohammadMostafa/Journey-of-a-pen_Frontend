@@ -13,10 +13,6 @@ import BooksManagement from './pages/BooksManagement'
 import CompetitionsManagement from './pages/CompetitionsManagement'
 import QuotesManagement from './pages/QuotesManagement'
 import NotificationsManagement from './pages/NotificationsManagement'
-
-
-import PaymentsManagement from './pages/PaymentsManagement'
-import PointsManagement from './pages/PointsManagement'
 import DashboardLayout from './components/layout/DashboardLayout';
 
 const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
@@ -66,11 +62,6 @@ const AppRouter = ({ sidebarCollapsed, onToggleSidebar }) => {
             <Route path="/competitions" element={<CompetitionsManagement />} />
             <Route path="/quotes" element={<QuotesManagement />} />
             <Route path="/notifications" element={<NotificationsManagement />} />
-            
-          
-          
-            <Route path="/payments" element={<PaymentsManagement />} />
-            <Route path="/points" element={<PointsManagement />} />
             <Route path="/login" element={<Navigate to="/dashboard" />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
