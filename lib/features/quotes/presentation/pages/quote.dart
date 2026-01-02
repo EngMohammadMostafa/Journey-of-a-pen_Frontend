@@ -20,6 +20,8 @@ class _QuotesPageState extends State<QuotesPage> {
 
   List<Quote> _quotes = [];
   bool _isLoading = true;
+  bool _quoteError = false;
+  bool _bookError = false;
 
   // ============================
   // استرجاع التوكن عند فتح الصفحة
@@ -62,7 +64,20 @@ class _QuotesPageState extends State<QuotesPage> {
   }
 
   Future<void> _addQuote() async {
-    if (_quoteController.text.isEmpty || _bookController.text.isEmpty) return;
+    setState(() {
+      _quoteError = _quoteController.text.trim().isEmpty;
+      _bookError = _bookController.text.trim().isEmpty;
+    });
+
+    if (_quoteError || _bookError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى تعبئة نص الاقتباس واسم الكتاب'),
+          backgroundColor: const Color(0xFF9E9E9E),
+        ),
+      );
+      return;
+    }
 
     try {
       const int userId = 1; // مؤقتًا
@@ -145,11 +160,20 @@ class _QuotesPageState extends State<QuotesPage> {
                           labelStyle: const TextStyle(color: Color(0xFF1C597B)),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.7),
+                          errorText: _quoteError ? 'نص الاقتباس مطلوب' : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(
+                              color: _quoteError ? Colors.red : const Color(0xFF1C597B),
+                              width: 1.5,
+                            ),
+                          ),
                         ),
                       ),
+
                       const SizedBox(height: 15),
                       TextField(
                         controller: _bookController,
@@ -158,8 +182,16 @@ class _QuotesPageState extends State<QuotesPage> {
                           labelStyle: const TextStyle(color: Color(0xFF1C597B)),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.7),
+                          errorText: _bookError ? 'اسم الكتاب مطلوب' : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(
+                              color: _bookError ? Colors.red : const Color(0xFF1C597B),
+                              width: 1.5,
+                            ),
                           ),
                         ),
                       ),
@@ -189,63 +221,67 @@ class _QuotesPageState extends State<QuotesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'الاقتباسات',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'الاقتباسات',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          backgroundColor: const Color(0xFF000000),
+          elevation: 4,
+          centerTitle: true,
         ),
-        backgroundColor: const Color(0xFF000000),
-        elevation: 4,
-        centerTitle: true,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddQuoteDialog,
-        backgroundColor: const Color(0xFF1C597B),
-        child: const Icon(Icons.add, size: 30),
-      ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF000000),
-                  Color(0xFF7199AA),
-                  Color(0xFF4C869F),
-                  Color(0xFF1C597B),
-                ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: _showAddQuoteDialog,
+          backgroundColor: const Color(0xFF1C597B),
+          child: const Icon(Icons.add, size: 30),
+        ),
+        body: Stack(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xFF7199AA),
+                    Color(0xFF4C869F),
+                    Color(0xFF1C597B),
+                  ],
+                ),
               ),
             ),
-          ),
-          _isLoading
-              ? const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          )
-              : Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _quotes.isEmpty
+            _isLoading
                 ? const Center(
-              child: Text(
-                'لا توجد اقتباسات حتى الآن',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
+              child: CircularProgressIndicator(color: Colors.white),
             )
-                : ListView.builder(
-              itemCount: _quotes.length,
-              itemBuilder: (context, index) {
-                final quote = _quotes[index];
-                return QuoteCard(
-                  quoteText: quote.text,
-                  bookName: quote.bookName ?? 'غير معروف',
-                );
-              },
+                : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _quotes.isEmpty
+                  ? const Center(
+                child: Text(
+                  'لا توجد اقتباسات حتى الآن',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              )
+                  : ListView.builder(
+                itemCount: _quotes.length,
+                itemBuilder: (context, index) {
+                  final quote = _quotes[index];
+                  return QuoteCard(
+                    quoteText: quote.text,
+                    bookName: quote.bookName ?? 'غير معروف',
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
 }
