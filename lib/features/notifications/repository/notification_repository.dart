@@ -8,16 +8,13 @@ class NotificationRepository {
   final ApiService _api;
   NotificationRepository(this._api);
 
-  // ==========================
   // جلب جميع الإشعارات
-  // ==========================
   Future<List<NotificationModel>> fetchNotifications() async {
     try {
       final response = await _api.get(ApiEndpoints.notifications);
 
-      /// الباك يرجع List مباشرة
+     //  الباك يرجع List مباشرة
       final dynamic rawData = response.data;
-
       final List<dynamic> data =
       rawData is String ? jsonDecode(rawData) : rawData as List<dynamic>;
 
@@ -30,16 +27,12 @@ class NotificationRepository {
     }
   }
 
-  // ==========================
-  // إعداد التوكن (مثل ProfileRepository)
-  // ==========================
+  // إعداد التوكن
   void setAuthToken(String token) {
     _api.setAuthToken(token);
   }
 
-  // ==========================
   // معالجة الأخطاء
-  // ==========================
   String _handleError(DioException e) {
     if (e.response != null) {
       return 'Server error: ${e.response?.statusCode} → ${e.response?.data}';

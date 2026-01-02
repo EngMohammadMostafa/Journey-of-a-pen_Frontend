@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
-
 import '../page/competition_book_reader_page.dart';
 
 class CompetitionBookCard extends StatefulWidget {
@@ -187,7 +186,7 @@ class _CompetitionBookCardState extends State<CompetitionBookCard>
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 16),
-                        // زر التحميل الجديد
+
                         IconButton(
                           icon: const Icon(Icons.download_rounded, color: Color(0xFF1C597B)),
                           onPressed: () async {

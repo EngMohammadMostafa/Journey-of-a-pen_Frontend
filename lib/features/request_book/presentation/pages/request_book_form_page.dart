@@ -210,9 +210,7 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
     }
   }
 
-// ==============================
-// تصميم رسالة النجاح (مثل صفحة المسابقة)
-// ==============================
+//  رسالة النجاح
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
@@ -281,9 +279,7 @@ class _RequestBookFormPageState extends State<RequestBookFormPage> {
     );
   }
 
-// ==============================
-// رسالة خطأ بنفس التصميم
-// ==============================
+// رسالة خطأ
   void _showErrorDialog(String message) {
     showDialog(
       context: context,

@@ -24,9 +24,7 @@ class ApiService {
 
     _dio = Dio(options);
 
-    // ====================================================
     //  Interceptor لعرض كل الطلبات والردود والأخطاء
-    // ====================================================
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -71,11 +69,9 @@ class ApiService {
     print(" Token set successfully: $token");
   }
 
-//  Getter آمن للقراءة فقط
   String? get token => _authToken;
 
 
-  // دوال عامة
   Future<Response> get(String endpoint, {Map<String, dynamic>? params}) async {
     return await _dio.get(endpoint, queryParameters: params);
   }

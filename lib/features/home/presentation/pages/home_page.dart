@@ -17,9 +17,7 @@ import '../../provider/home_provider.dart';
 import '../../repository/category_repository.dart';
 import '../widgets/bottom_nav_bar.dart';
 
-// ============================
 // الصفحة الرئيسية
-// ============================
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -52,7 +50,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       try {
         Provider.of<HomeProvider>(context, listen: false).fetchAllBooks();
       } catch (e) {
-        // في حال لم يكن الـ Provider جاهزًا بعد، نتجاهل الخطأ بأمان
+        // في حال لم يكن الـ Provider جاهزًا بعد نتجاهل الخطأ بأمان
         print('Error calling fetchAllBooks from initState: $e');
       }
     });
@@ -84,7 +82,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       body: Stack(
         children: [
-          //  الخلفية المتدرجة
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -116,7 +113,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           if (index == 1) {
             final booksProvider = context.read<BooksProvider>();
 
-            // 🔹 تحديث المشتريات من السيرفر فقط إذا لم يتم تحميلها مسبقًا
+            // تحديث المشتريات
             if (booksProvider.purchasedBooks.isEmpty) {
               await booksProvider.initializeUserData();
             } else {
@@ -132,9 +129,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 }
 
-// ============================
 // محتوى الصفحة الرئيسية
-// ============================
+
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
 
@@ -143,9 +139,7 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  // ============================
   // متغيرات الحالة
-  // ============================
   String searchQuery = "";
   List<BookModel> _books = [];
   List<CategoryModel> _categories = [];
@@ -162,13 +156,10 @@ class _HomeContentState extends State<HomeContent> {
       case 'romance':
         return "assets/images/romantic.png";
       default:
-        return "assets/images/default.png"; // صورة افتراضية لأي قسم آخر
+        return "assets/images/default.png";
     }
   }
 
-  // ============================
-  // الخدمات
-  // ============================
   late CategoryRepository categoryRepository;
   late BooksService booksService;
 
@@ -184,9 +175,7 @@ class _HomeContentState extends State<HomeContent> {
     _loadCategories();
   }
 
-  // ============================
   // تحميل الكتب
-  // ============================
   Future<void> _loadBooks() async {
     setState(() => _isLoading = true);
     try {
@@ -200,9 +189,7 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  // ============================
   // تحميل التصنيفات
-  // ============================
   Future<void> _loadCategories() async {
     setState(() => _isLoadingCategories = true);
     try {
@@ -218,13 +205,10 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  // ============================
   // فلترة الكتب
-  // ============================
   List<BookModel> getFilteredBooks() {
     List<BookModel> list = _books;
 
-    // 🔹 إذا كان هناك بحث → تجاهل القسم وابحث في كل الكتب
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
       return list.where((book) {
@@ -234,7 +218,6 @@ class _HomeContentState extends State<HomeContent> {
       }).toList();
     }
 
-    // 🔹 إذا لا يوجد بحث → فلترة حسب القسم فقط
     if (selectedCategory != null) {
       list = list
           .where((book) => book.categoryName == selectedCategory!.name)
@@ -407,7 +390,7 @@ class _HomeContentState extends State<HomeContent> {
                                 ),
                                 const SizedBox(height: 10),
 
-                                // حالة الكتاب (مجاني / مدفوع) + الإعجاب
+                                // حالة الكتاب (مجاني / مدفوع) و الإعجاب
                                 Container(
                                   padding:
                                   const EdgeInsets.symmetric(

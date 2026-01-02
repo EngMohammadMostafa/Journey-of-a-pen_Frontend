@@ -23,9 +23,8 @@ class _QuotesPageState extends State<QuotesPage> {
   bool _quoteError = false;
   bool _bookError = false;
 
-  // ============================
   // استرجاع التوكن عند فتح الصفحة
-  // ============================
+
   Future<void> _initAuth() async {
     final token = await PrefsHelper.getToken();
     if (token != null) {
@@ -40,9 +39,8 @@ class _QuotesPageState extends State<QuotesPage> {
     _initializePage();
   }
 
-  // ============================
   // استدعاء التوكن أولاً ثم جلب الاقتباسات
-  // ============================
+
   Future<void> _initializePage() async {
     await _initAuth();  // ← استرجاع التوكن أولاً
     await _fetchQuotes(); // ← ثم جلب الاقتباسات

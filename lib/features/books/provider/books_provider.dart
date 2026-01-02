@@ -17,9 +17,7 @@ class BooksProvider extends ChangeNotifier {
 
   List<PurchaseModel> purchasedBooks = [];
 
-  // =========================
   // جلب جميع الكتب وتهيئة البيانات بعد تسجيل الدخول
-  // =========================
   Future<void> initializeUserData() async {
     loading = true;
     error = null;
@@ -162,9 +160,7 @@ class BooksProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  // =========================
-  // باقي الدوال
-  // =========================
+
   Future<void> loadBookById(int id) async {
     try {
       loading = true;

@@ -6,13 +6,9 @@ class NotificationService {
 
   NotificationService(this._api);
 
-  // ==========================
   // جلب جميع الإشعارات
-  // ==========================
   Future<List<NotificationModel>> fetchNotifications() async {
     final response = await _api.get('/notifications');
-
-    // الباك يرجع List مباشرة
     final data = response.data as List<dynamic>;
 
     return data

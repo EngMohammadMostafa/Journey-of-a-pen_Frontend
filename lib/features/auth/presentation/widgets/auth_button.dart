@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class AuthButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  final Color color; // اللون الأساسي
-  final Color? textColor; //  لون النص
+  final Color color;
+  final Color? textColor;
   final bool isLoading;
   final bool isSecondary;
 

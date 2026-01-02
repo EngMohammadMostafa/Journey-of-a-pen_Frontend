@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -137,7 +136,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
       final booksResp =
       await api.get('/competitions/${competition!['id']}/books');
 
-      // جلب كل الكتب التي أرسلها السيرفر (تمت الموافقة عليها مسبقًا من الباك)
+      //جلب كل الكتب التي تمت الموافقة عليها
       books = List<Map<String, dynamic>>.from(booksResp.data['books']);
 
       // معرفة إذا كان المستخدم قد شارك مسبقًا
@@ -177,19 +176,18 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
       debugPrint("Error toggling like: $e");
     }
   }
-// داخل _showJoinDialog() فقط استبدل المعالجة الحالية بالآتي
 
   void _showJoinDialog() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     if (token == null) {
-      _showErrorDialog("❌ لم يتم تسجيل الدخول");
+      _showErrorDialog(" لم يتم تسجيل الدخول");
       return;
     }
 
     if (books.length >= (competition?['max_user'] ?? 5)) {
-      _showErrorDialog("❌ اكتمل عدد المشاركين");
+      _showErrorDialog(" اكتمل عدد المشاركين");
       return;
     }
 
@@ -227,7 +225,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          "⚠️ لقد شاركت مسبقًا في هذه المسابقة",
+                          " لقد شاركت مسبقًا في هذه المسابقة",
                           style: TextStyle(
                             color: Colors.red.shade700,
                             fontWeight: FontWeight.bold,
@@ -373,7 +371,6 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
     );
   }
 
-// إضافة الدوال المساعدة لعرض Dialog
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
@@ -576,7 +573,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
                         Row(
                           children: [
-                            // 🔹 أيقونة شروط المسابقة
+                            //  أيقونة شروط المسابقة
                             InkWell(
                               onTap: _showCompetitionRules,
                               borderRadius: BorderRadius.circular(20),
@@ -596,7 +593,7 @@ class _WritingCompetitionsPageState extends State<WritingCompetitionsPage> {
 
                             const SizedBox(width: 8),
 
-                            // 🔹 زر الانضمام
+                            //  زر الانضمام
                             ElevatedButton.icon(
                               onPressed: (!_loading && competition != null && !hasJoined)
                                   ? _showJoinDialog

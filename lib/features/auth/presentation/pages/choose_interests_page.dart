@@ -168,7 +168,6 @@ class _ChooseInterestsPageState extends State<ChooseInterestsPage> {
               ),
             ),
 
-            //  المحتوى الرئيسي
             SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
@@ -196,7 +195,6 @@ class _ChooseInterestsPageState extends State<ChooseInterestsPage> {
                     ),
                     const SizedBox(height: 40),
 
-                    //  الشبكة مع تعطيل تمريرها الداخلي
                     GridView.count(
                       crossAxisCount: 3,
                       mainAxisSpacing: 15,

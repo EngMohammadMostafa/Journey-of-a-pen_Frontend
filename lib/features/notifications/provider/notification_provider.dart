@@ -5,17 +5,14 @@ import '../repository/notification_repository.dart';
 
 class NotificationProvider extends ChangeNotifier {
   final NotificationRepository _repository;
-
   NotificationProvider(this._repository);
 
-  // ==========================
   // الحالة
-  // ==========================
   List<NotificationModel> _notifications = [];
   bool _isLoading = false;
   String? _errorMessage;
 
-  /// 🆕 عدد الإشعارات السابقة (للمقارنة)
+  // عدد الإشعارات السابقة (للمقارنة)
   int _lastNotificationsCount = 0;
 
   // ==========================
@@ -25,13 +22,11 @@ class NotificationProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// 🆕 عدد الإشعارات الجديدة (Badge)
+ //عدد الإشعارات الجديدة
   int get unreadCount =>
       _notifications.where((n) => n.isNew).length;
 
-  // ==========================
   // جلب الإشعارات من الباك
-  // ==========================
   Future<void> fetchNotifications() async {
     _isLoading = true;
     _errorMessage = null;
@@ -40,12 +35,12 @@ class NotificationProvider extends ChangeNotifier {
     try {
       final list = await _repository.fetchNotifications();
 
-      /// 🧠 خريطة بالإشعارات القديمة
+     //خريطة بالإشعارات القديمة
       final Map<int, NotificationModel> oldMap = {
         for (var n in _notifications) n.notificationId: n
       };
 
-      /// 🔄 دمج الحالة القديمة مع الجديدة
+     // دمج الحالة القديمة مع الجديدة
       _notifications = list.map((n) {
         final old = oldMap[n.notificationId];
         if (old != null) {
@@ -56,7 +51,7 @@ class NotificationProvider extends ChangeNotifier {
         return n;
       }).toList();
 
-      /// 🔔 اكتشاف إشعار جديد (اختياري)
+     // اكتشاف إشعار جديد
       if (_notifications.length > _lastNotificationsCount) {
         debugPrint("🔔 New notification arrived");
       }
@@ -73,32 +68,25 @@ class NotificationProvider extends ChangeNotifier {
     }
   }
 
-  // ==========================
   // تحديث يدوي أو دوري
-  // ==========================
   Future<void> refresh() async {
     await fetchNotifications();
   }
-
-  /// 🔄 تحديث تلقائي (يمكن استدعاؤها من UI)
+// تحديث تلقائي (يمكن استدعاؤها من UI)
   void startAutoRefresh({Duration interval = const Duration(seconds: 5)}) {
     Future.delayed(interval, () async {
       await fetchNotifications();
-      startAutoRefresh(interval: interval); // استدعاء متكرر
+      startAutoRefresh(interval: interval);
     });
   }
 
-  // ==========================
   // تعليم إشعار كمقروء
-  // ==========================
   void markAsRead(NotificationModel notification) {
     notification.isNew = false;
     notifyListeners();
   }
 
-  // ==========================
   // تعليم الكل كمقروء
-  // ==========================
   void markAllAsRead() {
     for (final n in _notifications) {
       n.isNew = false;
@@ -106,14 +94,10 @@ class NotificationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ==========================
   // عدد الإشعارات
-  // ==========================
   int get notificationsCount => _notifications.length;
 
-  // ==========================
   // مسح البيانات محليًا
-  // ==========================
   void clear() {
     _notifications = [];
     _errorMessage = null;

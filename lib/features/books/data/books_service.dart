@@ -12,9 +12,7 @@ class BooksService {
 
   BooksService(this._api);
 
-  // ==========================
   // جلب كل الكتب
-  // ==========================
   Future<List<BookModel>> fetchBooks() async {
     final response = await _api.get('/books');
     final data = response.data as Map<String, dynamic>;
@@ -22,27 +20,21 @@ class BooksService {
     return booksList.map((json) => BookModel.fromJson(json)).toList();
   }
 
-  // ==========================
   // جلب كتاب محدد حسب ID
-  // ==========================
   Future<BookModel> fetchBookById(int id) async {
     final response = await _api.get('/books/$id');
     final data = response.data as Map<String, dynamic>;
     return BookModel.fromJson(data['book']);
   }
 
-  // ==========================
   // شراء كتاب
-  // ==========================
   Future<PurchaseModel> purchaseBook(int id) async {
     final response = await _api.post('/books/$id/purchase');
     final data = response.data as Map<String, dynamic>;
     return PurchaseModel.fromJson(data);
   }
 
-  // ==========================
   // جلب الكتب حسب القسم
-  // ==========================
   Future<List<BookModel>> fetchBooksByCategory(int categoryId) async {
     final response = await _api.get('/categories/$categoryId/books');
     final data = response.data as Map<String, dynamic>;
@@ -50,9 +42,8 @@ class BooksService {
     return booksList.map((json) => BookModel.fromJson(json)).toList();
   }
 
-  // ==========================
-  // تحميل الكتاب وتسجيله على السيرفر (للكتاب المجاني أو المدفوع بعد الشراء)
-  // ==========================
+  // تحميل الكتاب  (للكتاب المجاني أو المدفوع بعد الشراء)
+
   Future<File?> downloadAndRegisterBook(BookModel book, {String? userToken}) async {
     try {
       String? token = userToken;
@@ -67,8 +58,6 @@ class BooksService {
       }
 
       _api.setAuthToken(token);
-
-      // طلب التحميل من السيرفر (يتحقق من الملكية على السيرفر)
       final response = await _api.post('/books/${book.id}/download');
 
       if (response.statusCode == 200 &&
@@ -76,7 +65,6 @@ class BooksService {
           response.data['download_url'] != null) {
         book.downloadUrl = response.data['download_url'];
 
-        // مجلد التطبيق لحفظ الملف محليًا
         final dir = await getApplicationDocumentsDirectory();
         final safeTitle = book.title.replaceAll(RegExp(r'[^\w\s-]'), '');
         final filePath =
@@ -109,9 +97,8 @@ class BooksService {
     }
   }
 
-  // ==========================
   // فتح الكتاب (تحميله إذا لم يكن موجودًا محليًا)
-  // ==========================
+
   Future<void> openBook(BookModel book) async {
     if (book.filePath == null) {
       final file = await downloadAndRegisterBook(book);
@@ -122,9 +109,7 @@ class BooksService {
     }
   }
 
-  // ==========================
   // Toggle Like / Unlike
-  // ==========================
   Future<Map<String, dynamic>> toggleLike(int bookId, {String? userToken}) async {
     try {
       String? token = userToken;
@@ -152,9 +137,8 @@ class BooksService {
       rethrow;
     }
   }
-  // ==========================
+
 // جلب جميع الكتب التي اشتراها المستخدم
-// ==========================
   Future<List<PurchaseModel>> getPurchasedBooks() async {
     final response = await _api.get('/me/purchased-books');
 
@@ -165,7 +149,7 @@ class BooksService {
           .map((json) => PurchaseModel(
         book: BookModel.fromJson(json),
         message: "تمت إضافته من السيرفر",
-        purchasedAt: DateTime.now(), // إذا أردت استخدام created_at من API ضع: DateTime.parse(json['created_at'])
+        purchasedAt: DateTime.now(),
       ))
           .toList();
     } else {

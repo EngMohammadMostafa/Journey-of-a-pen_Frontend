@@ -16,9 +16,9 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  Set<String> readIds = {}; // IDs المقروءة
-  final player = AudioPlayer();  // مشغل الصوت لمرة واحدة فقط
-  int _lastNotificationsCount = 0; // لتتبع عدد الإشعارات
+  Set<String> readIds = {};
+  final player = AudioPlayer();
+  int _lastNotificationsCount = 0;
 
   @override
   void initState() {
@@ -38,13 +38,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
-  /// جلب الإشعارات وتشغيل الصوت إذا وصل إشعار جديد
+  // جلب الإشعارات وتشغيل الصوت إذا وصل إشعار جديد
   Future<void> _fetchNotificationsWithSound() async {
     final provider = context.read<NotificationProvider>();
     await provider.fetchNotifications();
 
     if (provider.notifications.length > _lastNotificationsCount) {
-      // إشعار جديد وصل → تشغيل الصوت
+      // إشعار جديد وصل تشغيل الصوت
       _playNotificationSound();
     }
 
@@ -56,12 +56,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
       readIds.add(notification.notificationId.toString());
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('read_notifications', readIds.toList());
-
-      // تعليم الإشعار كمقروء في البروفايدر
       final provider = context.read<NotificationProvider>();
       provider.markAsRead(notification);
 
-      setState(() {}); // تحديث الواجهة فورًا لإلغاء "جديد"
+      setState(() {});
     }
   }
 
@@ -115,7 +113,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  /// ===== Header + Badge =====
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -151,7 +148,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                   const SizedBox(height: 20),
 
-                  /// 🔄 Loading
                   if (notificationProvider.isLoading)
                     const Expanded(
                       child: Center(
@@ -159,7 +155,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       ),
                     )
 
-                  /// ❌ Error
                   else if (notificationProvider.errorMessage != null)
                     Expanded(
                       child: Center(
@@ -170,7 +165,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       ),
                     )
 
-                  /// 📭 Empty
                   else if (notifications.isEmpty)
                       const Expanded(
                         child: Center(
@@ -181,7 +175,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ),
                       )
 
-                    /// ✅ Data
                     else
                       Expanded(
                         child: ListView.builder(
@@ -210,9 +203,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   await _markAsRead(notification);
                                   _playNotificationSound();
                                   _showSnackBar(
-                                      "تم قراءة الإشعار: ${notification.title}");
-
-                                  // عرض الحوار كما في السابق
+                                      "تم قراءة الإشعار: ${notification.title}"
+                                  );
                                   showGeneralDialog(
                                     context: context,
                                     barrierDismissible: true,

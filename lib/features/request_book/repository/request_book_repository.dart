@@ -11,9 +11,8 @@ class RequestBookRepository {
 
   RequestBookRepository(this._api);
 
-  // ==========================
   // إعداد التوكن
-  // ==========================
+
   Future<void> setAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -22,9 +21,8 @@ class RequestBookRepository {
     }
   }
 
-  // ==========================
   // جلب جميع طلبات المستخدم
-  // ==========================
+
   Future<List<RequestBookModel>> fetchMyRequests() async {
     try {
       await setAuthToken();
@@ -43,9 +41,8 @@ class RequestBookRepository {
     }
   }
 
-  // ==========================
   // إنشاء طلب كتاب جديد
-  // ==========================
+
   Future<RequestBookModel> createRequestBook({
     required String title,
     required String description,
@@ -77,9 +74,8 @@ class RequestBookRepository {
     }
   }
 
-  // ==========================
   // تحميل ملف طلب كتاب
-  // ==========================
+
   Future<File?> downloadRequestFile(RequestBookModel requestBook) async {
     try {
       await setAuthToken();
@@ -107,9 +103,8 @@ class RequestBookRepository {
     }
   }
 
-  // ==========================
   // معالجة الأخطاء
-  // ==========================
+
   String _handleError(DioException e) {
     if (e.response != null) {
       return 'Server error: ${e.response?.statusCode} → ${e.response?.data}';

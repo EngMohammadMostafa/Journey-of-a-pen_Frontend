@@ -6,7 +6,7 @@ import 'package:open_file/open_file.dart';
 import '../../../core/api/api_service.dart';
 
 class PdfService {
-  /// تحميل أو فتح كتاب مسابقة PDF
+ //  تحميل أو فتح كتاب مسابقة PDF
   static Future<void> openCompetitionBook({
     required BuildContext context,
     required int bookId,
@@ -17,7 +17,6 @@ class PdfService {
       final filePath = '${dir.path}/$title.pdf';
       final file = File(filePath);
 
-      // إذا كان الملف موجود محليًا → افتحه مباشرة
       if (await file.exists()) {
         await OpenFile.open(file.path);
         return;
@@ -29,7 +28,6 @@ class PdfService {
         return;
       }
 
-      //  تحميل من الباك مع التوكن
       await ApiService().dio.download(
         '/competition-books/$bookId/download',
         filePath,
@@ -49,7 +47,7 @@ class PdfService {
     }
   }
 
-  /// تحميل كتاب PDF بدون فتحه مباشرة
+  // تحميل كتاب PDF بدون فتحه مباشرة
   static Future<File> downloadCompetitionBook({
     required BuildContext context,
     required int bookId,
@@ -62,7 +60,6 @@ class PdfService {
 
       final file = File(filePath);
 
-      //  إذا كان الملف موجودًا لا تعيد تحميله
       if (await file.exists()) {
         return file;
       }
@@ -72,11 +69,10 @@ class PdfService {
         throw Exception('لم يتم تسجيل الدخول');
       }
 
-      //  التحميل الصحيح للـ PDF
       final response = await ApiService().dio.get(
         '/competition-books/$bookId/download',
         options: Options(
-          responseType: ResponseType.bytes, //  مهم جدًا
+          responseType: ResponseType.bytes,
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/pdf',
@@ -84,7 +80,6 @@ class PdfService {
         ),
       );
 
-      //  حفظ الـ bytes كملف حقيقي
       await file.writeAsBytes(response.data, flush: true);
 
       return file;
@@ -97,7 +92,7 @@ class PdfService {
     }
   }
 
-  // ================== Helpers ==================
+  //Helpers
 
   static void _handleDioError(BuildContext context, DioException e) {
     if (e.response == null) {

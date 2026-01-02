@@ -15,7 +15,7 @@ class PurchaseModel {
     this.pointsEarned,
     this.status,
     this.totalAmount,
-    this.purchasedAt, // <-- أضف هنا
+    this.purchasedAt,
     this.book,
   });
 
@@ -30,7 +30,7 @@ class PurchaseModel {
           : null,
       purchasedAt: json['purchased_at'] != null
           ? DateTime.parse(json['purchased_at'])
-          : null, // <-- حول السلسلة إلى DateTime
+          : null,
       book: json['book'] != null ? BookModel.fromJson(json['book']) : null,
     );
   }

@@ -50,7 +50,7 @@ class _PurchasedBooksSectionState extends State<PurchasedBooksSection> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  ' الكتب المدفوعة',
+                  ' الكتب المحملة',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,

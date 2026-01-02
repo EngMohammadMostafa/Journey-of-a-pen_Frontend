@@ -23,9 +23,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
     _syncLocalBookState();
   }
 
-  // =========================
   // زر الشراء أو القراءة أو التحميل
-  // =========================
   void _onActionPressed() async {
     final booksProvider = context.read<BooksProvider>();
     final book = widget.book;
@@ -37,7 +35,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
     try {
       // إذا الكتاب مملوك بالفعل
       if (book.isOwned) {
-        // تحميل الكتاب إذا لم يكن محمّل
+        // تحميل الكتاب إذا لم يكن محمل
         if (!book.isDownloaded) {
           final downloadLink = await booksProvider.downloadBook(book);
           if (downloadLink != null) {
@@ -239,10 +237,10 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     ),
                     label: Text(
                       _loadingAction
-                          ? "Loading..."
+                          ? "تحميل..."
                           : book.isOwned
-                          ? (book.isDownloaded ? "Open Book" : "Download Book")
-                          : (book.isPaid ? "Buy Now" : "Read Now"),
+                          ? (book.isDownloaded ? "فتح الكتاب" : "تحميل الكتاب")
+                          : (book.isPaid ? "دفع الآن" : "أقرأ الآن"),
                       style: const TextStyle(
                         fontFamily: 'Papyrus',
                         fontSize: 18,

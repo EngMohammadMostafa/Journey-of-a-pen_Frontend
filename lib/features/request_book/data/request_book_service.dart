@@ -10,9 +10,7 @@ class RequestBookService {
 
   RequestBookService(this._api);
 
-  // ==========================
   // إنشاء طلب كتاب جديد
-  // ==========================
   Future<RequestBookModel> createRequestBook({
     required String title,
     required String description,
@@ -32,7 +30,6 @@ class RequestBookService {
       'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
     });
 
-    // استخدام Dio مباشرة
     final response = await _api.dio.post(
       '/request-books',
       data: formData,
@@ -45,9 +42,7 @@ class RequestBookService {
     }
   }
 
-  // ==========================
   // جلب جميع طلبات المستخدم
-  // ==========================
   Future<List<RequestBookModel>> fetchMyRequests() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -63,9 +58,8 @@ class RequestBookService {
     }
   }
 
-  // ==========================
   // تحميل ملف طلب كتاب
-  // ==========================
+
   Future<File?> downloadRequestFile(RequestBookModel requestBook) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';

@@ -1,12 +1,12 @@
 class AnswerModel {
   final int id;
   final String answer;
-  final bool isCorrect; // اجعلها non-nullable لتسهيل التعامل
+  final bool isCorrect;
 
   AnswerModel({
     required this.id,
     required this.answer,
-    this.isCorrect = false, // افتراضي false
+    this.isCorrect = false,
   });
 
   factory AnswerModel.fromJson(Map<String, dynamic> json) {

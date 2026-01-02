@@ -27,7 +27,6 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     setState(() => isLoading = true);
 
-    //  جلب AuthRepository من Provider
     final authRepo = Provider.of<AuthRepository>(context, listen: false);
 
     final success = await authRepo.login(
@@ -35,18 +34,16 @@ class _LoginPageState extends State<LoginPage> {
       passwordController.text.trim(),
     );
 
-    if (!mounted) return; // تحقق أن الصفحة ما زالت موجودة
+    if (!mounted) return;
     setState(() => isLoading = false);
 
     if (success) {
       if (!mounted) return;
 
-      // 🔹⬇⬇⬇ التعديل المهم هنا ⬇⬇⬇
       final booksProvider =
       Provider.of<BooksProvider>(context, listen: false);
 
       await booksProvider.initializeUserData();
-      // 🔹⬆⬆⬆ نهاية التعديل ⬆⬆⬆
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login successful!')),

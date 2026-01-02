@@ -21,7 +21,6 @@ class ProfileHeader extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // الخلفية العلوية
         ClipPath(
           clipper: _HeaderClipper(),
           child: Container(
@@ -39,13 +38,12 @@ class ProfileHeader extends StatelessWidget {
           ),
         ),
 
-// محتوى الرأس
         Positioned(
           top: 40,
           left: 0,
           right: 0,
           child: Column(
-            mainAxisSize: MainAxisSize.min, // لتجنب المساحة الفارغة
+            mainAxisSize: MainAxisSize.min,
             children: [
               // الصورة الشخصية
               CircleAvatar(

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import '../../../core/api/api_service.dart';
 import '../../../core/constants/api_endpoints.dart';
@@ -10,9 +9,8 @@ import '../data/models/competition_book_model.dart';
 class CompetitionRepository {
   final ApiService _api = ApiService();
 
-  // ===============================
+
   //  جلب المسابقات المتاحة
-  // ===============================
   Future<List<CompetitionModel>> getCompetitions() async {
     try {
       final response = await _api.get(ApiEndpoints.competitions);
@@ -32,9 +30,7 @@ class CompetitionRepository {
     }
   }
 
-  // ===============================
   //  جلب كتب مسابقة معينة
-  // ===============================
   Future<List<CompetitionBookModel>> getCompetitionBooks(int competitionId) async {
     try {
       final response = await _api.get(
@@ -56,9 +52,7 @@ class CompetitionRepository {
     }
   }
 
-  // ===============================
   //  المشاركة في المسابقة (رفع كتاب)
-  // ===============================
   Future<void> participate({
     required int competitionId,
     required String title,
@@ -84,9 +78,8 @@ class CompetitionRepository {
       throw Exception(_handleError(e));
     }
   }
-  // ===============================
+
   //  لايك / إلغاء لايك
-  // ===============================
   Future<_LikeResult> toggleLike(int competitionBookId) async {
     try {
       final response = await _api.post(
@@ -107,9 +100,7 @@ class CompetitionRepository {
     }
   }
 
-  // ===============================
   //  تحميل كتاب مسابقة
-  // ===============================
   Future<void> downloadCompetitionBook(int competitionBookId) async {
     try {
       await _api.get(
@@ -121,16 +112,11 @@ class CompetitionRepository {
   }
 
 
-  // ===============================
-  //  ربط التوكن (إن احتجته)
-  // ===============================
   void setAuthToken(String token) {
     _api.setAuthToken(token);
   }
 
-  // ===============================
-  //  Error Handler (نفس مشروعك)
-  // ===============================
+
   String _handleError(DioException e) {
     if (e.response != null) {
       return 'Server error: ${e.response?.statusCode} → ${e.response?.data}';
@@ -140,9 +126,7 @@ class CompetitionRepository {
   }
 }
 
-// ==================================
 //  كلاس داخلي لنتيجة اللايك
-// ==================================
 class _LikeResult {
   final bool liked;
   final int likesCount;

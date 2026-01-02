@@ -11,9 +11,7 @@ class AuthRepository {
 
   AuthRepository(this._apiService);
 
-  // ==============================
   //  تسجيل المستخدم الجديد
-  // ==============================
   Future<String?> register(
       String username,
       String email,
@@ -50,7 +48,6 @@ class AuthRepository {
           print(' User: ${registerResponse.user.username}');
 
           if (registerResponse.token != null) {
-            // حفظ التوكن وربطه مع ApiService
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('token', registerResponse.token);
             _apiService.setAuthToken(registerResponse.token);
@@ -61,7 +58,7 @@ class AuthRepository {
           print(' Register Success: ${data['message'] ?? 'Registered (no message field)'}');
         }
 
-        return null; // null تعني لا يوجد خطأ → التسجيل ناجح
+        return null;
       } else {
         print(' Register Failed → Status: $status, Body: ${response.data}');
 
@@ -80,9 +77,7 @@ class AuthRepository {
     }
   }
 
-  // ==============================
   //  تسجيل الدخول
-  // ==============================
   Future<bool> login(String email, String password) async {
     try {
       final response = await _apiService.post(
@@ -109,7 +104,6 @@ class AuthRepository {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
 
-          // ربط التوكن مع ApiService (مهم جداً)
           _apiService.setAuthToken(token);
 
           print("🔗 Token added to API headers successfully");

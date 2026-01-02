@@ -14,11 +14,7 @@ class BooksRepository {
   // جلب الكتب المشتراة من الباك
   Future<List<PurchaseModel>> getPurchasedBooks() async {
     final response = await api.get(ApiEndpoints.purchasedBooks);
-
-    // الوصول لمفتاح 'books' داخل JSON
     final data = response.data['books'] as List<dynamic>;
-
-    // تحويل كل عنصر إلى PurchaseModel
     final purchases = data.map((json) {
       final book = BookModel.fromJson(json);
       return PurchaseModel(
@@ -28,7 +24,7 @@ class BooksRepository {
       );
     }).toList();
 
-    // حفظ IDs الكتب المشتراة محليًا
+    // حفظ الكتب المشتراة محليًا
     final purchasedIds = purchases.map((p) => p.book!.id).toList();
     await PrefsHelper.setPurchasedBookIds(purchasedIds);
 
@@ -61,7 +57,7 @@ class BooksRepository {
     return PurchaseModel.fromJson(response.data);
   }
 
-  // تحميل كتاب + تسجيله محليًا
+  // تحميل كتاب و تسجيله محليًا
   Future<String?> downloadAndRegisterBook(BookModel book) async {
     try {
       final response = await api.post(ApiEndpoints.downloadBook(book.id));

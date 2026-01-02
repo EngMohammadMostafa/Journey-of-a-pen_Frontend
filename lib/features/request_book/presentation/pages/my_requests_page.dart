@@ -49,7 +49,6 @@ class _MyRequestsPageState extends State<MyRequestsPage> {
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            // الخلفية المتدرجة
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(

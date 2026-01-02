@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../../core/api/api_service.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import 'models/competition_book_model.dart';
@@ -11,12 +10,9 @@ import 'models/competition_model.dart';
 
 class CompetitionService {
   final ApiService _api;
-
   CompetitionService(this._api);
 
-  // ==========================
   // جلب كل المسابقات
-  // ==========================
   Future<List<CompetitionModel>> fetchCompetitions() async {
     final response = await _api.get(ApiEndpoints.competitions);
 
@@ -28,9 +24,7 @@ class CompetitionService {
         .toList();
   }
 
-  // ==========================
   // جلب تفاصيل مسابقة واحدة
-  // ==========================
   Future<CompetitionModel> fetchCompetitionById(int id) async {
     final response = await _api.get('${ApiEndpoints.competitions}/$id');
     final data = response.data as Map<String, dynamic>;
@@ -38,9 +32,7 @@ class CompetitionService {
     return CompetitionModel.fromJson(data['competition']);
   }
 
-  // ==========================
   // المشاركة في مسابقة (رفع كتاب)
-  // ==========================
   Future<bool> participateInCompetition({
     required int competitionId,
     required String title,
@@ -67,9 +59,7 @@ class CompetitionService {
     }
   }
 
-  // ==========================
   // جلب كتب المسابقة
-  // ==========================
   Future<List<CompetitionBookModel>> fetchCompetitionBooks(int competitionId) async {
     final response = await _api.get(
       '${ApiEndpoints.competitions}/$competitionId/books',
@@ -83,9 +73,7 @@ class CompetitionService {
         .toList();
   }
 
-  // ==========================
   // تحميل كتاب مسابقة وفتحه
-  // ==========================
   Future<File?> downloadAndOpenCompetitionBook(
       CompetitionBookModel book,
       ) async {

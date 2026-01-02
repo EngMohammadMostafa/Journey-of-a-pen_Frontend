@@ -4,7 +4,7 @@ import '../../data/models/user_model.dart';
 import '../../provider/profile_provider.dart';
 
 class EditProfileSection extends StatefulWidget {
-  final UserModel? user; //  اختياري
+  final UserModel? user;
 
   const EditProfileSection({Key? key, this.user}) : super(key: key);
 

@@ -8,9 +8,7 @@ import '../models/quote_model.dart';
 class QuoteRepository {
   final ApiService _apiService = ApiService();
 
-  // ==============================
   //  جلب جميع الاقتباسات
-  // ==============================
   Future<List<Quote>> fetchQuotes() async {
     try {
       //  جلب التوكن من SharedPreferences
@@ -21,7 +19,6 @@ class QuoteRepository {
         throw Exception('لم يتم العثور على التوكن. يُرجى تسجيل الدخول مجددًا.');
       }
 
-      //  تعيين التوكن في ApiService
       _apiService.setAuthToken(token);
 
       final response = await _apiService.get(ApiEndpoints.quotes);
@@ -36,10 +33,7 @@ class QuoteRepository {
       throw Exception('حدث خطأ أثناء تحميل الاقتباسات: $e');
     }
   }
-
-  // ==============================
   //  إضافة اقتباس جديد
-  // ==============================
   Future<Quote> addQuote(String text, String bookName, int userId) async {
     try {
       //  جلب التوكن من SharedPreferences

@@ -9,19 +9,18 @@ class HomeProvider extends ChangeNotifier {
 
   List<BookModel> _books = [];
   String _searchQuery = '';
-  String? _selectedCategoryName; // بدل _selectedCategoryId
+  String? _selectedCategoryName;
 
   List<BookModel> get books => _books;
   String get searchQuery => _searchQuery;
 
-  // جلب كل الكتب من API
   Future<void> fetchAllBooks() async {
     try {
       final response = await _booksService.fetchBooks();
       _books = response;
     } catch (e) {
       print("Error fetching books: $e");
-      _books = []; // تعيين قائمة فارغة عند الخطأ
+      _books = [];
     } finally {
       notifyListeners();
     }
@@ -33,7 +32,7 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // اختيار التصنيف (استبدل القديم)
+  // اختيار التصنيف
   void selectCategory(String? name) {
     _selectedCategoryName = name;
     notifyListeners();
@@ -61,9 +60,7 @@ class HomeProvider extends ChangeNotifier {
     return result;
   }
 
-  // ==============================
   // دالة للحصول على رابط تحميل الكتاب
-  // ==============================
   Future<String?> getDownloadLink(BookModel book, {String? userToken}) async {
     try {
       // تحميل الكتاب وتسجيله وإرجاع الملف

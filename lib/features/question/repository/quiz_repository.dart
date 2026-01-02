@@ -7,9 +7,7 @@ class QuizRepository {
 
   QuizRepository(this._api);
 
-  // =============================
   //  جلب أسئلة كتاب
-  // =============================
   Future<List<QuestionModel>> fetchQuestions(int bookId) async {
     final response = await _api.get('/books/$bookId/questions');
 
@@ -23,9 +21,7 @@ class QuizRepository {
   }
 
 
-  // =============================
 // جلب النقاط الكلية الحالية للمستخدم
-// =============================
   Future<int> fetchUserTotalPoints() async {
     final response = await _api.get('/users/points');
     final raw = response.data;
@@ -33,19 +29,14 @@ class QuizRepository {
     return data['total_points'] ?? 0;
   }
 
-
-  // =============================
   //  بدء الجلسة
-  // =============================
   Future<Map<String, dynamic>> startSession(int bookId) async {
     final response = await _api.post('/books/$bookId/session/start');
     final raw = response.data;
     return raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
   }
 
-  // =============================
   //  تسجيل إجابة واحدة
-  // =============================
   Future<Map<String, dynamic>> recordAnswer({
     required int bookId,
     required int questionId,
@@ -63,9 +54,7 @@ class QuizRepository {
     return raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
   }
 
-  // =============================
   //  إنهاء الجلسة
-  // =============================
   Future<Map<String, dynamic>> finishSession(int bookId, {List<Map<String, dynamic>>? answers}) async {
     final response = await _api.post(
       '/books/$bookId/session/submit',
@@ -76,9 +65,7 @@ class QuizRepository {
     return raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw);
   }
 
-  // =============================
   //  إنهاء الجلسة عند الخروج
-  // =============================
   Future<void> exitSession(int bookId) async {
     await _api.post('/books/$bookId/session/exit');
   }

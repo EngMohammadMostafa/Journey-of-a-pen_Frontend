@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-
 import '../../../profile/provider/profile_provider.dart';
 import '../../data/models/book_model.dart';
 
@@ -36,7 +35,6 @@ class _BookReaderPageState extends State<BookReaderPage> {
       final filePath = "${dir.path}/${widget.book.id}.pdf";
       final file = File(filePath);
 
-      //  إذا كان الملف موجود مسبقًا → افتحه مباشرة بدون أي تحققات
       if (await file.exists()) {
         document = await PDFDocument.fromFile(file);
         Provider.of<ProfileProvider>(context, listen: false)
@@ -49,16 +47,13 @@ class _BookReaderPageState extends State<BookReaderPage> {
         return;
       }
 
-      //  الملف غير موجود → تحقق من وجود رابط التحميل وحمله
       if (widget.book.downloadUrl == null || widget.book.downloadUrl!.isEmpty) {
-        // إذا كان الكتاب غير موجود محليًا ورابط التحميل غير متاح
         setState(() {
           isLoading = false;
           errorMessage = "لا يمكن فتح الكتاب لأنه غير محمّل مسبقًا";
         });
         return;
       }
-
       //  تحميل الكتاب من الإنترنت
       final response = await http.get(Uri.parse(widget.book.downloadUrl!));
 

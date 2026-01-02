@@ -9,16 +9,14 @@ class CompetitionProvider extends ChangeNotifier {
   CompetitionProvider({required CompetitionRepository repository})
       : _repository = repository;
 
-  // ================== State ==================
+  //State
   bool loading = false;
   String? error;
 
   List<CompetitionModel> competitions = [];
   List<CompetitionBookModel> competitionBooks = [];
 
-  // ================== Competitions ==================
-
-  /// جلب جميع المسابقات المتاحة
+  //Competitions
   Future<void> loadCompetitions() async {
     try {
       loading = true;
@@ -35,9 +33,8 @@ class CompetitionProvider extends ChangeNotifier {
     }
   }
 
-  // ================== Competition Books ==================
+  // Competition Books
 
-  /// جلب كتب مسابقة معينة
   Future<void> loadCompetitionBooks(int competitionId) async {
     try {
       loading = true;
@@ -55,9 +52,8 @@ class CompetitionProvider extends ChangeNotifier {
     }
   }
 
-  // ================== Participate ==================
-
-  /// رفع كتاب للمسابقة
+  //Participate
+  // رفع كتاب للمسابقة
   Future<bool> participateInCompetition({
     required int competitionId,
     required String title,
@@ -84,9 +80,8 @@ class CompetitionProvider extends ChangeNotifier {
     }
   }
 
-  // ================== Like ==================
-
-  /// لايك / إلغاء لايك
+  //Like
+ //  لايك / إلغاء لايك
   Future<void> toggleLike(int competitionBookId) async {
     try {
       final result = await _repository.toggleLike(competitionBookId);
@@ -101,7 +96,7 @@ class CompetitionProvider extends ChangeNotifier {
               likesCount: result.likesCount,
             );
 
-        //  تعديل بسيط مستحسن: ترتيب حسب الإعجابات
+        //   ترتيب حسب الإعجابات
         competitionBooks.sort(
               (a, b) => b.likesCount.compareTo(a.likesCount),
         );
@@ -114,8 +109,7 @@ class CompetitionProvider extends ChangeNotifier {
     }
   }
 
-  // ================== Helpers ==================
-
+  // Helpers
   void clearBooks() {
     competitionBooks.clear();
     notifyListeners();

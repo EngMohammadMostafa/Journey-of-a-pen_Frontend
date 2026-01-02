@@ -6,7 +6,7 @@ class QuizProvider extends ChangeNotifier {
   final QuizRepository _quizRepo;
 
   QuizProvider(this._quizRepo) {
-    // جلب النقاط الكلية عند إنشاء المزود
+    // جلب النقاط الكلية
     fetchTotalPoints();
   }
 
@@ -114,7 +114,7 @@ class QuizProvider extends ChangeNotifier {
     /// زيادة عدد الإجابات الصحيحة للجلسة
     if (isCorrect) addPoint();
 
-    /// زيادة عدد الأسئلة المجابة (لا علاقة له بالباك)
+    /// زيادة عدد الأسئلة المجابة
     answeredCount++;
 
     if (_sessionStarted) {

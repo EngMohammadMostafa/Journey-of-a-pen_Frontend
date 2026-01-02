@@ -6,11 +6,9 @@ class BookModel {
   final bool isPaid;
   final String categoryName;
   final String? description;
-
-  // الحقول المالية
   final double price;
   final double discountRate;
-  int numberOfLikes; // قابل للتغيير عند الإعجاب/إلغاء الإعجاب
+  int numberOfLikes;
 
   // ملفات الكتاب
   String? filePath;
@@ -20,9 +18,7 @@ class BookModel {
   bool isLikedByUser;
   bool isOwned;
   bool isDownloaded;
-
-  // حالة الإعجاب أثناء انتظار API (UI only)
-  bool isLiking; // ← تمت الإضافة
+  bool isLiking;
 
   BookModel({
     required this.id,
@@ -42,7 +38,7 @@ class BookModel {
     this.isLikedByUser = false,
     this.isOwned = false,
     this.isDownloaded = false,
-    this.isLiking = false, // ← القيمة الافتراضية
+    this.isLiking = false,
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -68,7 +64,7 @@ class BookModel {
       isLikedByUser: json['is_liked_by_user'] ?? false,
       isOwned: json['owned'] ?? false,
       isDownloaded: json['downloaded_at'] != null,
-      isLiking: false, // ← القيمة الافتراضية
+      isLiking: false,
     );
   }
 

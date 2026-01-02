@@ -27,7 +27,6 @@ class SuccessPage extends StatelessWidget {
             ),
           ),
 
-          //  المحتوى في المنتصف
           Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -56,7 +55,6 @@ class SuccessPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  //  زر الانتقال
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(

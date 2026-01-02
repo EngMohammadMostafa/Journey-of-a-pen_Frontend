@@ -64,7 +64,6 @@ class _PaymentPageState extends State<PaymentPage> {
         ),
         body: Stack(
           children: [
-            // ===== خلفية التدرج =====
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -80,14 +79,14 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
 
-            // ===== المحتوى =====
+            // المحتوى
             SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ===== بطاقة الكتاب (Glass Effect) =====
+                    //بطاقة الكتاب
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.85),
@@ -168,7 +167,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
                     const SizedBox(height: 50),
 
-                    // ===== زر الدفع بتدرج =====
+                    //زر الدفع
                     Container(
                       height: 56,
                       decoration: BoxDecoration(
@@ -207,7 +206,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ),
 
-                    // ===== رسالة الخطأ =====
+                    // رسالة الخطأ
                     if (errorMessage != null) ...[
                       const SizedBox(height: 24),
                       Text(
@@ -225,7 +224,7 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
 
-            // ===== شاشة التحميل =====
+            // شاشة التحميل
             if (isLoading)
               Container(
                 color: Colors.black.withOpacity(0.5),
