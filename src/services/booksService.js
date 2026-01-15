@@ -1,4 +1,5 @@
 // src/services/booksService.js
+
 import api from './api'; 
 
 export const booksService = {
@@ -12,8 +13,6 @@ export const booksService = {
 getAllCategories: async () => {
   try {
     const response = await api.get('/categories');
-
-    // Backend returns: { success: true, data: [...] }
     return response.data.data || [];
   } catch (error) {
     throw error;
@@ -24,7 +23,7 @@ getAllCategories: async () => {
   getCategoryById: async (categoryId) => {
     try {
       const response = await api.get(`/categories/${categoryId}`);
-      return response.data; // { success:true, category:{...} }
+      return response.data; 
     } catch (error) {
       throw error;
     }
@@ -34,11 +33,12 @@ getAllCategories: async () => {
   addCategory: async (categoryData) => {
     try {
       const response = await api.post('/admin/categories', categoryData);
-      return response.data; // { success:true, category:{...} }
+      return response.data; 
     } catch (error) {
       throw error;
     }
   },
+
   // حذف قسم (Admin)
 deleteCategory: async (categoryId) => {
   try {
@@ -56,7 +56,7 @@ deleteCategory: async (categoryId) => {
   getAllBooks: async () => {
     try {
       const response = await api.get('/books');
-      return response.data; // { success:true, books:[...] }
+      return response.data; 
     } catch (error) {
       throw error;
     }
@@ -66,7 +66,7 @@ deleteCategory: async (categoryId) => {
   getBooksByCategory: async (categoryId) => {
     try {
       const response = await api.get(`/categories/${categoryId}/books`);
-      return response.data; // { success:true, books:[...] }
+      return response.data; 
     } catch (error) {
       throw error;
     }
@@ -76,7 +76,7 @@ deleteCategory: async (categoryId) => {
   getBookById: async (bookId) => {
     try {
       const response = await api.get(`/books/${bookId}`);
-      return response.data; // { success:true, book:{...} }
+      return response.data; 
     } catch (error) {
       throw error;
     }
@@ -106,7 +106,7 @@ deleteCategory: async (categoryId) => {
   updateBook: async (bookId, bookData) => {
     try {
       const response = await api.put(`/admin/books/${bookId}`, bookData);
-      return response.data; // { success:true, book:{...} }
+      return response.data; 
     } catch (error) {
       throw error;
     }
@@ -116,36 +116,39 @@ deleteCategory: async (categoryId) => {
   deleteBook: async (bookId) => {
     try {
       const response = await api.delete(`/admin/books/${bookId}`);
-      return response.data; // { success:true }
+      return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  // تحميل كتاب للمستخدم
+
+
+  // جلب الكتب المملوكة للمستخدم
+  /* getMyBooks: async () => {
+    try {
+      const response = await api.get('/me/books');
+      return response.data; 
+    } catch (error) {
+      throw error;
+    }
+  },
+    // تحميل كتاب للمستخدم
   downloadBook: async (bookId) => {
     try {
       const response = await api.post(`/books/${bookId}/download`);
-      return response.data; // { success:true, download_url:"..." }
+      return response.data; 
     } catch (error) {
       throw error;
     }
   },
-
-  // جلب الكتب المملوكة للمستخدم
-  getMyBooks: async () => {
-    try {
-      const response = await api.get('/me/books');
-      return response.data; // { success:true, books:[...] }
-    } catch (error) {
-      throw error;
-    }
-  },
+  */
+ 
 // جلب عدد الكتب الكلي
 getTotalBooks: async () => {
   try {
     const response = await api.get('/admin/stats/total-books');
-    return response.data; // ← سيحتوي على { total_books: 25 }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -189,12 +192,12 @@ getTotalBooks: async () => {
       throw error;
     }
   },
-  getPaginatedQuestions: async (page = 1, perPage = 10) => {
+    getPaginatedQuestions: async (page = 1, perPage = 10) => {
     try {
       const response = await api.get(`/admin/questions?page=${page}&per_page=${perPage}`);
       
       return {
-        list: response.data.data.data,      // ← قائمة الأسئلة
+        list: response.data.data.data,     
         current_page: response.data.data.current_page,
         last_page: response.data.data.last_page,
         total: response.data.data.total
@@ -203,11 +206,11 @@ getTotalBooks: async () => {
       throw error;
     }
   },
+
   // جلب كل الأسئلة لكتاب معيّن (بدون إجابات)
 getQuestionsByBook: async (bookId) => {
   try {
     const response = await api.get(`/admin/books/${bookId}/questions`);
-    // الباكند يرسل: { success: true, book: {...}, questions: [...] }
     return response.data;
   } catch (error) {
     throw error;
@@ -218,7 +221,7 @@ getQuestionsByBook: async (bookId) => {
 getQuestionWithAnswers: async (questionId) => {
   try {
     const response = await api.get(`/admin/questions/${questionId}`);
-    return response.data; // ← سيحتوي على question + answers
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -227,7 +230,7 @@ getQuestionWithAnswers: async (questionId) => {
 getTotalQuestions: async () => {
   try {
     const response = await api.get('/admin/stats/total-questions');
-    return response.data; // سيعيد { total_questions: 120 }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -269,19 +272,16 @@ getTotalQuestions: async () => {
   },
 
   
- // داخل booksService
     getPaginatedAnswers: async (page = 1, perPage = 10) => {
   try {
     const response = await api.get('/admin/answers', {
-      params: { page, per_page: perPage }  // ← مهم: params هنا
+      params: { page, per_page: perPage }  
     });
-    return response.data; // ← هذا يعيد data و meta من الباكند
+    return response.data; 
   } catch (error) {
     throw error;
   }
 },
-
-
 };
 
 

@@ -28,7 +28,7 @@ const Login = () => {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err.message || 'بيانات الدخول غير صحيحة');
+      setError(err.message || '  Incorrect login information ');
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,7 @@ const Login = () => {
               className="login-button"
               disabled={loading}
             >
-              {loading ? 'جاري تسجيل الدخول...' : 'LOGIN'}
+              {loading ? '  Logging in...' : 'LOGIN'}
             </button>
           </form>
         </div>

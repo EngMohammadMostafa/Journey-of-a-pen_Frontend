@@ -1,11 +1,10 @@
 // src/services/usersService.js
-import api from './api'; // ✅ سيستخدم baseURL تلقائياً + يضيف التوكن
+import api from './api'; 
 
 export const usersService = {
   // الحصول على جميع المستخدمين
   getAllUsers: async () => {
     try {
-      // ✅ لا حاجة لإضافة التوكن يدوياً - الـ interceptor يتكفل بذلك
       const response = await api.get('/admin/users');
       return response.data;
     } catch (error) {
@@ -16,7 +15,6 @@ export const usersService = {
   // تحديث مستخدم
   updateUser: async (id, userData) => {
     try {
-      // ✅ لا حاجة للتوكن أو headers
       const response = await api.put(`/admin/users/${id}`, userData);
       return response.data;
     } catch (error) {
@@ -27,7 +25,6 @@ export const usersService = {
   // حذف مستخدم
   deleteUser: async (id) => {
     try {
-      // ✅ لا حاجة للتوكن أو headers
       const response = await api.delete(`/admin/users/${id}`);
       return response.data;
     } catch (error) {
@@ -47,8 +44,8 @@ export const usersService = {
   // --- طلبات الكتب (عرض فقط) ---
 getAllRequests: async () => {
   try {
-    const response = await api.get('/admin/request-books'); // ✅ جلب جميع طلبات الكتب مع التصنيفات
-    return response.data; // يحتوي على { requests: [...], categories: [...] }
+    const response = await api.get('/admin/request-books'); 
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -60,7 +57,7 @@ acceptRequest: async (requestId, category_id) => {
     const response = await api.post(`/admin/request-books/${requestId}/accept`, {
       category_id
     });
-    return response.data; // { message: "...", book: { ... } }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -70,19 +67,19 @@ acceptRequest: async (requestId, category_id) => {
 rejectRequest: async (requestId) => {
   try {
     const response = await api.post(`/admin/request-books/${requestId}/reject`);
-    return response.data; // { message: "تم رفض الطلب." }
+    return response.data; 
   } catch (error) {
     throw error;
   }
 },
 
 
- // ✅ تحميل ملف الطلب (للأدمن)
+ //  تحميل ملف الطلب (للأدمن)
 downloadRequestFile: async (requestId) => {
   const response = await api.get(
     `/admin/request-books/${requestId}/download`,
     {
-      responseType: 'blob', // مهم جداً
+      responseType: 'blob', 
     }
   );
   return response;

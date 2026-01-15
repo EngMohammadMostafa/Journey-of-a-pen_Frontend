@@ -1,4 +1,145 @@
-.competitions-page {
+
+.main-btn {
+  background: #1C597B;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 40px;
+  transition: all 0.3s ease;
+}
+
+.main-btn:hover {
+  background: #1C597B;
+  transform: translateY(-2px);
+}
+
+
+.buttons-container {
+display: flex;
+justify-content: center;
+gap: 10px;
+flex-wrap: nowrap;
+margin: 20px 0;
+}
+
+.btn {
+padding: 20px 5px;
+font-size: 1rem;
+border-radius: 12px;
+cursor: pointer;
+border: 2px solid transparent;
+font-weight: 600;
+transition: all 0.3s ease;
+min-width: 0;
+white-space: nowrap;
+flex: 1;
+max-width: 260px;
+}
+
+.btn-primary {
+background: #4C869F !important;
+color: white !important;
+border-color: #4C869F !important;
+}
+
+.btn-outline {
+background: white !important;
+color: #4C869F !important;
+border-color: #7199AA !important;
+}
+
+.btn-secondary {
+background: #4C869F;
+color: white;
+}
+
+.btn-secondary:hover {
+background: #1C597B;
+}
+
+.competitions-filters {
+display: flex;
+gap: 15px;
+align-items: center;
+margin-bottom: 25px;
+flex-wrap: wrap;
+background: white;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0 1px 8px #4C869F;
+}
+
+.competition-search-section {
+flex: 1;
+min-width: 250px;
+}
+
+.competition-search-input {
+width: 100%;
+padding: 10px 15px;
+border: 1px solid #ddd;
+border-radius: 6px;
+font-size: 14px;
+transition: border-color 0.3s ease;
+}
+
+.competition-search-input:focus {
+outline: none;
+border-color: #4C869F;
+box-shadow: 0 0 0 2px rgba(76, 134, 159, 0.1);
+}
+.users-filters {
+display: flex;
+gap: 15px;
+align-items: center;
+margin-bottom: 25px;
+flex-wrap: wrap;
+background: white;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0 1px 8px #4C869F;
+}
+
+.search-section {
+flex: 1;
+min-width: 250px;
+}
+
+.search-input {
+width: 100%;
+padding: 10px 15px;
+border: 1px solid #ddd;
+border-radius: 6px;
+font-size: 14px;
+transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+outline: none;
+border-color: #4C869F;
+}
+
+.filter-section {
+min-width: 150px;
+}
+
+.filter-select {
+width: 100%;
+padding: 10px 15px;
+border: 1px solid #ddd;
+border-radius: 6px;
+font-size: 14px;
+background: white;
+}
+
+.results-count {
+color: #666;
+font-size: 0.9rem;
+white-space: nowrap;
+}
+ /*.competitions-page {
     padding: 20px;
   }
   
@@ -6,181 +147,26 @@
     color: #2c3e50;
     margin-bottom: 30px;
     text-align: center;
-  }
- 
-  .main-btn {
-    background: #1C597B;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 40px;
-    transition: all 0.3s ease;
-  }
-  
-  .main-btn:hover {
-    background: #1C597B;
-    transform: translateY(-2px);
-  }
-  
-  .table-container {
+
+    .table-container {
     width: 100%;
     margin-top: 20px;
   }
-  
-  /* تأكيد ظهور الأزرار */
-  button {
+
+   button {
     display: inline-block ;
     visibility: visible ;
     opacity: 1 ;
   }
-  
 
-  /* أزرار التبويب الخاصة بالمسابقات – نفس ألوان الكتب تمامًا */
-.buttons-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-  margin: 20px 0;
-}
-
-.btn {
-  padding: 20px 5px;
-  font-size: 1rem;
-  border-radius: 12px;
-  cursor: pointer;
-  border: 2px solid transparent;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  min-width: 0;
-  white-space: nowrap;
-  flex: 1;
-  max-width: 260px;
-}
-
-/* ✔ زر نشط – مطابق للكتب */
-.btn-primary {
-  background: #4C869F !important;
-  color: white !important;
-  border-color: #4C869F !important;
-}
-
-/* ✔ زر غير نشط – مطابق للكتب */
-.btn-outline {
-  background: white !important;
-  color: #4C869F !important;
-  border-color: #7199AA !important;
-}
-
-/* زر إضافة مسابقة (+) */
-.btn-secondary {
-  background: #4C869F;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #1C597B;
-}
-
-
-
-/* صندوق الفلترة - نفس تصميم اليوزر */
-.competitions-filters {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 1px 8px #4C869F;
-}
-
-/* قسم البحث */
-.competition-search-section {
-  flex: 1;
-  min-width: 250px;
-}
-
-/* صندوق الإدخال */
-.competition-search-input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-}
-
-/* تأثير عند الكتابة أو التركيز */
-.competition-search-input:focus {
-  outline: none;
-  border-color: #4C869F;
-  box-shadow: 0 0 0 2px rgba(76, 134, 159, 0.1);
-}
-/* إعادة استخدام تنسيقات UsersManagement */
-.users-filters {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 1px 8px #4C869F;
-}
-
-.search-section {
-  flex: 1;
-  min-width: 250px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #4C869F;
-}
-
-.filter-section {
-  min-width: 150px;
-}
-
-.filter-select {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-}
-
-.results-count {
-  color: #666;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-/* تفاصيل الكتاب واللايكات */
-.book-details-section {
+  .book-details-section {
   background: #fff;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(113, 153, 170, 0.2);
   margin-top: 20px;
 }
-
+  
 .book-details-section h3 {
   margin-bottom: 10px;
   color: #2c3e50;
@@ -195,3 +181,6 @@
   padding: 8px 12px;
   border-bottom: 1px solid #eee;
 }
+
+  }*/
+

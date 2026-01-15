@@ -37,10 +37,10 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
         setQuotes(response.quotes);
         setFilteredQuotes(response.quotes);
       } else {
-        setError('فشل في جلب البيانات');
+        setError('Failed to fetch data');
       }
     } catch (err) {
-      setError('حدث خطأ في الاتصال بالخادم');
+      setError('An error occurred while connecting to the server');
       console.error('Error fetching quotes:', err);
     } finally {
       setLoading(false);
@@ -58,19 +58,18 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
   
   //  هنا ضع useEffect الجديد للتصفية والبحث
   useEffect(() => {
-    let filtered = quotes; // نبدأ بالبيانات كلها
+    let filtered = quotes; 
   
-    if (searchTerm) { // إذا كتب المستخدم شيء
+    if (searchTerm) { 
       filtered = filtered.filter(quote => {
-        const term = searchTerm.toLowerCase(); // نحول كل شيء لصغير لتسهيل البحث
+        const term = searchTerm.toLowerCase(); 
         if (filterType === 'text') return quote.text.toLowerCase().includes(term);
         if (filterType === 'book') return quote.book_name.toLowerCase().includes(term);
-        // إذا كان الاختيار "الكل"
         return quote.text.toLowerCase().includes(term) || quote.book_name.toLowerCase().includes(term);
       });
     }
   
-    setFilteredQuotes(filtered); // نعرض النتائج بعد التصفية
+    setFilteredQuotes(filtered); 
   }, [quotes, searchTerm, filterType]);
   
   // البحث والتصفية
@@ -189,7 +188,7 @@ const [filterType, setFilterType] = useState('all'); // نوع الفلترة: �
         columns={columns}
         data={tableData} 
         loading={loading}  
-        emptyMessage="لا توجد اقتباسات لعرضها"
+        emptyMessage="No quotes to display  "
       />
 
       {/* نافذة تأكيد الحذف */}

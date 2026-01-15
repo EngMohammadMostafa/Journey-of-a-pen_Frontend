@@ -1,5 +1,5 @@
 // src/services/competitionsService.js
-import api from './api'; // نفس api المستخدم في usersService
+import api from './api'; 
 
 export const competitionsService = {
   // إنشاء مسابقة جديدة فقط
@@ -15,7 +15,7 @@ export const competitionsService = {
   getAllCompetitions: async () => {
     try {
       const response = await api.get('/admin/competitions');
-      return response.data; // { success: true, competitions: [...] }
+      return response.data; 
     } catch (error) {
       throw error;
     }
@@ -33,7 +33,7 @@ export const competitionsService = {
 deleteCompetition: async (id) => {
   try {
     const response = await api.delete(`/admin/competitions/${id}`);
-    return response.data; // { message: "تم الحذف" }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -47,7 +47,7 @@ getCompetitionDetails: async (competitionId, token) => {
         Authorization: `Bearer ${token}`
       }
     });
-    return response.data; // سترجع { competition: {...}, books: [...] }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -60,7 +60,7 @@ getTotalCompetitions: async (token) => {
         Authorization: `Bearer ${token}`
       }
     });
-    return response.data; // { total_competitions: 10 }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -73,7 +73,7 @@ deleteCompetitionBook: async (competition_book_id, token) => {
         Authorization: `Bearer ${token}`,
       }
     });
-    return response.data; // { message: "Competition book deleted successfully", deleted_book_id: ... }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -85,7 +85,7 @@ approveOrRejectBook: async (competition_book_id, data, token) => {
   try {
     const response = await api.post(
       `/admin/competition-books/${competition_book_id}/approve-or-reject`,
-      data, // { status: 'accepted' | 'rejected' }
+      data, 
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -100,7 +100,7 @@ approveOrRejectBook: async (competition_book_id, data, token) => {
 // تحميل كتاب مسابقة (Admin أو حسب الصلاحية)
 downloadCompetitionBook: async (competitionbookid, token) => {
   const response = await api.get(
-    `/competition-books/${competitionbookid}/download`, // هنا {id} = competitionBookId
+    `/competition-books/${competitionbookid}/download`, 
     {
       responseType: 'blob',
       headers: { Authorization: `Bearer ${token}` },
@@ -118,7 +118,7 @@ getBookLikes: async (bookId, token) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data; // سترجع { book_id, title, likes_count, liked_users: [...] }
+    return response.data; 
   } catch (error) {
     throw error;
   }
@@ -144,7 +144,6 @@ addCompetitionBookToPlatform: async (competitionBookId, data, token) => {
 getAllCategories: async () => {
   try {
     const response = await api.get('/categories');
-    // Backend returns: { success: true, data: [...] }
     return response.data.data || [];
   } catch (error) {
     throw error;

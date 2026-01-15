@@ -109,11 +109,10 @@ const [platformFormData, setPlatformFormData] = useState({
         </>
       )}
       <button
-  className="btn-info"
-  onClick={() => handleDownloadBook(book.competition_book_id, book.title)}>
-  Download
-</button>
-
+          className="btn-info"
+          onClick={() => handleDownloadBook(book.competition_book_id, book.title)}>
+            Download
+          </button>
     <button className="btn-danger"onClick={() => handleDeleteCompetitionBook(book.competition_book_id)}>
             Delete Book
           </button>
@@ -126,35 +125,34 @@ const [platformFormData, setPlatformFormData] = useState({
       )
     }
   ];
-  // جلب المسابقات
+  // جلب المسابقات من الباك
   const fetchCompetitions = async () => {
     setLoading(true)
     try {
       const response = await competitionsService.getAllCompetitions(token)
       setCompetitions(response.competitions || [])
-      setFilteredCompetitions(response.competitions || [])  // ←  هذا السطر المهم للبحث عن مسباقة معينه
-
+      setFilteredCompetitions(response.competitions || [])  
     } catch (error) {
       console.error('Error fetching competitions:', error)
-      alert('حدث خطأ في جلب بيانات المسابقات')
+      alert('An error occurred while fetching the competition data ')
     } finally {
       setLoading(false)
     }
   };
-
+//جلب تفاصيل مسابقه معينه مثل المشارك والكتاب وعدد لايكاته وغيره
 const fetchCompetitionDetails = async (competitionId) => {
   setParticipantsLoading(true);
   try {
     const response = await competitionsService.getCompetitionDetails(competitionId, token);
-    setCompetitionDetails(response); // تحتوي على competition + books
+    setCompetitionDetails(response); 
   } catch (error) {
     console.error("Error fetching competition details:", error);
-    alert("حدث خطأ في جلب بيانات المسابقة");
+    alert("An error occurred while fetching the contest data  ");
   } finally {
     setParticipantsLoading(false);
   }
 };
-
+//جلب عدد المسابقات الكلي
 const fetchCompetitionStats = async () => {
   try {
     const data = await competitionsService.getTotalCompetitions(token);
@@ -164,19 +162,20 @@ const fetchCompetitionStats = async () => {
     setCompetitionStats({ total: 0 });
   }
 };
+//جلب بيانات المستخدمين اللذين اعجبو بكتاب معين
 const fetchBookLikes = async (bookId) => {
   setLikesLoading(true);
   try {
     const response = await competitionsService.getBookLikes(bookId, token);
-    setBookLikes(response); // تخزين البيانات في الحالة
+    setBookLikes(response); 
   } catch (error) {
     console.error("Error fetching book likes:", error);
-    alert("حدث خطأ في جلب بيانات اللايكات");
+    alert("An error occurred while fetching the likes data ");
   } finally {
     setLikesLoading(false);
   }
 };
-  // فتح مودال الإضافة
+  // يهيئ مودال الإضافة مسابقه جديده
   const handleAddCompetition = () => {
     setEditingCompetition(null)
     setFormData({
@@ -189,7 +188,7 @@ const fetchBookLikes = async (bookId) => {
     
     setIsModalOpen(true)
   }
-  // فتح مودال التعديل
+  // فتح مودال التعديل ويهيئ البينات الموجوده للتعديل
   const handleEdit = (competition) => {
     setEditingCompetition(competition)
     setFormData({
@@ -201,7 +200,7 @@ const fetchBookLikes = async (bookId) => {
     })
     setIsModalOpen(true)
   }
-  // حفظ الإضافة أو التعديل
+  // حفظ الإضافة أو التعديل ويحدث الجدول بعد الحفظ
   const handleSave = async () => {
     try {
       if (editingCompetition) {
@@ -215,10 +214,10 @@ const fetchBookLikes = async (bookId) => {
             max_user: formData.max_user
           }
         )
-          alert('تم تعديل المسابقة بنجاح')
+          alert('The contest has been successfully modified')
       } else {
         await competitionsService.addCompetition(formData, token)
-        alert('تم إضافة المسابقة بنجاح')
+        alert('The competition has been added successfully  ')
       }
       setIsModalOpen(false)
       setEditingCompetition(null)
@@ -229,66 +228,56 @@ const fetchBookLikes = async (bookId) => {
         enddate: '',
         max_user: 1
       })
-      
       fetchCompetitions()
     } catch (error) {
       console.error('Error saving competition:', error)
-      alert('حدث خطأ في حفظ البيانات')
+      alert('An error occurred while saving the data ')
     }
   }
- // حذف مسابقة
+ // حذف مسابقةمع تحديث الجدول بعد الحذف
   const handleDelete = async (competition) => {
-    if (window.confirm(`هل أنت متأكد من حذف المسابقة "${competition.name}"؟`)) {
+    if (window.confirm(`Are you sure you want to delete the contest "${competition.name}"؟`)) {
       try {
         await competitionsService.deleteCompetition(competition.id, token);
-        alert('تم حذف المسابقة بنجاح');
+        alert('The contest has been successfully deleted');
         fetchCompetitions(); // تحديث الجدول بعد الحذف
       } catch (error) {
         console.error('Error deleting competition:', error);
-        alert('حدث خطأ في حذف المسابقة');
+        alert('An error occurred while deleting the contest');
       }
     }
   }
-  const modalTitle = editingCompetition ? 'تعديل المسابقة' : 'Add New Competation  '
-
-//حذف مشترك اي كتابه من المشابقه وجميع تفاصيله بعد
+  const modalTitle = editingCompetition ? 'Edit the competition' : 'Add New Competation  '
+//حذف مشترك اي كتابه من المشابقه وجميع تفاصيله بعد ويحدث الجدول بعد الحذف
   const handleDeleteCompetitionBook = async (competition_book_id) => {
-    if (!window.confirm('هل أنت متأكد من حذف هذا الكتاب من المسابقة؟')) return;
-  
+    if (!window.confirm('Are you sure you want to delete this book from the competition?  ')) return;
     try {
       const response = await competitionsService.deleteCompetitionBook(competition_book_id, token);
       alert(response.message);
-  
-      // تحديث الجدول مباشرة بعد الحذف
       setCompetitionDetails(prev => ({
         ...prev,
         books: prev.books.filter(b => b.competition_book_id !== competition_book_id)
       }));
     } catch (error) {
       console.error(error);
-      alert('حدث خطأ أثناء حذف الكتاب من المسابقة');
+      alert('An error occurred while removing the book from the competition ');
     }
   };
-  
+  //قبول او رفض كتاب مشارك في المسابقه يحدث الجدول حسب القرار
   const handleApproveOrReject = async (competition_book_id, status) => {
     const confirmMessage =
       status === 'accepted'
-        ? 'هل أنت متأكد من قبول هذا الكتاب؟'
-        : 'هل أنت متأكد من رفض الكتاب؟ سيتم حذفه نهائيًا';
-  
+        ? 'Are you sure about accepting this book?'
+        : 'Are you sure you want to reject the book? It will be deleted permanently.  ';
     if (!window.confirm(confirmMessage)) return;
-  
     try {
       const response = await competitionsService.approveOrRejectBook(
         competition_book_id,
         { status },
         token
       );
-  
       alert(response.message);
-  
       if (status === 'rejected') {
-        // حذف من الجدول لأن الباك حذف السجل
         setCompetitionDetails(prev => ({
           ...prev,
           books: prev.books.filter(
@@ -296,7 +285,6 @@ const fetchBookLikes = async (bookId) => {
           )
         }));
       } else {
-        // تحديث الحالة إلى accepted
         setCompetitionDetails(prev => ({
           ...prev,
           books: prev.books.map(b =>
@@ -308,42 +296,39 @@ const fetchBookLikes = async (bookId) => {
       }
     } catch (error) {
       console.error(error);
-      alert('حدث خطأ أثناء تنفيذ العملية');
+      alert(' An error occurred while executing the operation ');
     }
   };
-  
+  //تحميل كتاب مشارك في مسابقه كملف pdf
   const handleDownloadBook = async (competitionbookid, title) => {
     try {
       console.log("Downloading book ID:", competitionbookid, "Token:", token); // للتأكد
       const blob = await competitionsService.downloadCompetitionBook(competitionbookid, token);
-  
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = title + '.pdf';
       link.click();
       window.URL.revokeObjectURL(url);
-  
     } catch (error) {
       console.error('Error downloading book:', error);
-      alert('حدث خطأ أثناء تحميل الكتاب');
+      alert('An error occurred while loading the book  ');
     }
   };
+  //فتح مودال لاضافه كتاب المسابقه للمنصه عن طريق جلب الاقسام من الباك
   const openAddToPlatformModal = async (book) => {
     setSelectedCompetitionBook(book);
     setCategoriesLoading(true);
-  
     try {
-      const categoriesData = await competitionsService.getAllCategories(); // ← بيانات جاهزة
-      setCategories(categoriesData);  // حفظ الأقسام
-      setAddToPlatformModalOpen(true); // فتح المودال بعد التحميل
+      const categoriesData = await competitionsService.getAllCategories(); 
+      setCategories(categoriesData); 
+      setAddToPlatformModalOpen(true); 
     } catch (error) {
       console.error('Error fetching categories:', error);
-      alert('حدث خطأ في جلب الأقسام');
+      alert('An error occurred while fetching the category ');
     } finally {
       setCategoriesLoading(false);
     }
-  
     setPlatformFormData({
       category_id: '',
       price: 0,
@@ -351,36 +336,32 @@ const fetchBookLikes = async (bookId) => {
       description: ''
     });
   };
+  //إضافة كتاب مسابقة تم قبوله إلى منصة
   const handleAddToPlatform = async () => {
     try {
       if (!selectedCompetitionBook) return;
-  
       const token = localStorage.getItem("token");
-  
       const response = await competitionsService.addCompetitionBookToPlatform(
         selectedCompetitionBook.competition_book_id,
         platformFormData,
         token
       );
-  
       console.log("Added to platform:", response);
-  
-      // تحديث جدول المسابقة: إزالة الكتاب من قائمة الكتب
-      setCompetitionDetails(prev => ({
+        setCompetitionDetails(prev => ({
         ...prev,
         books: prev.books.filter(
           book => book.competition_book_id !== selectedCompetitionBook.competition_book_id
         )
       }));
-  
       setAddToPlatformModalOpen(false);
-      alert("تم إضافة الكتاب إلى المنصة بنجاح ");
+      alert("The book has been successfully added to the platform book  ");
     } catch (error) {
       console.error(error);
-      alert("حدث خطأ أثناء إضافة الكتاب");
+      alert("An error occurred while adding the book ");
     }
   };
-  
+  // all useEffect
+
   useEffect(() => {
     if (showCompetitionsTable || showParticipantsTable) {
       fetchCompetitions();
@@ -389,7 +370,6 @@ const fetchBookLikes = async (bookId) => {
    // فلترة حسب اسم المسابقة
 useEffect(() => {
   let filtered = competitions;
-
   if (searchTerm) {
     filtered = filtered.filter(c =>
       c.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -401,20 +381,18 @@ useEffect(() => {
 useEffect(() => {
   if (showCompetitionsTable) {
     fetchCompetitions();
-    fetchCompetitionStats(); // ← هنا نجيب الإحصاء من الباكند
+    fetchCompetitionStats(); 
   }
 }, [showCompetitionsTable]);
 
 useEffect(() => {
   if (bookLikes?.liked_users) {
     let filtered = bookLikes.liked_users;
-
     if (likesSearchTerm) {
       filtered = filtered.filter(user =>
         user.username?.toLowerCase().includes(likesSearchTerm.toLowerCase())
       );
     }
-
     setFilteredLikes(filtered);
   } else {
     setFilteredLikes([]);
@@ -637,7 +615,7 @@ return (
                 Cancel
               </button>
               <button className="btn-primary" onClick={handleSave}>
-                {editingCompetition ? 'حفظ التغييرات' : 'Add Competition'}
+                {editingCompetition ? 'Save changes' : 'Add Competition'}
               </button>
             </div>
           </div>

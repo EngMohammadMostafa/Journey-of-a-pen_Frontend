@@ -61,31 +61,28 @@ const columns = [
       
     } catch (error) {
       console.error('Error fetching notifications:', error)
-      alert('حدث خطأ في جلب بيانات الإشعارات')
+      alert('An error occurred while fetching notification data   ')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteNotification = async (notification) => {
-    console.log('حذف إشعار:', notification)
-    const confirmDelete = window.confirm('هل أنت متأكد من حذف هذا الإشعار؟')
+    console.log('Delete Notification:', notification)
+    const confirmDelete = window.confirm('Are you sure you want to delete this notification?  ')
     if (!confirmDelete) return
   
     try {
       const response = await notificationsService.deleteNotification(notification.notification_id, token)
       console.log('Response:', response)
-      alert(response.message || 'تم حذف الإشعار بنجاح')
+      alert(response.message || 'The notification has been successfully deleted')
       fetchNotifications()
     } catch (error) {
       console.error(error)
-      alert(error.message || 'حدث خطأ أثناء الحذف')
+      alert(error.message || ' An error occurred while deleting')
     }
   }
   
-  
-  
-
 //لجلب الاشعارات من الباك
   useEffect(() => {
     fetchNotifications()
@@ -172,7 +169,7 @@ const columns = [
 
       <DataTable
         columns={columns}
-        data={filteredNotifications} // ← هنا استخدام البيانات المفلترة
+        data={filteredNotifications} 
         loading={loading}
       />
 

@@ -206,7 +206,6 @@ const [formData, setFormData] = useState({
     };
   
     try {
-      // **هنا نرسل التوكن أيضاً** (token موجود من useAuth)
       await usersService.addUser(newUser, token);
       alert('The User Was Added Successfully');
       fetchUsers();
@@ -214,7 +213,6 @@ const [formData, setFormData] = useState({
       setFormData({ username: '', email: '', password: '', password_confirmation: '', age: '', gender: 'male' });
     } catch (error) {
       console.error('Error adding user:', error);
-      // أفضل استخراج رسالة خطأ من الباك (422 validation)
       const msg = error?.response?.data?.errors ? JSON.stringify(error.response.data.errors) : 'An Error Occured While Adding The User ';
       setErrorMessage(msg);
       setTimeout(() => setErrorMessage(''), 5000);
@@ -224,9 +222,7 @@ const [formData, setFormData] = useState({
   const handleSaveUser = async () => {
     try {
       const userData = { ...formData };
-  
-      // التحقق من كلمة المرور
-      if (userData.password) {
+        if (userData.password) {
         if (!userData.password_confirmation) {
           alert('Please Enter Your Password Confirmation');
           return;
@@ -244,9 +240,7 @@ const [formData, setFormData] = useState({
         delete userData.password;
         delete userData.password_confirmation;
       }
-  
-      // التحقق من العمر
-      if (userData.age !== '') {
+        if (userData.age !== '') {
         const ageInt = parseInt(userData.age, 10);
         if (isNaN(ageInt) || ageInt < 10) {
           alert('Please Enter An Age Greater Than 10');
@@ -258,10 +252,7 @@ const [formData, setFormData] = useState({
         return;
       }
       userData.points = parseInt(formData.points || 0);
-
-      // إرسال البيانات للباكند مع التوكن
       await usersService.updateUser(editingUser.id, userData, token);
-  
       alert(' User Data Was Successfully Updated');
       setIsModalOpen(false);
       setEditingUser(null);
@@ -291,11 +282,9 @@ const [formData, setFormData] = useState({
   const handleFormSubmit = editingUser ? handleSaveUser : handleSaveNewUser;
   const handleRejectRequest = async (requestId) => {
     if (!window.confirm("Are You Sure This Request Will Be Rejected ?")) return;
-  
     try {
       const data = await usersService.rejectRequest(requestId);
       alert(data.message);
-      // تحديث حالة الطلب في الجدول
       setRequests(prev => prev.map(r => r.request_id === requestId ? { ...r, status: 'rejected' } : r));
     } catch (error) {
       console.error(error);
@@ -306,10 +295,8 @@ const [formData, setFormData] = useState({
   const handleDownloadRequest = async (requestId) => {
     try {
       const response = await usersService.downloadRequestFile(requestId);
-  
       const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
-  
       const link = document.createElement('a');
       link.href = url;
       link.download = `request_${requestId}.pdf`;
@@ -322,21 +309,18 @@ const [formData, setFormData] = useState({
   };
   
   const openAcceptModal = (requestId) => {
-    setSelectedRequestId(requestId);  // نخزن ID الطلب
-    setSelectedCategory('');           // نعيد تهيئة القسم المختار
-    setAcceptModalOpen(true);          // نفتح الـ Modal
+    setSelectedRequestId(requestId);  
+    setSelectedCategory('');           
+    setAcceptModalOpen(true);          
   };
-
     const confirmAcceptRequest = async () => {
     if (!selectedCategory) {
       alert("Please select a category");
       return;
     }
-  
     try {
       const data = await usersService.acceptRequest(selectedRequestId, selectedCategory);
       alert(data.message);
-      // تحديث حالة الطلب في الجدول
       setRequests(prev => prev.map(r => r.request_id === selectedRequestId ? { ...r, status: 'accepted' } : r));
       setAcceptModalOpen(false);
     } catch (error) {
@@ -373,9 +357,7 @@ const [formData, setFormData] = useState({
     }
   }, [activeTab]);
 
-  
-  // --- JSX ---
-  return (
+    return (
     <div className="users-management">
       <div className="page-header">
         <h1>Users Management</h1>

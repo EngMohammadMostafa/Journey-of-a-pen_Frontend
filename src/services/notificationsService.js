@@ -1,5 +1,7 @@
-import axios from 'axios'
 
+//تم اعادة استخدام ال axios هنا في كل apiفقط في الاشعارات وال auth
+
+import axios from 'axios'
 const API_BASE_URL = 'http://localhost:8000/api'
 
 export const notificationsService = {
